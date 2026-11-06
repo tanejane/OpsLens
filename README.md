@@ -31,8 +31,3 @@ OpsLens is a governed business investigation agent over the Olist commerce world
 
 Phase 4B.1 is a single-relation query preview; it is **not** a generalized metric/join engine yet. Do not interpret `AVG(gross_profit)` as margin or treat a successful SQL execution as evidence of correct business semantics.
 
-## Environment and safety
-
-Your original `.env` was deliberately **not included** in this shared/cleaned archive. Keep your secrets in a local `.env` outside shared ZIPs; consult `.env.example` and `.env.phase2d.example`. Python `__pycache__` and `.pyc` files were removed because they regenerate.
-
-See `docs/CLEANUP_MANIFEST.md` for the full rename list and preserved items.
