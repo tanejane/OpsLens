@@ -1,0 +1,200 @@
+{
+  "phase": "4B.5",
+  "audit_basis": "C:\\Users\\ejane\\Downloads\\opslens_cleaned\\opslens\\reports\\phase4b42_relationship_audit.json",
+  "disclaimer": "Static contract checks only; no database query or metric automatically approved.",
+  "existing_metrics": [
+    {
+      "metric": "revenue",
+      "domain": "finance",
+      "source": "semantic.order_economics",
+      "source_contract_status": "COLUMN_CHECK_PASSED_NOT_EXECUTION_APPROVED",
+      "issues": [],
+      "execution_approved": false
+    },
+    {
+      "metric": "contribution_profit",
+      "domain": "finance",
+      "source": "semantic.order_economics",
+      "source_contract_status": "COLUMN_CHECK_PASSED_NOT_EXECUTION_APPROVED",
+      "issues": [],
+      "execution_approved": false
+    },
+    {
+      "metric": "contribution_margin",
+      "domain": "finance",
+      "source": "semantic.daily_commerce",
+      "source_contract_status": "NEEDS_REPAIR",
+      "issues": [
+        "unknown_formula_column:effective_contribution_profit",
+        "unknown_formula_column:effective_revenue"
+      ],
+      "execution_approved": false
+    },
+    {
+      "metric": "orders",
+      "domain": "commerce",
+      "source": "semantic.daily_commerce",
+      "source_contract_status": "NEEDS_REPAIR",
+      "issues": [
+        "unknown_formula_column:order_id"
+      ],
+      "execution_approved": false
+    },
+    {
+      "metric": "purchase_session_rate",
+      "domain": "behavior",
+      "source": "semantic.ga4_funnel_daily",
+      "source_contract_status": "NEEDS_REPAIR",
+      "issues": [
+        "source_missing_from_audit"
+      ],
+      "execution_approved": false
+    },
+    {
+      "metric": "checkout_abandon_rate",
+      "domain": "behavior",
+      "source": "semantic.ga4_funnel_daily",
+      "source_contract_status": "NEEDS_REPAIR",
+      "issues": [
+        "source_missing_from_audit"
+      ],
+      "execution_approved": false
+    },
+    {
+      "metric": "modeled_stockout_lost_revenue",
+      "domain": "inventory",
+      "source": "semantic.stockout_effective_sales",
+      "source_contract_status": "NEEDS_REPAIR",
+      "issues": [
+        "source_missing_from_audit"
+      ],
+      "execution_approved": false
+    },
+    {
+      "metric": "effective_review_score",
+      "domain": "cx",
+      "source": "cx.effective_reviews",
+      "source_contract_status": "NEEDS_REPAIR",
+      "issues": [
+        "grain_unverified:REJECTED"
+      ],
+      "execution_approved": false
+    }
+  ],
+  "candidate_metrics": [
+    {
+      "metric": "effective_revenue",
+      "domain": "finance",
+      "source": "semantic.order_economics",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "effective_contribution_profit",
+      "domain": "finance",
+      "source": "semantic.order_economics",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "effective_contribution_margin_pct",
+      "domain": "finance",
+      "source": "semantic.order_economics",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "effective_gross_margin_pct",
+      "domain": "finance",
+      "source": "semantic.order_economics",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "delivered_order_late_rate",
+      "domain": "operations",
+      "source": "operations.delivery_effective",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "review_average",
+      "domain": "cx",
+      "source": "cx.effective_reviews",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "review_low_share",
+      "domain": "cx",
+      "source": "cx.effective_reviews",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "item_sales_value",
+      "domain": "commerce",
+      "source": "commerce.order_items",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "purchase_session_rate",
+      "domain": "behavior",
+      "source": "behavior.sessions",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "checkout_abandon_rate",
+      "domain": "behavior",
+      "source": "behavior.sessions",
+      "status": "READY_FOR_SEMANTIC_REVIEW",
+      "missing_columns": [],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "modeled_stockout_lost_revenue",
+      "domain": "inventory",
+      "source": "semantic.stockout_effective_sales",
+      "status": "NEEDS_SOURCE_METADATA",
+      "missing_columns": [
+        "modeled_lost_revenue",
+        "order_purchase_timestamp"
+      ],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    },
+    {
+      "metric": "marketing_spend",
+      "domain": "marketing",
+      "source": "marketing.spend_daily",
+      "status": "NEEDS_SOURCE_METADATA",
+      "missing_columns": [
+        "spend_amount",
+        "spend_date"
+      ],
+      "execution_approved": false,
+      "next_gate": "validate denominators, time basis, data scope, and measure-safe dimensions"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "checks_passed": 13,
+  "checks_total": 13,
+  "verdict": "PASS",
+  "checks": [
+    {
+      "name": "INC_005 low-margin revenue share increases",
+      "passed": true,
+      "value": "+2.43 pp"
+    },
+    {
+      "name": "INC_005 weighted gross margin declines",
+      "passed": true,
+      "value": "-0.47 pp"
+    },
+    {
+      "name": "INC_005 margin effect remains plausible",
+      "passed": true,
+      "value": "-0.47 pp"
+    },
+    {
+      "name": "INC_006 campaign creates measurable revenue growth",
+      "passed": true,
+      "value": "+2.23%"
+    },
+    {
+      "name": "INC_006 contribution margin deteriorates",
+      "passed": true,
+      "value": "-6.32 pp"
+    },
+    {
+      "name": "INC_006 profit underperforms revenue",
+      "passed": true,
+      "value": "profit=-32.77%, revenue=+2.23%"
+    },
+    {
+      "name": "INC_006 campaign spend remains plausible",
+      "passed": true,
+      "value": "62000.0"
+    },
+    {
+      "name": "INC_007 stockout affects observed lines",
+      "passed": true,
+      "value": "30"
+    },
+    {
+      "name": "INC_007 modeled revenue loss is positive",
+      "passed": true,
+      "value": "5770.79"
+    },
+    {
+      "name": "INC_007 category revenue loss is material but plausible",
+      "passed": true,
+      "value": "5.98%"
+    },
+    {
+      "name": "INC_008 review score declines materially",
+      "passed": true,
+      "value": "-1.30"
+    },
+    {
+      "name": "INC_008 added delay is operationally material",
+      "passed": true,
+      "value": "4.46 days"
+    },
+    {
+      "name": "INC_008 negative-review rate increases",
+      "passed": true,
+      "value": "+11.50 pp"
+    }
+  ]
+}

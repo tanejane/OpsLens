@@ -1,0 +1,60 @@
+[
+  {
+    "status": "FAILED",
+    "error_type": "ExceptionGroup",
+    "latency_seconds": 15.92,
+    "execution_trace": [
+      {
+        "tool": "run_readonly_sql",
+        "arguments": {
+          "query": "WITH base AS (\n SELECT order_id,COUNT(*) AS n FROM commerce.orders\n WHERE order_purchase_timestamp >= DATE '2018-07-01' AND order_purchase_timestamp < DATE '2018-08-01' GROUP BY order_id\n ), events AS (\n SELECT r.* FROM cx.returns r JOIN base b ON r.order_id=b.order_id\n ), r AS (\n SELECT order_id,COUNT(*) AS events,SUM(refund_amount::numeric) AS amount FROM events GROUP BY order_id\n ), joined AS (SELECT b.order_id,b.n,COALESCE(r.events,0) AS events,COALESCE(r.amount,0) AS amount FROM base b LEFT JOIN r ON b.order_id=r.order_id) SELECT COUNT(*) AS orders,COUNT(*) FILTER(WHERE events>0) AS returned_orders,COUNT(*) FILTER(WHERE amount>0) AS refunded_orders,COALESCE(SUM(events),0) AS events,COALESCE(SUM(amount),0)::text AS refund_amount,(SELECT COUNT(*) FROM base WHERE n<>1 OR order_id IS NULL OR BTRIM(order_id)='') AS invalid_orders,\n (SELECT COUNT(*) FROM events WHERE return_id IS NULL OR BTRIM(return_id)='' OR refund_amount IS NULL OR refund_amount::text IN ('NaN','Infinity','-Infinity') OR refund_amount<0) AS invalid_events,\n (SELECT COUNT(*)-COUNT(DISTINCT return_id) FROM events) AS duplicate_events,(SELECT COUNT(*) FROM cx.returns x WHERE x.order_id IS NULL OR NOT EXISTS(SELECT 1 FROM commerce.orders o WHERE o.order_id=x.order_id)) AS source_unlinked_events,(SELECT jsonb_agg(DISTINCT source_type) FROM events) AS source_types FROM joined",
+          "purpose": "Governed order-linked refund summary",
+          "expected_grain": "one aggregate row",
+          "max_rows": 1,
+          "timeout_ms": 20000
+        },
+        "response": {
+          "ok": false,
+          "tool": "run_readonly_sql",
+          "data": null,
+          "error": "(psycopg.errors.ConnectionTimeout) connection timeout expired\nMultiple connection attempts failed. All failures were:\n- host: 'localhost', port: 5432, hostaddr: '::1': connection timeout expired\n- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection timeout expired\n(Background on this error at: https://sqlalche.me/e/20/e3q8)",
+          "meta": {
+            "purpose": "Governed order-linked refund summary",
+            "expected_grain": "one aggregate row"
+          }
+        },
+        "latency_ms": 14216.997,
+        "outcome": "REJECTED"
+      }
+    ]
+  },
+  {
+    "status": "FAILED",
+    "error_type": "ExceptionGroup",
+    "latency_seconds": 10.022,
+    "execution_trace": [
+      {
+        "tool": "run_readonly_sql",
+        "arguments": {
+          "query": "WITH base AS (\n SELECT order_id,COUNT(*) AS n FROM commerce.orders\n WHERE order_purchase_timestamp >= DATE '2019-07-01' AND order_purchase_timestamp < DATE '2019-08-01' GROUP BY order_id\n ), events AS (\n SELECT r.* FROM cx.returns r JOIN base b ON r.order_id=b.order_id\n ), r AS (\n SELECT order_id,COUNT(*) AS events,SUM(refund_amount::numeric) AS amount FROM events GROUP BY order_id\n ), joined AS (SELECT b.order_id,b.n,COALESCE(r.events,0) AS events,COALESCE(r.amount,0) AS amount FROM base b LEFT JOIN r ON b.order_id=r.order_id) SELECT COUNT(*) AS orders,COUNT(*) FILTER(WHERE events>0) AS returned_orders,COUNT(*) FILTER(WHERE amount>0) AS refunded_orders,COALESCE(SUM(events),0) AS events,COALESCE(SUM(amount),0)::text AS refund_amount,(SELECT COUNT(*) FROM base WHERE n<>1 OR order_id IS NULL OR BTRIM(order_id)='') AS invalid_orders,\n (SELECT COUNT(*) FROM events WHERE return_id IS NULL OR BTRIM(return_id)='' OR refund_amount IS NULL OR refund_amount::text IN ('NaN','Infinity','-Infinity') OR refund_amount<0) AS invalid_events,\n (SELECT COUNT(*)-COUNT(DISTINCT return_id) FROM events) AS duplicate_events,(SELECT COUNT(*) FROM cx.returns x WHERE x.order_id IS NULL OR NOT EXISTS(SELECT 1 FROM commerce.orders o WHERE o.order_id=x.order_id)) AS source_unlinked_events,(SELECT jsonb_agg(DISTINCT source_type) FROM events) AS source_types FROM joined",
+          "purpose": "Governed order-linked refund summary",
+          "expected_grain": "one aggregate row",
+          "max_rows": 1,
+          "timeout_ms": 20000
+        },
+        "response": {
+          "ok": false,
+          "tool": "run_readonly_sql",
+          "data": null,
+          "error": "(psycopg.errors.ConnectionTimeout) connection timeout expired\nMultiple connection attempts failed. All failures were:\n- host: 'localhost', port: 5432, hostaddr: '::1': connection timeout expired\n- host: 'localhost', port: 5432, hostaddr: '127.0.0.1': connection timeout expired\n(Background on this error at: https://sqlalche.me/e/20/e3q8)",
+          "meta": {
+            "purpose": "Governed order-linked refund summary",
+            "expected_grain": "one aggregate row"
+          }
+        },
+        "latency_ms": 10019.592,
+        "outcome": "REJECTED"
+      }
+    ]
+  }
+]

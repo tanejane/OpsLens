@@ -1,0 +1,207 @@
+{
+  "schema_version": "opslens.investigation.v1",
+  "question": "Are delivery delays concentrated among sellers in July 2019?",
+  "payload": {
+    "route": "seller_concentration",
+    "status": "MEASURED_WITH_LIMITATIONS",
+    "seller_intent": true,
+    "executable": true,
+    "causal_claim": false,
+    "evidence": {
+      "status": "MEASURED_WITH_SCOPE_LIMITS",
+      "metric_id": "late_delivery_rate",
+      "value": "45.45454545454545",
+      "unit": "percent",
+      "source": "semantic.order_delivery_evidence_v1",
+      "period": [
+        "2019-07-01",
+        "2019-08-01"
+      ],
+      "population": {
+        "eligible_orders": 12,
+        "lateness_eligible_orders": 11,
+        "late_orders": 5,
+        "duration_eligible_orders": 11,
+        "missing_actual": 1,
+        "missing_estimated": 0,
+        "missing_purchase": 0
+      },
+      "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+      "time_basis": "order_purchase_time",
+      "causal_claim": false,
+      "limitations": [
+        "Purchase-time cohorts; not delivery-completion cohorts",
+        "Actual delivery dates may include modeled incident adjustments",
+        "Orders missing delivery timestamps are excluded from lateness denominator",
+        "Nonempty period is not certification of continuous coverage",
+        "Descriptive; no causal inference"
+      ]
+    },
+    "reason": "5 orders arrived late.",
+    "limitations": [
+      "Multi-seller orders are reported separately and never allocated to sellers.",
+      "Missing item/seller mappings are reported as unknown.",
+      "Association is not seller responsibility or causation.",
+      "Purchase-time cohorts; effective delivery dates may include modeled incident adjustments.",
+      "Seller IDs identify item sellers, not the party responsible for fulfillment."
+    ],
+    "seller_analysis": {
+      "evidence_id": "seller-concentration:2019-07-01:2019-08-01",
+      "period": [
+        "2019-07-01",
+        "2019-08-01"
+      ],
+      "source": "semantic.order_delivery_evidence_v1 + commerce.order_items",
+      "population": {
+        "eligible_orders": 12,
+        "lateness_eligible_orders": 11,
+        "late_orders": 5,
+        "duration_eligible_orders": 11,
+        "missing_actual": 1,
+        "missing_estimated": 0,
+        "missing_purchase": 0
+      },
+      "buckets": {
+        "single_seller": {
+          "orders": 8,
+          "eligible": 7,
+          "late": 3
+        },
+        "multi_seller": {
+          "orders": 3,
+          "eligible": 3,
+          "late": 2
+        },
+        "unknown": {
+          "orders": 1,
+          "eligible": 1,
+          "late": 0
+        }
+      },
+      "sellers": [
+        {
+          "seller_id": "a",
+          "orders": 5,
+          "eligible": 4,
+          "late": 3,
+          "late_rate_pct": "75",
+          "share_of_single_seller_late_pct": "100"
+        },
+        {
+          "seller_id": "b",
+          "orders": 3,
+          "eligible": 3,
+          "late": 0,
+          "late_rate_pct": "0",
+          "share_of_single_seller_late_pct": "0"
+        }
+      ],
+      "causal_claim": false,
+      "methodology": "Aggregate distinct seller IDs per order before joining unique delivery orders. Rank single-seller orders by late-order count. Late rate uses only timestamp-eligible orders; concentration share uses single-seller late orders.",
+      "limitations": [
+        "Multi-seller orders are reported separately and never allocated to sellers.",
+        "Missing item/seller mappings are reported as unknown.",
+        "Association is not seller responsibility or causation.",
+        "Purchase-time cohorts; effective delivery dates may include modeled incident adjustments.",
+        "Seller IDs identify item sellers, not the party responsible for fulfillment."
+      ]
+    },
+    "supporting_analyses": [
+      {
+        "capability": "seller_concentration",
+        "evidence": {
+          "evidence_id": "seller-concentration:2019-07-01:2019-08-01",
+          "period": [
+            "2019-07-01",
+            "2019-08-01"
+          ],
+          "source": "semantic.order_delivery_evidence_v1 + commerce.order_items",
+          "population": {
+            "eligible_orders": 12,
+            "lateness_eligible_orders": 11,
+            "late_orders": 5,
+            "duration_eligible_orders": 11,
+            "missing_actual": 1,
+            "missing_estimated": 0,
+            "missing_purchase": 0
+          },
+          "buckets": {
+            "single_seller": {
+              "orders": 8,
+              "eligible": 7,
+              "late": 3
+            },
+            "multi_seller": {
+              "orders": 3,
+              "eligible": 3,
+              "late": 2
+            },
+            "unknown": {
+              "orders": 1,
+              "eligible": 1,
+              "late": 0
+            }
+          },
+          "sellers": [
+            {
+              "seller_id": "a",
+              "orders": 5,
+              "eligible": 4,
+              "late": 3,
+              "late_rate_pct": "75",
+              "share_of_single_seller_late_pct": "100"
+            },
+            {
+              "seller_id": "b",
+              "orders": 3,
+              "eligible": 3,
+              "late": 0,
+              "late_rate_pct": "0",
+              "share_of_single_seller_late_pct": "0"
+            }
+          ],
+          "causal_claim": false,
+          "methodology": "Aggregate distinct seller IDs per order before joining unique delivery orders. Rank single-seller orders by late-order count. Late rate uses only timestamp-eligible orders; concentration share uses single-seller late orders.",
+          "limitations": [
+            "Multi-seller orders are reported separately and never allocated to sellers.",
+            "Missing item/seller mappings are reported as unknown.",
+            "Association is not seller responsibility or causation.",
+            "Purchase-time cohorts; effective delivery dates may include modeled incident adjustments.",
+            "Seller IDs identify item sellers, not the party responsible for fulfillment."
+          ]
+        },
+        "conclusion": "Seller a has the largest observed count: 3 late orders among 4 eligible single-seller orders, representing 100% of single-seller late orders."
+      }
+    ],
+    "conclusions": [
+      "5 orders arrived late.",
+      "Seller a has the largest observed count: 3 late orders among 4 eligible single-seller orders, representing 100% of single-seller late orders."
+    ],
+    "orchestration": {
+      "steps_used": 2,
+      "tools_used": 0,
+      "trace": [
+        {
+          "step": 1,
+          "capability": "initial",
+          "reason": "Validated delivery metric",
+          "decision": "STARTED"
+        },
+        {
+          "step": 2,
+          "capability": "seller_concentration",
+          "reason": "The user asked about sellers and validated late orders warrant an exclusive seller partition.",
+          "decision": "VALIDATED",
+          "source": "semantic.order_delivery_evidence_v1 + commerce.order_items"
+        }
+      ],
+      "stop_reason": "QUESTION_ADDRESSED",
+      "budgets": {
+        "steps": 4,
+        "tools": 40,
+        "seconds": 120
+      },
+      "causal_claim": false
+    }
+  }
+}

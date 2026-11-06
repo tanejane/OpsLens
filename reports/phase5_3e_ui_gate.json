@@ -1,0 +1,50 @@
+{
+  "status": "PRE_UI_GATE_NOT_PASSED",
+  "scope": "bounded_demo_only_not_production_certification",
+  "requirements": {
+    "core_gemini_live": "7/7",
+    "incident_safety_live": "12/12",
+    "incident_responses_live": "12/12",
+    "measured_incident_cases_min": 3,
+    "unhandled_incident_cases_max": 0
+  },
+  "observed": {
+    "core": {
+      "passed": 6,
+      "total": 7,
+      "pass_rate": 0.8571,
+      "observed_responses": 7
+    },
+    "incident_score": {
+      "incidents_attempted": 12,
+      "responses_observed": 12,
+      "safety_passed": 12,
+      "safety_total": 12,
+      "investigations_verified": 0,
+      "investigations_total": 12
+    },
+    "incident_coverage": {
+      "MEASURED_DESCRIPTIVE": 2,
+      "ACTIONABLE_EVIDENCE_GAP": 9,
+      "UNINTERPRETED_OR_BLOCKED": 0,
+      "OTHER_UNVERIFIED": 1,
+      "NO_RESPONSE": 0
+    }
+  },
+  "independent_mechanisms_verified": 0,
+  "outstanding_capability_gaps": 9,
+  "blocking_reasons": [
+    "CORE_LIVE_RUN_NOT_VERIFIED",
+    "CORE_REGRESSION_NOT_7_OF_7",
+    "UNHANDLED_OR_UNEXPLAINED_INCIDENTS",
+    "INSUFFICIENT_LIVE_MEASURED_COVERAGE"
+  ],
+  "limitations": [
+    "Only measured bounded scenarios are suitable for a UI demonstration",
+    "All unsupported scenarios must explicitly display evidence gaps and next validations",
+    "Incident mechanism certification remains subject to independent source review",
+    "Structured-output safety checks are not a substitute for external write authorization logs",
+    "No evidence that all plausible user questions are supported",
+    "UI, observability, and deployment require further integration tests"
+  ]
+}

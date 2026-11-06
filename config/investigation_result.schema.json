@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpsLens Investigation Result v1",
+  "type": "object",
+  "required": ["schema_version", "question", "payload"],
+  "properties": {
+    "schema_version": {"const": "opslens.investigation.v1"},
+    "question": {"type": "string"},
+    "payload": {
+      "type": "object",
+      "description": "Complete original executor response. Dispositions and nested source scopes remain authoritative; envelope membership does not certify evidence.",
+      "properties": {
+        "explanation": {
+          "type": "object",
+          "description": "Optional local narrative projection. Gemini selects reviewed template IDs only; this field never grants evidence authority or replaces executor status.",
+          "required": ["version", "status", "sections", "causal_claim"],
+          "properties": {
+            "version": {"const": "opslens.explanation.v1"},
+            "status": {"enum": ["MODEL_SELECTED", "DETERMINISTIC", "DETERMINISTIC_FALLBACK"]},
+            "causal_claim": {"const": false},
+            "sections": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["kind", "text", "evidence_refs", "causal_claim"],
+                "properties": {
+                  "kind": {"enum": ["fact", "retained_fact", "finding", "accounting_contribution", "hypothesis", "limitation"]},
+                  "text": {"type": "string"},
+                  "evidence_refs": {"type": "array", "items": {"type": "string"}},
+                  "causal_claim": {"const": false}
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "number_encodings": {
+      "type": "object",
+      "description": "JSON Pointer to exact numeric string for Decimal or integers outside JavaScript's safe range. No conversion to floating point is permitted for archival/export.",
+      "additionalProperties": {"enum": ["decimal", "integer"]}
+    }
+  },
+  "additionalProperties": true
+}

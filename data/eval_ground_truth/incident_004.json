@@ -1,0 +1,32 @@
+{
+  "incident_id": "INC_004",
+  "name": "Delivery Deterioration",
+  "incident_month": "2018-08-01",
+  "affected_sellers": [
+    "6560211a19b47992c3666cc44a7e94c0",
+    "1025f0e2d44d7041d6cf58b6550e0bfa",
+    "4869f7a5dfa277a7dca6462dcf3b52b2"
+  ],
+  "delayed_order_count": 154,
+  "true_causes": [
+    {
+      "cause": "carrier_handoff_delay",
+      "importance": "primary"
+    },
+    {
+      "cause": "specific_seller_cluster",
+      "importance": "secondary"
+    }
+  ],
+  "decoys": [
+    "all_sellers_deteriorated",
+    "customer_geography_alone_explains_issue"
+  ],
+  "required_evidence": [
+    "effective_delivery_dates",
+    "orders",
+    "sellers",
+    "reviews"
+  ],
+  "status": "IMPLEMENTED_V2"
+}

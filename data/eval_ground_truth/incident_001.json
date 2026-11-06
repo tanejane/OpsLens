@@ -1,0 +1,44 @@
+{
+  "incident_id": "INC_001",
+  "incident_type": "profit_squeeze",
+  "incident_month": "2018-03-01",
+  "affected_categories": [
+    "health_beauty",
+    "watches_gifts",
+    "bed_bath_table"
+  ],
+  "supplier_cost_shock_pct": 0.085,
+  "observable_pattern": {
+    "revenue_mom_growth": 0.16469821893518266,
+    "contribution_profit_mom_growth": -0.42204034334580887
+  },
+  "true_causes": [
+    {
+      "cause": "supplier_cost_increase",
+      "mechanism": "8.5% controlled cost shock applied to the three largest real revenue categories",
+      "importance": "primary"
+    },
+    {
+      "cause": "growth_campaign_spend",
+      "mechanism": "GrowthMax adds material paid acquisition cost during the incident period",
+      "importance": "primary"
+    },
+    {
+      "cause": "campaign_incentive_cost",
+      "mechanism": "GrowthMax carries a synthetic merchant-funded incentive cost equal to 5.5% of attributed order revenue",
+      "importance": "secondary"
+    }
+  ],
+  "decoy_hypotheses": [
+    "return_rate_spike_is_primary_driver",
+    "payment_method_mix_is_primary_driver"
+  ],
+  "required_evidence": [
+    "finance.product_cost_history",
+    "finance.order_profitability",
+    "marketing.campaigns",
+    "marketing.marketing_spend_daily",
+    "commerce.order_items"
+  ],
+  "source_truth": "controlled_synthetic_incident_over_real_olist_transactions"
+}

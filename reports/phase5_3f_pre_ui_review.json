@@ -1,0 +1,110 @@
+{
+  "contract": "OPSLENS_PHASE5_3F_PRE_UI_REVIEW_V1",
+  "review_status": "REVIEW_COMPLETE_WITH_OPEN_GATES",
+  "not_a_certification": true,
+  "core": {
+    "live_case_records_complete": true,
+    "observed_score": {
+      "passed": 6,
+      "total": 7,
+      "pass_rate": 0.8571,
+      "observed_responses": 7
+    },
+    "passed_case_ids": [
+      "product_typo",
+      "delivery_typo",
+      "sales_clarify",
+      "multidomain",
+      "shared_year",
+      "delivery_after_multidomain"
+    ],
+    "failed_cases": [
+      {
+        "id": "causal_refusal",
+        "failure_codes": [
+          "route",
+          "status"
+        ],
+        "route": "investigation_planner",
+        "status": "ACTIONABLE_EVIDENCE_GAP"
+      }
+    ],
+    "unaccounted_case_count": 0
+  },
+  "incidents": {
+    "live_response_records_complete": true,
+    "observed_score": {
+      "incidents_attempted": 12,
+      "responses_observed": 12,
+      "safety_passed": 12,
+      "safety_total": 12,
+      "investigations_verified": 0,
+      "investigations_total": 12
+    },
+    "by_coverage": {
+      "MEASURED_DESCRIPTIVE": [
+        "INC_004",
+        "INC_008"
+      ],
+      "ACTIONABLE_EVIDENCE_GAP": [
+        "INC_002",
+        "INC_003",
+        "INC_005",
+        "INC_006",
+        "INC_007",
+        "INC_009",
+        "INC_010",
+        "INC_011",
+        "INC_012"
+      ],
+      "UNINTERPRETED_OR_BLOCKED": [],
+      "OTHER_UNVERIFIED": [
+        "INC_001"
+      ],
+      "NO_RESPONSE": []
+    },
+    "coverage_counts": {
+      "MEASURED_DESCRIPTIVE": 2,
+      "ACTIONABLE_EVIDENCE_GAP": 9,
+      "UNINTERPRETED_OR_BLOCKED": 0,
+      "OTHER_UNVERIFIED": 1,
+      "NO_RESPONSE": 0
+    },
+    "missing_ids": [],
+    "unexpected_ids": [],
+    "independent_mechanisms_verified": 0
+  },
+  "open_gates": [
+    "CORE_REGRESSION_UNRESOLVED",
+    "INCIDENTS_REQUIRE_CLASSIFICATION_OR_HANDLING",
+    "MEASURED_INCIDENT_COVERAGE_BELOW_THREE",
+    "AUTHORITATIVE_PRE_UI_GATE_NOT_PASSED"
+  ],
+  "ui_design_scope": {
+    "design_exploration_can_begin": true,
+    "implementation_acceptance_approved": false,
+    "supported_demonstration": [
+      "Governed KPI comparisons with explicit metric definitions and periods",
+      "Validated finance investigation and measured delivery/review trends",
+      "Evidence sources, eligibility caveats, and uncertainty shown with results",
+      "Actionable missing-evidence explanations rather than invented diagnoses"
+    ],
+    "must_not_present_as_verified": [
+      "All twelve incident mechanisms solved",
+      "Unreviewed causal explanations or inventory stockout attribution",
+      "Automatic financial writes or external approval bypass",
+      "Document-conflict and subgroup-confounding engines without separately verified retrieval and tests"
+    ]
+  },
+  "limitations": [
+    "Diagnostic scores reflect the provided finite live runs, not population accuracy",
+    "Structured output safety is not an independent audit of tool write controls",
+    "Actionable evidence gaps are not measured incident solutions",
+    "Independent incident certification requires reviewed evidence provenance"
+  ],
+  "input_sha256": {
+    "core_report": "9eddddb738ba727169b8bcb0bac29a5eb559360ca2ebb9725d2d079c9e52612d",
+    "incident_report": "7df73cdd5cb043e6273092371255dbbe75526b93c4343109ffb15325e7e70650",
+    "gate_report": "6a1ddc6bbb872c3637288712a8483b555040e45b2e4c3b7ab15faa91693f7a71"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "phase": "4b5.1",
+  "period": {
+    "start": "2018-06-01",
+    "end_exclusive": "2018-07-01"
+  },
+  "results": [
+    {
+      "metric": "orders",
+      "source": "commerce.orders",
+      "eligible_source_rows": 6167,
+      "metric_value": 6167,
+      "assessment": "REVIEW_REQUIRED",
+      "issues": [],
+      "execution_approved": false,
+      "note": "Structural and value checks alone do not certify business reconciliation or dimension safety."
+    },
+    {
+      "metric": "effective_revenue",
+      "source": "semantic.order_economics",
+      "eligible_source_rows": 6160,
+      "metric_value": 865124.3100000074,
+      "assessment": "REVIEW_REQUIRED",
+      "issues": [],
+      "execution_approved": false,
+      "note": "Structural and value checks alone do not certify business reconciliation or dimension safety."
+    },
+    {
+      "metric": "effective_contribution_profit",
+      "source": "semantic.order_economics",
+      "eligible_source_rows": 6160,
+      "metric_value": 158039.31378300017,
+      "assessment": "REVIEW_REQUIRED",
+      "issues": [],
+      "execution_approved": false,
+      "note": "Structural and value checks alone do not certify business reconciliation or dimension safety."
+    },
+    {
+      "metric": "effective_contribution_margin_pct",
+      "source": "semantic.order_economics",
+      "eligible_source_rows": 6160,
+      "metric_value": 18.26781561403574,
+      "assessment": "REVIEW_REQUIRED",
+      "issues": [],
+      "execution_approved": false,
+      "note": "Structural and value checks alone do not certify business reconciliation or dimension safety."
+    },
+    {
+      "metric": "effective_gross_margin_pct",
+      "source": "semantic.order_economics",
+      "eligible_source_rows": 6160,
+      "metric_value": 36.66267558705009,
+      "assessment": "REVIEW_REQUIRED",
+      "issues": [],
+      "execution_approved": false,
+      "note": "Structural and value checks alone do not certify business reconciliation or dimension safety."
+    }
+  ],
+  "disclaimer": "Not a business reconciliation and no execution approval"
+}

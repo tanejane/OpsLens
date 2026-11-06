@@ -1,0 +1,221 @@
+{
+  "phase": "4b5.2",
+  "status": "REVIEW_BLOCKED",
+  "periods": [
+    {
+      "period": {
+        "start": "2017-11-01",
+        "end_exclusive": "2017-12-01"
+      },
+      "status": "DISCREPANCIES_FOUND",
+      "checks": [
+        {
+          "check": "POPULATION_BALANCE",
+          "passed": true,
+          "detail": "placed orders = represented + missing"
+        },
+        {
+          "check": "MISSING_STATUS_BALANCE",
+          "passed": true,
+          "detail": "all missing orders accounted for by status"
+        },
+        {
+          "check": "FINANCIAL_POPULATION_MATCH",
+          "passed": true,
+          "detail": "requires no financial-only orders, duplicates, or date reassignment"
+        },
+        {
+          "check": "NO_UNEXPECTED_EXCLUSIONS",
+          "passed": false,
+          "detail": "all missing orders canceled/unavailable; validates this period, not global eligibility policy"
+        },
+        {
+          "check": "PERIOD_COVERAGE",
+          "passed": true,
+          "detail": "all three sources represented in requested period"
+        },
+        {
+          "check": "DAILY_RECONCILES_REVENUE",
+          "passed": true,
+          "detail": "absolute difference 2.31E-8 <= 0.05"
+        },
+        {
+          "check": "DAILY_RECONCILES_COGS",
+          "passed": true,
+          "detail": "absolute difference 5E-10 <= 0.05"
+        },
+        {
+          "check": "DAILY_RECONCILES_CONTRIBUTION_PROFIT",
+          "passed": true,
+          "detail": "absolute difference 1.1E-10 <= 0.05"
+        },
+        {
+          "check": "NONZERO_REVENUE_FOR_RATIOS",
+          "passed": true,
+          "detail": "ratios undefined when summed revenue is zero"
+        },
+        {
+          "check": "DAILY_ORDERS_MATCH_FINANCIAL",
+          "passed": true,
+          "detail": "daily orders compared to financially represented orders (definition must be confirmed)"
+        }
+      ],
+      "measurements": {
+        "placed_orders": 7544,
+        "financial_orders": 7451,
+        "missing_canceled": 7,
+        "missing_unavailable": 84,
+        "effective_revenue": 1032768.8668000235,
+        "effective_cogs": 648554.9228199996,
+        "effective_contribution_profit": 125283.94685899992,
+        "effective_gross_margin_pct": 37.2023166393938,
+        "effective_contribution_margin_pct": 12.130879511035728
+      },
+      "execution_approved": false
+    },
+    {
+      "period": {
+        "start": "2018-03-01",
+        "end_exclusive": "2018-04-01"
+      },
+      "status": "RECONCILED_FOR_REVIEW",
+      "checks": [
+        {
+          "check": "POPULATION_BALANCE",
+          "passed": true,
+          "detail": "placed orders = represented + missing"
+        },
+        {
+          "check": "MISSING_STATUS_BALANCE",
+          "passed": true,
+          "detail": "all missing orders accounted for by status"
+        },
+        {
+          "check": "FINANCIAL_POPULATION_MATCH",
+          "passed": true,
+          "detail": "requires no financial-only orders, duplicates, or date reassignment"
+        },
+        {
+          "check": "NO_UNEXPECTED_EXCLUSIONS",
+          "passed": true,
+          "detail": "all missing orders canceled/unavailable; validates this period, not global eligibility policy"
+        },
+        {
+          "check": "PERIOD_COVERAGE",
+          "passed": true,
+          "detail": "all three sources represented in requested period"
+        },
+        {
+          "check": "DAILY_RECONCILES_REVENUE",
+          "passed": true,
+          "detail": "absolute difference 2.65E-8 <= 0.05"
+        },
+        {
+          "check": "DAILY_RECONCILES_COGS",
+          "passed": true,
+          "detail": "absolute difference 4E-10 <= 0.05"
+        },
+        {
+          "check": "DAILY_RECONCILES_CONTRIBUTION_PROFIT",
+          "passed": true,
+          "detail": "absolute difference 2E-11 <= 0.05"
+        },
+        {
+          "check": "NONZERO_REVENUE_FOR_RATIOS",
+          "passed": true,
+          "detail": "ratios undefined when summed revenue is zero"
+        },
+        {
+          "check": "DAILY_ORDERS_MATCH_FINANCIAL",
+          "passed": true,
+          "detail": "daily orders compared to financially represented orders (definition must be confirmed)"
+        }
+      ],
+      "measurements": {
+        "placed_orders": 7211,
+        "financial_orders": 7188,
+        "missing_canceled": 6,
+        "missing_unavailable": 17,
+        "effective_revenue": 983213.4400000282,
+        "effective_cogs": 636445.5252000004,
+        "effective_contribution_profit": 66524.91676800002,
+        "effective_gross_margin_pct": 35.26883387599114,
+        "effective_contribution_margin_pct": 6.766070729057376
+      },
+      "execution_approved": false
+    },
+    {
+      "period": {
+        "start": "2018-06-01",
+        "end_exclusive": "2018-07-01"
+      },
+      "status": "RECONCILED_FOR_REVIEW",
+      "checks": [
+        {
+          "check": "POPULATION_BALANCE",
+          "passed": true,
+          "detail": "placed orders = represented + missing"
+        },
+        {
+          "check": "MISSING_STATUS_BALANCE",
+          "passed": true,
+          "detail": "all missing orders accounted for by status"
+        },
+        {
+          "check": "FINANCIAL_POPULATION_MATCH",
+          "passed": true,
+          "detail": "requires no financial-only orders, duplicates, or date reassignment"
+        },
+        {
+          "check": "NO_UNEXPECTED_EXCLUSIONS",
+          "passed": true,
+          "detail": "all missing orders canceled/unavailable; validates this period, not global eligibility policy"
+        },
+        {
+          "check": "PERIOD_COVERAGE",
+          "passed": true,
+          "detail": "all three sources represented in requested period"
+        },
+        {
+          "check": "DAILY_RECONCILES_REVENUE",
+          "passed": true,
+          "detail": "absolute difference 1.63E-8 <= 0.05"
+        },
+        {
+          "check": "DAILY_RECONCILES_COGS",
+          "passed": true,
+          "detail": "absolute difference 2E-9 <= 0.05"
+        },
+        {
+          "check": "DAILY_RECONCILES_CONTRIBUTION_PROFIT",
+          "passed": true,
+          "detail": "absolute difference 2.5E-10 <= 0.05"
+        },
+        {
+          "check": "NONZERO_REVENUE_FOR_RATIOS",
+          "passed": true,
+          "detail": "ratios undefined when summed revenue is zero"
+        },
+        {
+          "check": "DAILY_ORDERS_MATCH_FINANCIAL",
+          "passed": true,
+          "detail": "daily orders compared to financially represented orders (definition must be confirmed)"
+        }
+      ],
+      "measurements": {
+        "placed_orders": 6167,
+        "financial_orders": 6160,
+        "missing_canceled": 3,
+        "missing_unavailable": 4,
+        "effective_revenue": 865124.3100000175,
+        "effective_cogs": 547946.590799998,
+        "effective_contribution_profit": 158039.3137829998,
+        "effective_gross_margin_pct": 36.66267558705096,
+        "effective_contribution_margin_pct": 18.267815614035467
+      },
+      "execution_approved": false
+    }
+  ],
+  "execution_approved": false,
+  "disclaimer": "Read-only diagnostic, not independent accounting audit; no metric, relationship, or dimensional execution is approved."
+}

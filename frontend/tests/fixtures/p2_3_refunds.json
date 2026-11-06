@@ -1,0 +1,470 @@
+{
+  "schema_version": "opslens.investigation.v1",
+  "question": "Where are refunds concentrated in July 2018?",
+  "payload": {
+    "route": "refund_concentration",
+    "status": "MEASURED_WITH_LIMITATIONS",
+    "executable": true,
+    "causal_claim": false,
+    "refund_intent": true,
+    "evidence": {
+      "evidence_id": "returns:2018-07-01:2018-08-01",
+      "period": [
+        "2018-07-01",
+        "2018-08-01"
+      ],
+      "source": "commerce.orders + cx.returns",
+      "refund_amount_unit": "source_currency_unspecified",
+      "population": {
+        "orders": 10,
+        "returned_orders": 4,
+        "refunded_orders": 3,
+        "events": 5,
+        "refund_amount": "60.50",
+        "return_rate_pct": "40",
+        "refund_rate_pct": "30"
+      },
+      "source_unlinked_events": 2,
+      "source_types": [
+        "synthetic_fixture"
+      ],
+      "limitations": [
+        "Returns are recorded synthetic outcomes; this is descriptive, not causal evidence.",
+        "Purchase cohorts include all recorded linked return events at the dataset snapshot, including events after purchase-period end; this is not a refund-date cash-flow metric.",
+        "No recorded return is not proof of no return; observation windows differ across purchase cohorts.",
+        "Multi-seller and missing seller mappings are separate; refunds are never allocated to an item, SKU or shared seller.",
+        "Multiple distinct return events are summed once per event ID, then joined once per order. Refunds are not reconciled to modeled finance adjustments."
+      ],
+      "causal_claim": false
+    },
+    "limitations": [
+      "Returns are recorded synthetic outcomes; this is descriptive, not causal evidence.",
+      "Purchase cohorts include all recorded linked return events at the dataset snapshot, including events after purchase-period end; this is not a refund-date cash-flow metric.",
+      "No recorded return is not proof of no return; observation windows differ across purchase cohorts.",
+      "Multi-seller and missing seller mappings are separate; refunds are never allocated to an item, SKU or shared seller.",
+      "Multiple distinct return events are summed once per event ID, then joined once per order. Refunds are not reconciled to modeled finance adjustments."
+    ],
+    "reason": "4 of 10 purchased orders have recorded returns (5 return events); linked refunds total 60.50.",
+    "refund_analysis": {
+      "evidence_id": "refund-concentration:2018-07-01:2018-08-01",
+      "period": [
+        "2018-07-01",
+        "2018-08-01"
+      ],
+      "source": "commerce.orders + cx.returns + commerce.order_items",
+      "population": {
+        "orders": 10,
+        "returned_orders": 4,
+        "refunded_orders": 3,
+        "events": 5,
+        "refund_amount": "60.50",
+        "return_rate_pct": "40",
+        "refund_rate_pct": "30"
+      },
+      "buckets": {
+        "single_seller": {
+          "orders": 7,
+          "returned_orders": 2,
+          "refunded_orders": 2,
+          "events": 3,
+          "refund_amount": "40.50",
+          "return_rate_pct": "28.57142857142857142857142857",
+          "refund_rate_pct": "28.57142857142857142857142857",
+          "multi_item_orders": 3
+        },
+        "multi_seller": {
+          "orders": 2,
+          "returned_orders": 1,
+          "refunded_orders": 1,
+          "events": 1,
+          "refund_amount": "20",
+          "return_rate_pct": "50",
+          "refund_rate_pct": "50",
+          "multi_item_orders": 2
+        },
+        "unknown": {
+          "orders": 1,
+          "returned_orders": 1,
+          "refunded_orders": 0,
+          "events": 1,
+          "refund_amount": "0",
+          "return_rate_pct": "100",
+          "refund_rate_pct": "0",
+          "multi_item_orders": 0
+        }
+      },
+      "sellers": [
+        {
+          "seller_id": "a",
+          "orders": 5,
+          "returned_orders": 1,
+          "refunded_orders": 1,
+          "events": 2,
+          "refund_amount": "30.50",
+          "return_rate_pct": "20",
+          "refund_rate_pct": "20",
+          "multi_item_orders": 2,
+          "share_of_all_refunds_pct": "50.41322314049586776859504132"
+        },
+        {
+          "seller_id": "b",
+          "orders": 2,
+          "returned_orders": 1,
+          "refunded_orders": 1,
+          "events": 1,
+          "refund_amount": "10",
+          "return_rate_pct": "50",
+          "refund_rate_pct": "50",
+          "multi_item_orders": 1,
+          "share_of_all_refunds_pct": "16.52892561983471074380165289"
+        }
+      ],
+      "limitations": [
+        "Returns are recorded synthetic outcomes; this is descriptive, not causal evidence.",
+        "Purchase cohorts include all recorded linked return events at the dataset snapshot, including events after purchase-period end; this is not a refund-date cash-flow metric.",
+        "No recorded return is not proof of no return; observation windows differ across purchase cohorts.",
+        "Multi-seller and missing seller mappings are separate; refunds are never allocated to an item, SKU or shared seller.",
+        "Multiple distinct return events are summed once per event ID, then joined once per order. Refunds are not reconciled to modeled finance adjustments."
+      ],
+      "causal_claim": false,
+      "methodology": "Aggregate unique return events by order before joining purchase orders; aggregate item sellers before attribution. Return rate = orders with recorded returns / purchased orders. Refund share = seller-cohort refund amount / all linked cohort refund amount, including shared and unknown attribution."
+    },
+    "supporting_analyses": [
+      {
+        "capability": "refund_concentration",
+        "evidence_reference": "/payload/refund_analysis",
+        "evidence_id": "refund-concentration:2018-07-01:2018-08-01",
+        "conclusion": "Seller a has the largest exclusive-cohort refund amount: 30.50, or 50.41322314049586776859504132% of all linked refunds. 1 of its 5 purchased orders have recorded returns."
+      }
+    ],
+    "conclusions": [
+      "4 of 10 purchased orders have recorded returns (5 return events); linked refunds total 60.50.",
+      "Seller a has the largest exclusive-cohort refund amount: 30.50, or 50.41322314049586776859504132% of all linked refunds. 1 of its 5 purchased orders have recorded returns."
+    ],
+    "orchestration": {
+      "steps_used": 2,
+      "tools_used": 2,
+      "trace": [
+        {
+          "step": 1,
+          "capability": "initial_governed_investigation",
+          "reason": "Resolve the question through existing governed routes",
+          "decision": "COMPLETED"
+        },
+        {
+          "step": 2,
+          "capability": "refund_concentration",
+          "reason": "The question requests concentration and recorded returns warrant exclusive seller attribution.",
+          "decision": "VALIDATED",
+          "source": "commerce.orders + cx.returns + commerce.order_items"
+        }
+      ],
+      "stop_reason": "QUESTION_ADDRESSED",
+      "budgets": {
+        "steps": 4,
+        "tools": 40,
+        "seconds": 120
+      },
+      "causal_claim": false
+    },
+    "validated_evidence": [
+      {
+        "producer": "agent.refund_concentration.validate_initial",
+        "result": {
+          "evidence_id": "returns:2018-07-01:2018-08-01",
+          "period": [
+            "2018-07-01",
+            "2018-08-01"
+          ],
+          "source": "commerce.orders + cx.returns",
+          "refund_amount_unit": "source_currency_unspecified",
+          "population": {
+            "orders": 10,
+            "returned_orders": 4,
+            "refunded_orders": 3,
+            "events": 5,
+            "refund_amount": "60.50",
+            "return_rate_pct": "40",
+            "refund_rate_pct": "30"
+          },
+          "source_unlinked_events": 2,
+          "source_types": [
+            "synthetic_fixture"
+          ],
+          "limitations": [
+            "Returns are recorded synthetic outcomes; this is descriptive, not causal evidence.",
+            "Purchase cohorts include all recorded linked return events at the dataset snapshot, including events after purchase-period end; this is not a refund-date cash-flow metric.",
+            "No recorded return is not proof of no return; observation windows differ across purchase cohorts.",
+            "Multi-seller and missing seller mappings are separate; refunds are never allocated to an item, SKU or shared seller.",
+            "Multiple distinct return events are summed once per event ID, then joined once per order. Refunds are not reconciled to modeled finance adjustments."
+          ],
+          "causal_claim": false
+        }
+      },
+      {
+        "producer": "agent.refund_concentration.validate_detail",
+        "result": {
+          "evidence_id": "refund-concentration:2018-07-01:2018-08-01",
+          "period": [
+            "2018-07-01",
+            "2018-08-01"
+          ],
+          "source": "commerce.orders + cx.returns + commerce.order_items",
+          "population": {
+            "orders": 10,
+            "returned_orders": 4,
+            "refunded_orders": 3,
+            "events": 5,
+            "refund_amount": "60.50",
+            "return_rate_pct": "40",
+            "refund_rate_pct": "30"
+          },
+          "buckets": {
+            "single_seller": {
+              "orders": 7,
+              "returned_orders": 2,
+              "refunded_orders": 2,
+              "events": 3,
+              "refund_amount": "40.50",
+              "return_rate_pct": "28.57142857142857142857142857",
+              "refund_rate_pct": "28.57142857142857142857142857",
+              "multi_item_orders": 3
+            },
+            "multi_seller": {
+              "orders": 2,
+              "returned_orders": 1,
+              "refunded_orders": 1,
+              "events": 1,
+              "refund_amount": "20",
+              "return_rate_pct": "50",
+              "refund_rate_pct": "50",
+              "multi_item_orders": 2
+            },
+            "unknown": {
+              "orders": 1,
+              "returned_orders": 1,
+              "refunded_orders": 0,
+              "events": 1,
+              "refund_amount": "0",
+              "return_rate_pct": "100",
+              "refund_rate_pct": "0",
+              "multi_item_orders": 0
+            }
+          },
+          "sellers": [
+            {
+              "seller_id": "a",
+              "orders": 5,
+              "returned_orders": 1,
+              "refunded_orders": 1,
+              "events": 2,
+              "refund_amount": "30.50",
+              "return_rate_pct": "20",
+              "refund_rate_pct": "20",
+              "multi_item_orders": 2,
+              "share_of_all_refunds_pct": "50.41322314049586776859504132"
+            },
+            {
+              "seller_id": "b",
+              "orders": 2,
+              "returned_orders": 1,
+              "refunded_orders": 1,
+              "events": 1,
+              "refund_amount": "10",
+              "return_rate_pct": "50",
+              "refund_rate_pct": "50",
+              "multi_item_orders": 1,
+              "share_of_all_refunds_pct": "16.52892561983471074380165289"
+            }
+          ],
+          "limitations": [
+            "Returns are recorded synthetic outcomes; this is descriptive, not causal evidence.",
+            "Purchase cohorts include all recorded linked return events at the dataset snapshot, including events after purchase-period end; this is not a refund-date cash-flow metric.",
+            "No recorded return is not proof of no return; observation windows differ across purchase cohorts.",
+            "Multi-seller and missing seller mappings are separate; refunds are never allocated to an item, SKU or shared seller.",
+            "Multiple distinct return events are summed once per event ID, then joined once per order. Refunds are not reconciled to modeled finance adjustments."
+          ],
+          "causal_claim": false,
+          "methodology": "Aggregate unique return events by order before joining purchase orders; aggregate item sellers before attribution. Return rate = orders with recorded returns / purchased orders. Refund share = seller-cohort refund amount / all linked cohort refund amount, including shared and unknown attribution."
+        }
+      }
+    ],
+    "unverified_hypotheses": [
+      {
+        "hypothesis_id": "returns_quality",
+        "status": "UNVERIFIED_HYPOTHESIS",
+        "basis": "general_business_knowledge_not_case_evidence",
+        "causal_claim": false,
+        "hypothesis": "Product defects, fulfillment problems or changes in return eligibility could increase refunds.",
+        "missing_evidence": "Return reasons, comparable observation windows, item-level return linkage and quality inspection records.",
+        "next_check": "Compare return rates within matched products and observation windows. Concentrated defect reasons support a quality hypothesis; stable matched rates or policy changes weaken it. Do not allocate order refunds to individual items without linkage."
+      }
+    ],
+    "explanation": {
+      "version": "opslens.explanation.v1",
+      "status": "DETERMINISTIC",
+      "fallback_reason": "MODEL_DISABLED",
+      "selection": null,
+      "sections": [
+        {
+          "kind": "fact",
+          "text": "Recorded refunds total 60.50 across 3 refunded orders in a purchase cohort of 10 orders. This is not refund-date cash flow.",
+          "evidence_refs": [
+            "/payload/evidence"
+          ],
+          "causal_claim": false,
+          "population": {
+            "orders": 10,
+            "returned_orders": 4,
+            "refunded_orders": 3,
+            "events": 5,
+            "refund_amount": "60.50",
+            "return_rate_pct": "40",
+            "refund_rate_pct": "30"
+          },
+          "period": [
+            "2018-07-01",
+            "2018-08-01"
+          ],
+          "source": "commerce.orders + cx.returns",
+          "unit": "source_currency_unspecified"
+        },
+        {
+          "kind": "finding",
+          "text": "4 of 10 purchased orders have recorded returns (5 return events); linked refunds total 60.50.",
+          "evidence_refs": [
+            "/payload/conclusions/0"
+          ],
+          "causal_claim": false
+        },
+        {
+          "kind": "finding",
+          "text": "Seller a has the largest exclusive-cohort refund amount: 30.50, or 50.41322314049586776859504132% of all linked refunds. 1 of its 5 purchased orders have recorded returns.",
+          "evidence_refs": [
+            "/payload/conclusions/1"
+          ],
+          "causal_claim": false
+        },
+        {
+          "kind": "hypothesis",
+          "text": "Unverified possibility: Product defects, fulfillment problems or changes in return eligibility could increase refunds.",
+          "evidence_refs": [],
+          "causal_claim": false,
+          "hypothesis_id": "returns_quality",
+          "status": "UNVERIFIED_HYPOTHESIS",
+          "basis": "general_business_knowledge_not_case_evidence",
+          "missing_evidence": "Return reasons, comparable observation windows, item-level return linkage and quality inspection records.",
+          "next_check": "Compare return rates within matched products and observation windows. Concentrated defect reasons support a quality hypothesis; stable matched rates or policy changes weaken it. Do not allocate order refunds to individual items without linkage."
+        },
+        {
+          "kind": "limitation",
+          "text": "Returns are recorded synthetic outcomes; this is descriptive, not causal evidence.",
+          "evidence_refs": [
+            "/payload/limitations",
+            "/payload/evidence/limitations"
+          ],
+          "causal_claim": false
+        },
+        {
+          "kind": "limitation",
+          "text": "Purchase cohorts include all recorded linked return events at the dataset snapshot, including events after purchase-period end; this is not a refund-date cash-flow metric.",
+          "evidence_refs": [
+            "/payload/limitations",
+            "/payload/evidence/limitations"
+          ],
+          "causal_claim": false
+        },
+        {
+          "kind": "limitation",
+          "text": "No recorded return is not proof of no return; observation windows differ across purchase cohorts.",
+          "evidence_refs": [
+            "/payload/limitations",
+            "/payload/evidence/limitations"
+          ],
+          "causal_claim": false
+        },
+        {
+          "kind": "limitation",
+          "text": "Multi-seller and missing seller mappings are separate; refunds are never allocated to an item, SKU or shared seller.",
+          "evidence_refs": [
+            "/payload/limitations",
+            "/payload/evidence/limitations"
+          ],
+          "causal_claim": false
+        },
+        {
+          "kind": "limitation",
+          "text": "Multiple distinct return events are summed once per event ID, then joined once per order. Refunds are not reconciled to modeled finance adjustments.",
+          "evidence_refs": [
+            "/payload/limitations",
+            "/payload/evidence/limitations"
+          ],
+          "causal_claim": false
+        },
+        {
+          "kind": "limitation",
+          "text": "Accounting contributions and associations do not establish causes. Unverified possibilities require the stated evidence and checks.",
+          "evidence_refs": [],
+          "causal_claim": false
+        }
+      ],
+      "causal_claim": false,
+      "generation": "reviewed_templates_with_exact_local_evidence",
+      "provider_elapsed_ms": 0,
+      "provider_code": null,
+      "evidence_authority": "original_payload_and_validators"
+    },
+    "execution_trace": [
+      {
+        "tool": "run_readonly_sql",
+        "arguments": {
+          "query": "WITH base AS (\n SELECT order_id,COUNT(*) AS n FROM commerce.orders\n WHERE (CASE WHEN pg_input_is_valid(order_purchase_timestamp::text, 'timestamp without time zone') THEN order_purchase_timestamp::timestamp END) >= DATE '2018-07-01' AND (CASE WHEN pg_input_is_valid(order_purchase_timestamp::text, 'timestamp without time zone') THEN order_purchase_timestamp::timestamp END) < DATE '2018-08-01' GROUP BY order_id\n ), events AS (\n SELECT r.* FROM cx.returns r JOIN base b ON r.order_id=b.order_id\n ), r AS (\n SELECT order_id,COUNT(*) AS events,SUM(refund_amount::numeric) AS amount FROM events GROUP BY order_id\n ), joined AS (SELECT b.order_id,b.n,COALESCE(r.events,0) AS events,COALESCE(r.amount,0) AS amount FROM base b LEFT JOIN r ON b.order_id=r.order_id) SELECT COUNT(*) AS orders,COUNT(*) FILTER(WHERE events>0) AS returned_orders,COUNT(*) FILTER(WHERE amount>0) AS refunded_orders,COALESCE(SUM(events),0) AS events,COALESCE(SUM(amount),0)::text AS refund_amount,(SELECT COUNT(*) FROM base WHERE n<>1 OR order_id IS NULL OR BTRIM(order_id)='') AS invalid_orders,\n (SELECT COUNT(*) FROM events WHERE return_id IS NULL OR BTRIM(return_id)='' OR refund_amount IS NULL OR refund_amount::text IN ('NaN','Infinity','-Infinity') OR refund_amount<0) AS invalid_events,\n (SELECT COUNT(*) FROM events WHERE return_id IN (SELECT return_id FROM cx.returns GROUP BY return_id HAVING COUNT(*)>1)) AS duplicate_events,(SELECT COUNT(*) FROM cx.returns x WHERE x.order_id IS NULL OR NOT EXISTS(SELECT 1 FROM commerce.orders o WHERE o.order_id=x.order_id)) AS source_unlinked_events,(SELECT jsonb_agg(DISTINCT source_type) FROM events) AS source_types FROM joined"
+        },
+        "fixture": true
+      },
+      {
+        "tool": "run_readonly_sql",
+        "arguments": {
+          "query": "WITH base AS (\n SELECT order_id,COUNT(*) AS n FROM commerce.orders\n WHERE (CASE WHEN pg_input_is_valid(order_purchase_timestamp::text, 'timestamp without time zone') THEN order_purchase_timestamp::timestamp END) >= DATE '2018-07-01' AND (CASE WHEN pg_input_is_valid(order_purchase_timestamp::text, 'timestamp without time zone') THEN order_purchase_timestamp::timestamp END) < DATE '2018-08-01' GROUP BY order_id\n ), events AS (\n SELECT r.* FROM cx.returns r JOIN base b ON r.order_id=b.order_id\n ), r AS (\n SELECT order_id,COUNT(*) AS events,SUM(refund_amount::numeric) AS amount FROM events GROUP BY order_id\n ), items AS (\n SELECT order_id,COUNT(DISTINCT order_item_id) AS item_rows,COUNT(DISTINCT seller_id) AS sellers,MIN(seller_id) AS seller,\n COUNT(*) FILTER(WHERE seller_id IS NULL OR BTRIM(seller_id)='') AS missing FROM commerce.order_items GROUP BY order_id\n ), joined AS (\n SELECT b.order_id,b.n,COALESCE(r.events,0) AS events,COALESCE(r.amount,0) AS amount,\n COALESCE(i.item_rows,0) AS item_rows,i.seller,\n CASE WHEN i.order_id IS NULL OR i.missing>0 OR i.sellers=0 THEN 'unknown'\n WHEN i.sellers>1 THEN 'multi_seller' ELSE 'single_seller' END AS bucket\n FROM base b LEFT JOIN r ON b.order_id=r.order_id LEFT JOIN items i ON b.order_id=i.order_id\n ), buckets AS (SELECT bucket,COUNT(*) AS orders,COUNT(*) FILTER(WHERE events>0) AS returned_orders,COUNT(*) FILTER(WHERE amount>0) AS refunded_orders,COALESCE(SUM(events),0) AS events,COALESCE(SUM(amount),0)::text AS refund_amount,COUNT(*) FILTER(WHERE item_rows>1) AS multi_item_orders FROM joined GROUP BY bucket), sellers AS (SELECT seller,COUNT(*) AS orders,COUNT(*) FILTER(WHERE events>0) AS returned_orders,COUNT(*) FILTER(WHERE amount>0) AS refunded_orders,COALESCE(SUM(events),0) AS events,COALESCE(SUM(amount),0)::text AS refund_amount,COUNT(*) FILTER(WHERE item_rows>1) AS multi_item_orders FROM joined WHERE bucket='single_seller' GROUP BY seller) SELECT (SELECT COUNT(*) FROM base WHERE n<>1 OR order_id IS NULL OR BTRIM(order_id)='') AS invalid_orders,\n (SELECT COUNT(*) FROM events WHERE return_id IS NULL OR BTRIM(return_id)='' OR refund_amount IS NULL OR refund_amount::text IN ('NaN','Infinity','-Infinity') OR refund_amount<0) AS invalid_events,\n (SELECT COUNT(*) FROM events WHERE return_id IN (SELECT return_id FROM cx.returns GROUP BY return_id HAVING COUNT(*)>1)) AS duplicate_events,(SELECT COUNT(*)-COUNT(DISTINCT (i.order_id,i.order_item_id))+COUNT(*) FILTER(WHERE i.order_item_id IS NULL) FROM commerce.order_items i JOIN base b ON i.order_id=b.order_id) AS invalid_items,COALESCE((SELECT jsonb_agg(to_jsonb(buckets)) FROM buckets),'[]'::jsonb) AS buckets,COALESCE((SELECT jsonb_agg(to_jsonb(sellers)) FROM sellers),'[]'::jsonb) AS sellers"
+        },
+        "fixture": true
+      }
+    ],
+    "model_calls": [],
+    "context_provenance": {
+      "original_question": "Where are refunds concentrated in July 2018?",
+      "policy": "bounded_session_slots_v1",
+      "inherited": [],
+      "source_turn": null,
+      "session_id": "5nqQiTzp4dD_wUhdXrB7tGvYans0lsZ_qYH5bCqu9-U",
+      "pending_source_turn": null
+    },
+    "observability": {
+      "schema_version": "opslens.trace.v1",
+      "run_id": "deVkPLg3kp7FPTWsHAO7FQ6B0WV2IDiH",
+      "latency_ms": 3.546,
+      "validation_decision": "VALIDATED",
+      "evidence": [
+        {
+          "evidence_id": "67835443d496911d6fa3e7b5f3db348acdd13e6c200bff525e40ce3a2ec5ddd9",
+          "path": "/payload/validated_evidence/0",
+          "decision": "VALIDATOR_RETURNED",
+          "producer": "agent.refund_concentration.validate_initial"
+        },
+        {
+          "evidence_id": "02835404714b30d1018338052abc7b72885d46293066baf77f093c0545184fb7",
+          "path": "/payload/validated_evidence/1",
+          "decision": "VALIDATOR_RETURNED",
+          "producer": "agent.refund_concentration.validate_detail"
+        }
+      ],
+      "stop_reason": "QUESTION_ADDRESSED",
+      "model_metadata": {
+        "calls": [],
+        "availability": "Recorded where returned by instrumented adapters; missing counts are unknown"
+      },
+      "replay_mode": "SAVED_EVIDENCE_ONLY",
+      "persistence": "SAVED"
+    }
+  }
+}

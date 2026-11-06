@@ -1,0 +1,55 @@
+﻿{
+  "status": "LIVE_MCP_VALIDATED",
+  "period": [
+    "2018-06-01",
+    "2018-07-01"
+  ],
+  "category": "beleza_saude",
+  "source": "semantic.order_item_product_evidence_v1",
+  "population": {
+    "total_units": 7078,
+    "unique_items": 7078,
+    "total_orders": 6160,
+    "invalid_items": 0,
+    "category_units": 885,
+    "category_unique_items": 885,
+    "category_orders": 799,
+    "category_invalid_items": 0
+  },
+  "total_item_gmv": "865124.31",
+  "category_item_gmv": "107908.82",
+  "policy": "item_grain_price_excludes_freight_unknown_category_retained",
+  "time_basis": "order_purchase_time",
+  "metrics": {
+    "category_order_count": {
+      "value": "799",
+      "unit": "orders"
+    },
+    "units_sold": {
+      "value": "885",
+      "unit": "units"
+    },
+    "item_gmv": {
+      "value": "107908.82",
+      "unit": "money"
+    },
+    "average_item_price": {
+      "value": "121.9308700564971751412429379",
+      "unit": "money_per_unit"
+    },
+    "category_gmv_share": {
+      "value": "12.47321555442130622823441408",
+      "unit": "percent"
+    }
+  },
+  "causal_claim": false,
+  "inventory_claim_allowed": false,
+  "limitations": [
+    "Item units are order-item rows, not inventory units",
+    "Item GMV excludes freight and is not audited financial revenue",
+    "Unknown categories are retained in the denominator",
+    "Category order counts are distinct only within the category and cannot be summed across categories",
+    "No stockout or causal conclusions",
+    "Period completeness not independently certified"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "incident_id": "INC_003",
+  "name": "Returns Spike",
+  "incident_month": "2018-01-01",
+  "affected_seller": "955fee9216a65b617aa5c0531780ce60",
+  "affected_products": [
+    "aca2eb7d00ea1a7b8ebd4e68314663af",
+    "54d9ac713e253fa1fae9c8003b011c2a"
+  ],
+  "injected_return_count": 53,
+  "true_causes": [
+    {
+      "cause": "defect_rate_spike_in_two_skus",
+      "importance": "primary"
+    },
+    {
+      "cause": "single_seller_concentration",
+      "importance": "secondary"
+    }
+  ],
+  "decoys": [
+    "all_categories_affected",
+    "late_delivery_is_primary"
+  ],
+  "required_evidence": [
+    "returns",
+    "product_quality_events",
+    "products",
+    "sellers",
+    "order_items"
+  ],
+  "status": "IMPLEMENTED_V2"
+}

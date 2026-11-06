@@ -1,0 +1,26 @@
+{
+  "incident_id": "INC_009",
+  "name": "Conflicting Internal Evidence",
+  "incident_month": "2018-04-01",
+  "true_causes": [
+    {
+      "cause": "localized_seller_capacity_disruption",
+      "importance": "primary"
+    }
+  ],
+  "conflict": {
+    "stale_document": "inc009_ops_summary_stale.md",
+    "corrected_document": "inc009_ops_summary_corrected.md",
+    "resolution_rule": "prefer later reviewed evidence over earlier preliminary note"
+  },
+  "decoys": [
+    "national_demand_contraction"
+  ],
+  "required_capabilities": [
+    "temporal_reasoning",
+    "source_quality_assessment",
+    "conflict_detection",
+    "evidence_precedence"
+  ],
+  "status": "IMPLEMENTED"
+}

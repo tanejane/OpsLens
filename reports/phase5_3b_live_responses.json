@@ -1,0 +1,128 @@
+{
+  "responses": {
+    "INC_001": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Confirm the investigation month and year",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false
+    },
+    "INC_002": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Gemini interpretation could not be verified",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "error_type": "InterpretationRejected"
+    },
+    "INC_003": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Gemini interpretation could not be verified",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "error_type": "InterpretationRejected"
+    },
+    "INC_004": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Gemini interpretation could not be verified",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "error_type": "InterpretationRejected"
+    },
+    "INC_005": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Gemini interpretation could not be verified",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "error_type": "InterpretationRejected"
+    },
+    "INC_006": {
+      "route": "three_domain_investigation",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "reason": "Unsafe or invalid multi-domain input"
+    },
+    "INC_007": {
+      "route": "product_category",
+      "status": "NOT_YET_SUPPORTED",
+      "executable": false,
+      "reason": "Comparisons, rankings, inventory, causal and financial-profit claims are not supported by this product NLP contract",
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "language": {
+        "original_question": "Were stockouts the cause of lost beauty-category sales in May 2018? Verify inventory availability before making the claim.",
+        "interpreted_question": "Were stockouts the cause of lost health and beauty-category sales in May 2018? Verify inventory availability before making the claim.",
+        "corrections": [
+          "health and beauty"
+        ],
+        "policy": "explicit_lexical_rules_v1"
+      }
+    },
+    "INC_008": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Gemini interpretation could not be verified",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "error_type": "InterpretationRejected"
+    },
+    "INC_009": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Gemini interpretation could not be verified",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "error_type": "InterpretationRejected"
+    },
+    "INC_010": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Gemini interpretation could not be verified",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "error_type": "InterpretationRejected"
+    },
+    "INC_011": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Gemini interpretation could not be verified",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "error_type": "InterpretationRejected"
+    },
+    "INC_012": {
+      "route": "unified_interpreter",
+      "status": "NEEDS_CLARIFICATION",
+      "executable": false,
+      "reason": "Gemini interpretation could not be verified",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "error_type": "InterpretationRejected"
+    }
+  }
+}

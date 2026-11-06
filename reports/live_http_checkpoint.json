@@ -1,0 +1,11 @@
+{
+  "status_code": 503,
+  "latency_seconds": 20.430828099997598,
+  "response": {
+    "detail": {
+      "status": "INVESTIGATION_UNAVAILABLE",
+      "error_type": "RoutingRejected",
+      "reason": "The governed investigation service could not complete this request. Check backend logs and local PostgreSQL/MCP availability."
+    }
+  }
+}

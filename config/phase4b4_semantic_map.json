@@ -1,0 +1,311 @@
+{
+  "version": "4b4.0",
+  "policy": "fail_closed",
+  "environments": [
+    "olist",
+    "ga4"
+  ],
+  "sources": [
+    {
+      "id": "commerce.orders",
+      "environment": "olist",
+      "grain": [
+        "order_id"
+      ],
+      "scope": "marketplace",
+      "date_column": "order_purchase_timestamp",
+      "coverage": null,
+      "columns": [
+        "order_id",
+        "order_purchase_timestamp",
+        "customer_id"
+      ],
+      "description": "One row per Olist order; verify uniqueness live"
+    },
+    {
+      "id": "commerce.order_items",
+      "environment": "olist",
+      "grain": [
+        "order_id",
+        "order_item_id"
+      ],
+      "scope": "marketplace",
+      "date_column": null,
+      "coverage": null,
+      "columns": [
+        "order_id",
+        "order_item_id",
+        "seller_id",
+        "product_id",
+        "price"
+      ],
+      "description": "One row per order item; never sum order revenue after joining items"
+    },
+    {
+      "id": "catalog.products",
+      "environment": "olist",
+      "grain": [
+        "product_id"
+      ],
+      "scope": "marketplace",
+      "date_column": null,
+      "coverage": null,
+      "columns": [
+        "product_id",
+        "category"
+      ],
+      "description": "Product category dimension"
+    },
+    {
+      "id": "semantic.order_economics",
+      "environment": "olist",
+      "grain": [
+        "order_id"
+      ],
+      "scope": "effective_marketplace",
+      "date_column": "order_purchase_timestamp",
+      "coverage": null,
+      "columns": [
+        "order_id",
+        "order_purchase_timestamp",
+        "effective_revenue",
+        "effective_cogs",
+        "effective_contribution_profit"
+      ],
+      "description": "Order-level effective economics; cannot distribute to items/categories without validated allocations"
+    },
+    {
+      "id": "semantic.daily_commerce",
+      "environment": "olist",
+      "grain": [
+        "business_date"
+      ],
+      "scope": "effective_marketplace",
+      "date_column": "business_date",
+      "coverage": null,
+      "columns": [
+        "business_date",
+        "orders",
+        "revenue",
+        "cogs",
+        "contribution_profit"
+      ],
+      "description": "Preaggregated daily economics. No order_id; cannot join to order items"
+    },
+    {
+      "id": "semantic.product_mix_effective",
+      "environment": "olist",
+      "grain": [
+        "order_id",
+        "order_item_id"
+      ],
+      "scope": "incident_specific",
+      "incident": "INC_005",
+      "date_column": null,
+      "coverage": {
+        "start": "2017-09-01",
+        "end_exclusive": "2017-10-01",
+        "basis": "observed SQL result from user; verify live on deployment"
+      },
+      "columns": [
+        "order_id",
+        "category",
+        "effective_revenue",
+        "effective_cogs"
+      ],
+      "description": "September 2017 modeled mix economics; not marketplace-wide source"
+    },
+    {
+      "id": "cx.effective_reviews",
+      "environment": "olist",
+      "grain": [
+        "review_id"
+      ],
+      "scope": "effective_marketplace",
+      "date_column": "review_creation_date",
+      "coverage": null,
+      "columns": [
+        "order_id",
+        "review_id",
+        "effective_review_score",
+        "review_creation_date"
+      ],
+      "description": "Reviews at review grain; order-level join may fan out"
+    },
+    {
+      "id": "operations.delivery_effective",
+      "environment": "olist",
+      "grain": [
+        "order_id"
+      ],
+      "scope": "effective_marketplace",
+      "date_column": "order_purchase_timestamp",
+      "coverage": null,
+      "columns": [
+        "order_id",
+        "order_purchase_timestamp",
+        "final_effective_delivered_customer_date",
+        "order_estimated_delivery_date"
+      ],
+      "description": "Order delivery outcomes"
+    },
+    {
+      "id": "behavior.sessions",
+      "environment": "ga4",
+      "grain": [
+        "session_id"
+      ],
+      "scope": "external_sample",
+      "date_column": "session_date",
+      "coverage": null,
+      "columns": [
+        "session_id",
+        "session_date"
+      ],
+      "description": "Separate GA4 environment; never join users to Olist"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "orders_to_items",
+      "left": "commerce.orders",
+      "right": "commerce.order_items",
+      "left_key": "order_id",
+      "right_key": "order_id",
+      "cardinality": "one_to_many",
+      "status": "declared_requires_live_audit",
+      "fanout_risk": true
+    },
+    {
+      "id": "items_to_products",
+      "left": "commerce.order_items",
+      "right": "catalog.products",
+      "left_key": "product_id",
+      "right_key": "product_id",
+      "cardinality": "many_to_one",
+      "status": "declared_requires_live_audit",
+      "fanout_risk": false
+    },
+    {
+      "id": "orders_to_economics",
+      "left": "commerce.orders",
+      "right": "semantic.order_economics",
+      "left_key": "order_id",
+      "right_key": "order_id",
+      "cardinality": "one_to_one",
+      "status": "declared_requires_live_audit",
+      "fanout_risk": false
+    },
+    {
+      "id": "orders_to_reviews",
+      "left": "commerce.orders",
+      "right": "cx.effective_reviews",
+      "left_key": "order_id",
+      "right_key": "order_id",
+      "cardinality": "one_to_many",
+      "status": "declared_requires_live_audit",
+      "fanout_risk": true
+    },
+    {
+      "id": "orders_to_delivery",
+      "left": "commerce.orders",
+      "right": "operations.delivery_effective",
+      "left_key": "order_id",
+      "right_key": "order_id",
+      "cardinality": "one_to_one",
+      "status": "declared_requires_live_audit",
+      "fanout_risk": false
+    },
+    {
+      "id": "orders_to_product_mix",
+      "left": "commerce.orders",
+      "right": "semantic.product_mix_effective",
+      "left_key": "order_id",
+      "right_key": "order_id",
+      "cardinality": "one_to_many",
+      "status": "declared_requires_live_audit",
+      "fanout_risk": true
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "seller_id",
+      "source": "commerce.order_items",
+      "column": "seller_id"
+    },
+    {
+      "id": "category",
+      "source": "catalog.products",
+      "column": "category"
+    },
+    {
+      "id": "incident_category",
+      "source": "semantic.product_mix_effective",
+      "column": "category"
+    },
+    {
+      "id": "business_date",
+      "source": "semantic.daily_commerce",
+      "column": "business_date"
+    }
+  ],
+  "metrics": [
+    {
+      "id": "unique_orders",
+      "source": "commerce.orders",
+      "expression_kind": "distinct_count",
+      "column": "order_id",
+      "grain": [
+        "order_id"
+      ],
+      "definition": "Number of distinct orders, not item count",
+      "allowed_dimensions": [
+        "seller_id",
+        "business_date"
+      ]
+    },
+    {
+      "id": "gross_margin_pct",
+      "source": "semantic.daily_commerce",
+      "expression_kind": "ratio_of_sums",
+      "numerator": "revenue_minus_cogs",
+      "denominator": "revenue",
+      "grain": [
+        "business_date"
+      ],
+      "definition": "Gross profit / revenue, effective marketplace aggregate",
+      "allowed_dimensions": [
+        "business_date"
+      ]
+    },
+    {
+      "id": "contribution_margin_pct",
+      "source": "semantic.daily_commerce",
+      "expression_kind": "ratio_of_sums",
+      "numerator": "contribution_profit",
+      "denominator": "revenue",
+      "grain": [
+        "business_date"
+      ],
+      "definition": "Effective contribution profit / revenue",
+      "allowed_dimensions": [
+        "business_date"
+      ]
+    },
+    {
+      "id": "incident_gross_margin_pct",
+      "source": "semantic.product_mix_effective",
+      "expression_kind": "ratio_of_sums",
+      "numerator": "effective_revenue_minus_effective_cogs",
+      "denominator": "effective_revenue",
+      "grain": [
+        "order_id",
+        "order_item_id"
+      ],
+      "definition": "INC005 Sep 2017 model-only gross margin",
+      "allowed_dimensions": [
+        "incident_category"
+      ]
+    }
+  ]
+}

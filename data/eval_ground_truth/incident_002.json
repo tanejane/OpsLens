@@ -1,0 +1,30 @@
+{
+  "incident_id": "INC_002",
+  "name": "Regional Capacity Disruption",
+  "incident_month": "2017-07-01",
+  "affected_state": "RJ",
+  "modeled_revenue_loss_pct": 0.1763081540796289,
+  "true_causes": [
+    {
+      "cause": "regional_seller_capacity_disruption",
+      "importance": "primary",
+      "mechanism": "16% of eligible regional orders lose recognized revenue in the controlled business view"
+    },
+    {
+      "cause": "regional_fulfillment_delay",
+      "importance": "secondary",
+      "mechanism": "additional regional orders receive 3\u20136 day fulfillment delays"
+    }
+  ],
+  "decoys": [
+    "national_demand_collapse",
+    "payment_failure_spike"
+  ],
+  "required_evidence": [
+    "regional_capacity_overrides",
+    "orders",
+    "order_items",
+    "customers"
+  ],
+  "status": "IMPLEMENTED_V2"
+}

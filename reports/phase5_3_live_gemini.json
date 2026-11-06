@@ -1,0 +1,163 @@
+{
+  "contract": "OPSLENS_PHASE5_3_EVAL_V1",
+  "mode": "live_gemini",
+  "status": "EVALUATION_PASSED",
+  "score": {
+    "passed": 7,
+    "total": 7,
+    "pass_rate": 1.0,
+    "observed_responses": 7
+  },
+  "total_wall_seconds": 44.527,
+  "cohort_audit_attached": true,
+  "limitations": [
+    "This is a narrow, fixed regression suite, not a claim to understand every user question",
+    "Case pass rates are not independent estimates of population accuracy",
+    "CLI stdout does not establish per-tool authorization by itself",
+    "Latency is whole-run wall time, not per-call latency or token billing"
+  ],
+  "incident_evaluation": {
+    "expected": 12,
+    "present": 12,
+    "missing": [],
+    "execution_status": "NOT_EXECUTED",
+    "warning": "Ground-truth files alone are not proof of incident-level evaluation"
+  },
+  "cases": [
+    {
+      "id": "product_typo",
+      "input": "eh how much beuty item GMV in Jun 2018 ah?",
+      "passed": true,
+      "checks": {
+        "route": true,
+        "status": true,
+        "executable": true,
+        "causal_claim": true,
+        "metric": true,
+        "period": true,
+        "value": true,
+        "category": true,
+        "inventory_refused": true
+      },
+      "failure_codes": [],
+      "observed_route": "product_category",
+      "observed_status": "MEASURED_WITH_SCOPE_LIMITS"
+    },
+    {
+      "id": "delivery_typo",
+      "input": "what was the late delivry rate in june 2018?",
+      "passed": true,
+      "checks": {
+        "route": true,
+        "status": true,
+        "executable": true,
+        "causal_claim": true,
+        "metric": true,
+        "period": true,
+        "value": true
+      },
+      "failure_codes": [],
+      "observed_route": "delivery_operations",
+      "observed_status": "MEASURED_WITH_SCOPE_LIMITS"
+    },
+    {
+      "id": "sales_clarify",
+      "input": "How were sales in June 2018?",
+      "passed": true,
+      "checks": {
+        "route": true,
+        "status": true,
+        "executable": true,
+        "causal_claim": true,
+        "no_mcp_authority": true,
+        "no_metric_evidence": true
+      },
+      "failure_codes": [],
+      "observed_route": "language_clarification",
+      "observed_status": "NEEDS_CLARIFICATION"
+    },
+    {
+      "id": "multidomain",
+      "input": "Compare finance, late delivery and review scores from February 2018 to March 2018",
+      "passed": true,
+      "checks": {
+        "route": true,
+        "status": true,
+        "executable": true,
+        "causal_claim": true,
+        "not_mcp_approved": true,
+        "finance_population_distinct": true,
+        "period": true,
+        "domains": true,
+        "measured_three_operational_metrics": true,
+        "financial_direction": true,
+        "approx_revenue": true,
+        "approx_profit": true,
+        "cohort_trace_scope": true
+      },
+      "failure_codes": [],
+      "observed_route": "three_domain_investigation",
+      "observed_status": "THREE_DOMAIN_DESCRIPTIVE_EVIDENCE"
+    },
+    {
+      "id": "shared_year",
+      "input": "Revenue increased but profit fell between February and March 2018. Did delivery and customer satisfaction also get worse?",
+      "passed": true,
+      "checks": {
+        "route": true,
+        "status": true,
+        "executable": true,
+        "causal_claim": true,
+        "not_mcp_approved": true,
+        "finance_population_distinct": true,
+        "period": true,
+        "domains": true,
+        "measured_three_operational_metrics": true,
+        "financial_direction": true,
+        "approx_revenue": true,
+        "approx_profit": true,
+        "cohort_trace_scope": true
+      },
+      "failure_codes": [],
+      "observed_route": "three_domain_investigation",
+      "observed_status": "THREE_DOMAIN_DESCRIPTIVE_EVIDENCE"
+    },
+    {
+      "id": "causal_refusal",
+      "input": "Did delivery delays cause poor reviews and profit decline between February and March 2018?",
+      "passed": true,
+      "checks": {
+        "route": true,
+        "status": true,
+        "executable": true,
+        "causal_claim": true,
+        "no_mcp_authority": true,
+        "no_metric_evidence": true
+      },
+      "failure_codes": [],
+      "observed_route": "three_domain_investigation",
+      "observed_status": "NEEDS_CLARIFICATION"
+    },
+    {
+      "id": "delivery_after_multidomain",
+      "input": "What was the late delivery rate in June 2018?",
+      "passed": true,
+      "checks": {
+        "route": true,
+        "status": true,
+        "executable": true,
+        "causal_claim": true,
+        "metric": true,
+        "period": true,
+        "value": true
+      },
+      "failure_codes": [],
+      "observed_route": "delivery_operations",
+      "observed_status": "MEASURED_WITH_SCOPE_LIMITS"
+    }
+  ],
+  "child_exit_code": 0,
+  "stdout_sha256": "c5ad72fe1ba2279039d63500ba59e9141385ca189fc61c9a630cf490a4204792",
+  "stderr_sha256": "6c3c9c293f56aeca50f4a87de9cf89e72001adb0950fc86c21274c2be76bc4e6",
+  "case_source": "fixed_v1"
+}

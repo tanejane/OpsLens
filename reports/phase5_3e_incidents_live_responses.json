@@ -1,0 +1,770 @@
+{
+  "responses": {
+    "INC_001": {
+      "route": "investigation",
+      "executable": true,
+      "causal_claim": false,
+      "periods": {
+        "before": [
+          "2018-02-01",
+          "2018-03-01"
+        ],
+        "after": [
+          "2018-03-01",
+          "2018-04-01"
+        ]
+      },
+      "premise": {
+        "revenue_increased": true,
+        "contribution_profit_decreased": true,
+        "revenue_delta": "139034.7300000042",
+        "contribution_profit_delta": "-48578.12892399993",
+        "divergence_confirmed": true
+      },
+      "investigation_status": "DESCRIPTIVE_DECOMPOSITION_ONLY",
+      "hypothesis_evaluation": {
+        "status": "EVIDENCE_RANKED_NOT_CAUSAL",
+        "causal_claim": false,
+        "premise_confirmed": true,
+        "profit_delta": "-48578.12892399993",
+        "hypotheses": [
+          {
+            "hypothesis_id": "financial_component:effective_cogs",
+            "label": "Cost of goods sold",
+            "observed_cost_change": "99426.0906999986",
+            "accounting_profit_impact": "-99426.0906999986",
+            "disposition": "SUPPORTS_PROFIT_PRESSURE",
+            "evidence_type": "reconciled_accounting_contribution",
+            "source": "semantic.order_economics",
+            "causal_claim": false,
+            "next_validation": "Verify attribution mechanism using independent operational data"
+          },
+          {
+            "hypothesis_id": "financial_component:marketing_cost_effective",
+            "label": "Marketing expense",
+            "observed_cost_change": "49291.23999999989",
+            "accounting_profit_impact": "-49291.23999999989",
+            "disposition": "SUPPORTS_PROFIT_PRESSURE",
+            "evidence_type": "reconciled_accounting_contribution",
+            "source": "semantic.order_cost_components",
+            "causal_claim": false,
+            "next_validation": "Verify attribution mechanism using independent operational data"
+          },
+          {
+            "hypothesis_id": "financial_component:refund_amount",
+            "label": "Refund expense",
+            "observed_cost_change": "17118.92999999999",
+            "accounting_profit_impact": "-17118.92999999999",
+            "disposition": "SUPPORTS_PROFIT_PRESSURE",
+            "evidence_type": "reconciled_accounting_contribution",
+            "source": "semantic.order_cost_components",
+            "causal_claim": false,
+            "next_validation": "Verify attribution mechanism using independent operational data"
+          },
+          {
+            "hypothesis_id": "financial_component:incentive_cost_effective",
+            "label": "Campaign incentives",
+            "observed_cost_change": "11541.6812940000183",
+            "accounting_profit_impact": "-11541.6812940000183",
+            "disposition": "SUPPORTS_PROFIT_PRESSURE",
+            "evidence_type": "reconciled_accounting_contribution",
+            "source": "semantic.order_cost_components",
+            "causal_claim": false,
+            "next_validation": "Verify attribution mechanism using independent operational data"
+          },
+          {
+            "hypothesis_id": "financial_component:fulfillment_cost",
+            "label": "Fulfillment expense",
+            "observed_cost_change": "7142.28759999991",
+            "accounting_profit_impact": "-7142.28759999991",
+            "disposition": "SUPPORTS_PROFIT_PRESSURE",
+            "evidence_type": "reconciled_accounting_contribution",
+            "source": "semantic.order_cost_components",
+            "causal_claim": false,
+            "next_validation": "Verify attribution mechanism using independent operational data"
+          }
+        ],
+        "hypotheses_evaluated": 7,
+        "hypotheses_returned": 5,
+        "untested": {
+          "campaign_incrementality": "Marketing spend alone cannot establish incremental campaign return",
+          "product_mix": "Item-level financial allocations are not governed for product/category profit",
+          "customer_cohorts": "No verified cohort-level contribution-profit evidence provided",
+          "operational_causation": "Accounting movement does not identify the operational cause"
+        },
+        "limitations": [
+          "Ranks measured accounting movements, not causal root causes",
+          "Financial data include modeled or synthetic cost components",
+          "No cross-domain joins, cohort comparisons, or statistical causal tests were performed",
+          "Only the supplied two periods were evaluated; completeness across all dates is not certified"
+        ]
+      },
+      "order_normalized_evidence": {
+        "status": "RECONCILED_INTENSITY_COMPARISON",
+        "population_basis": "financially eligible orders with items",
+        "before_orders": 6694,
+        "after_orders": 7188,
+        "components": [
+          {
+            "component": "refund_amount",
+            "before_per_order": "5.337333432925005975500448163",
+            "after_per_order": "7.352120200333887033945464663",
+            "change_per_order": "2.014786767408881058445016500",
+            "causal_claim": false
+          },
+          {
+            "component": "fulfillment_cost",
+            "before_per_order": "6.523640379444273976695548252",
+            "after_per_order": "7.068939385086238174735670562",
+            "change_per_order": "0.545299005641964198040122310",
+            "causal_claim": false
+          },
+          {
+            "component": "payment_processing_cost",
+            "before_per_order": "2.998304886465476844935763370",
+            "after_per_order": "3.222493355592629660545353367",
+            "change_per_order": "0.224188469127152815609589997",
+            "causal_claim": false
+          },
+          {
+            "component": "marketing_cost_effective",
+            "before_per_order": "13.73434269495074394980579624",
+            "after_per_order": "19.64787562604342932665553701",
+            "change_per_order": "5.91353293109268537684974077",
+            "causal_claim": false
+          },
+          {
+            "component": "incentive_cost_effective",
+            "before_per_order": "0.09718078846728409023005676725",
+            "after_per_order": "1.696189411797442682248191430",
+            "change_per_order": "1.599008623330158592018134663",
+            "causal_claim": false
+          },
+          {
+            "component": "other_adjustments_residual",
+            "before_per_order": "-8.500922470354465192709889453E-17",
+            "after_per_order": "-3.545709141492939621591541458E-16",
+            "change_per_order": "-2.695616894457493102320552513E-16",
+            "causal_claim": false
+          }
+        ],
+        "causal_claim": false,
+        "limitations": [
+          "Per-order averages reflect different order cohorts and do not identify causality",
+          "Financial charge data include modeled or synthetic values"
+        ]
+      },
+      "status": "EVIDENCE_RANKED_NOT_CAUSAL",
+      "adaptive": {
+        "steps_used": 3,
+        "trace": [
+          {
+            "step": 1,
+            "capability": "premise_and_accounting_bridge",
+            "decision": "EXECUTED",
+            "reason": "Required to verify question before examining drivers"
+          },
+          {
+            "step": 2,
+            "capability": "reconciled_cost_components",
+            "decision": "RECONCILED_COMPONENT_BREAKDOWN",
+            "reason": "Unexplained net-charge movement warrants approved cost-component inspection"
+          },
+          {
+            "step": 3,
+            "capability": "per_order_intensity",
+            "decision": "EXECUTED_NO_NEW_SQL",
+            "reason": "Test whether total cost pressures can be explained solely by greater order volume"
+          }
+        ],
+        "stop_reason": "NO_MORE_APPROVED_HYPOTHESIS_TOOLS",
+        "untested": {
+          "campaign_incrementality": "Marketing spend alone cannot establish incremental campaign return",
+          "product_mix": "Item-level financial allocations are not governed for product/category profit",
+          "customer_cohorts": "No verified cohort-level contribution-profit evidence provided",
+          "operational_causation": "Accounting movement does not identify the operational cause"
+        },
+        "causal_claim": false
+      },
+      "investigation_gateway": {
+        "status": "GOVERNED_FINANCE_RETRY",
+        "original_question": "Revenue grew but contribution profit fell from February 2018 to March 2018. Investigate the accounting pressures and state what needs independent validation.",
+        "bounded_question": "Why did revenue increase but contribution profit decrease from February 2018 to March 2018?",
+        "previous_route": "unified_interpreter",
+        "previous_status": "NEEDS_CLARIFICATION",
+        "gemini_executed_tools": false,
+        "causal_claim": false
+      }
+    },
+    "INC_002": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2017-07-01"
+      ],
+      "requested_domains": [
+        "regional"
+      ],
+      "evidence_requirements": [
+        "region-linked eligible orders and capacity logs",
+        "independently approved lost-order definition"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "unified_interpreter",
+        "status": "NEEDS_CLARIFICATION",
+        "reason": "Gemini interpretation could not be verified",
+        "error_type": "InterpretationRejected"
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    },
+    "INC_003": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2018-01-01"
+      ],
+      "requested_domains": [
+        "returns_quality"
+      ],
+      "evidence_requirements": [
+        "order-level returns/refunds with eligibility rules",
+        "seller and product linkage with verified grain"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "unified_interpreter",
+        "status": "NEEDS_CLARIFICATION",
+        "reason": "Financial investigation needs validated revenue and contribution-profit intent and a complete comparison period",
+        "error_type": null
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    },
+    "INC_004": {
+      "route": "investigation_planner",
+      "status": "PARTIAL_GOVERNED_EVIDENCE",
+      "executable": true,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2018-08-01"
+      ],
+      "requested_domains": [
+        "delivery"
+      ],
+      "observations": [
+        {
+          "status": "MEASURED_WITH_SCOPE_LIMITS",
+          "metric_id": "late_delivery_rate",
+          "value": "11.1793418359313494",
+          "unit": "percent",
+          "source": "semantic.order_delivery_evidence_v1",
+          "period": [
+            "2018-08-01",
+            "2018-09-01"
+          ],
+          "population": {
+            "eligible_orders": 6512,
+            "lateness_eligible_orders": 6351,
+            "late_orders": 710,
+            "duration_eligible_orders": 6351,
+            "missing_actual": 161,
+            "missing_estimated": 0,
+            "missing_purchase": 0
+          },
+          "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+          "time_basis": "order_purchase_time",
+          "causal_claim": false,
+          "limitations": [
+            "Purchase-time cohorts; not delivery-completion cohorts",
+            "Actual delivery dates may include modeled incident adjustments",
+            "Orders missing delivery timestamps are excluded from lateness denominator",
+            "Nonempty period is not certification of continuous coverage",
+            "Descriptive; no causal inference"
+          ]
+        }
+      ],
+      "source_evidence": [
+        {
+          "source": "semantic.order_delivery_evidence_v1",
+          "period": [
+            "2018-08-01",
+            "2018-09-01"
+          ],
+          "metric_id": "late_delivery_rate",
+          "value": "11.1793418359313494",
+          "unit": "percent",
+          "population": {
+            "eligible_orders": 6512,
+            "lateness_eligible_orders": 6351,
+            "late_orders": 710,
+            "duration_eligible_orders": 6351,
+            "missing_actual": 161,
+            "missing_estimated": 0,
+            "missing_purchase": 0
+          }
+        }
+      ],
+      "verified_mechanism": false,
+      "scope": "monthly_descriptive_metrics_only",
+      "next_step": "Require independently approved order/seller/carrier linkage to evaluate concentration or attribution",
+      "limitations": [
+        "These aggregate metrics do not establish seller-level concentration",
+        "Purchase-month cohort and metric-specific eligibility apply",
+        "No approved new join or causal inference"
+      ],
+      "tool_trace": [
+        {
+          "capability": "existing_governed_metric_compiler",
+          "source": "semantic.order_delivery_evidence_v1",
+          "metric_id": "late_delivery_rate",
+          "write_executed": false
+        }
+      ]
+    },
+    "INC_005": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2017-09-01"
+      ],
+      "requested_domains": [
+        "product_mix",
+        "finance"
+      ],
+      "evidence_requirements": [
+        "category item sales mix at item grain",
+        "category-level profitability and allocation reconciliation",
+        "approved finance metrics and cost breakdown",
+        "independent attribution source and modeled-cost validation"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "unified_interpreter",
+        "status": "NEEDS_CLARIFICATION",
+        "reason": "Gemini interpretation could not be verified",
+        "error_type": "InterpretationRejected"
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    },
+    "INC_006": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2017-11-01"
+      ],
+      "requested_domains": [
+        "finance"
+      ],
+      "evidence_requirements": [
+        "approved finance metrics and cost breakdown",
+        "independent attribution source and modeled-cost validation"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "language_clarification",
+        "status": "NEEDS_CLARIFICATION",
+        "reason": "Unsupported query syntax; please rephrase",
+        "error_type": null
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    },
+    "INC_007": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2018-05-01"
+      ],
+      "requested_domains": [
+        "inventory",
+        "product_mix"
+      ],
+      "evidence_requirements": [
+        "inventory availability by product and date",
+        "lost-demand counterfactual or independently validated stockout model",
+        "category item sales mix at item grain",
+        "category-level profitability and allocation reconciliation"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "unified_interpreter",
+        "status": "NEEDS_CLARIFICATION",
+        "reason": "Gemini interpretation could not be verified",
+        "error_type": "InterpretationRejected"
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    },
+    "INC_008": {
+      "route": "investigation_planner",
+      "status": "PARTIAL_GOVERNED_EVIDENCE",
+      "executable": true,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2018-06-01"
+      ],
+      "requested_domains": [
+        "delivery",
+        "satisfaction"
+      ],
+      "observations": [
+        {
+          "status": "MEASURED_WITH_SCOPE_LIMITS",
+          "metric_id": "late_delivery_rate",
+          "value": "1.3943569553805774",
+          "unit": "percent",
+          "source": "semantic.order_delivery_evidence_v1",
+          "period": [
+            "2018-06-01",
+            "2018-07-01"
+          ],
+          "population": {
+            "eligible_orders": 6167,
+            "lateness_eligible_orders": 6096,
+            "late_orders": 85,
+            "duration_eligible_orders": 6096,
+            "missing_actual": 71,
+            "missing_estimated": 0,
+            "missing_purchase": 0
+          },
+          "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+          "time_basis": "order_purchase_time",
+          "causal_claim": false,
+          "limitations": [
+            "Purchase-time cohorts; not delivery-completion cohorts",
+            "Actual delivery dates may include modeled incident adjustments",
+            "Orders missing delivery timestamps are excluded from lateness denominator",
+            "Nonempty period is not certification of continuous coverage",
+            "Descriptive; no causal inference"
+          ]
+        },
+        {
+          "status": "MEASURED_WITH_SCOPE_LIMITS",
+          "metric_id": "average_review_score",
+          "value": "4.25362318840579710145",
+          "unit": "score_1_to_5",
+          "source": "semantic.order_review_evidence_v1",
+          "period": [
+            "2018-06-01",
+            "2018-07-01"
+          ],
+          "population": {
+            "eligible_orders": 6167,
+            "reviewed_orders": 6141,
+            "low_rating_orders": 675,
+            "multi_review_orders": 6
+          },
+          "policy": "mean_non_null_effective_scores_per_order",
+          "time_basis": "order_purchase_time",
+          "causal_claim": false,
+          "limitations": [
+            "Purchase-time cohorts, not review-submission-time cohorts",
+            "Effective review scores may include modeled incident adjustments",
+            "Nonempty source data do not certify continuous coverage",
+            "Order-level mean of non-null scores is a documented modeling choice, not a unique ground truth"
+          ]
+        },
+        {
+          "status": "MEASURED_WITH_SCOPE_LIMITS",
+          "metric_id": "low_rating_rate",
+          "value": "10.9916951636541280",
+          "unit": "percent",
+          "source": "semantic.order_review_evidence_v1",
+          "period": [
+            "2018-06-01",
+            "2018-07-01"
+          ],
+          "population": {
+            "eligible_orders": 6167,
+            "reviewed_orders": 6141,
+            "low_rating_orders": 675,
+            "multi_review_orders": 6
+          },
+          "policy": "mean_non_null_effective_scores_per_order",
+          "time_basis": "order_purchase_time",
+          "causal_claim": false,
+          "limitations": [
+            "Purchase-time cohorts, not review-submission-time cohorts",
+            "Effective review scores may include modeled incident adjustments",
+            "Nonempty source data do not certify continuous coverage",
+            "Order-level mean of non-null scores is a documented modeling choice, not a unique ground truth"
+          ]
+        }
+      ],
+      "source_evidence": [
+        {
+          "source": "semantic.order_delivery_evidence_v1",
+          "period": [
+            "2018-06-01",
+            "2018-07-01"
+          ],
+          "metric_id": "late_delivery_rate",
+          "value": "1.3943569553805774",
+          "unit": "percent",
+          "population": {
+            "eligible_orders": 6167,
+            "lateness_eligible_orders": 6096,
+            "late_orders": 85,
+            "duration_eligible_orders": 6096,
+            "missing_actual": 71,
+            "missing_estimated": 0,
+            "missing_purchase": 0
+          }
+        },
+        {
+          "source": "semantic.order_review_evidence_v1",
+          "period": [
+            "2018-06-01",
+            "2018-07-01"
+          ],
+          "metric_id": "average_review_score",
+          "value": "4.25362318840579710145",
+          "unit": "score_1_to_5",
+          "population": {
+            "eligible_orders": 6167,
+            "reviewed_orders": 6141,
+            "low_rating_orders": 675,
+            "multi_review_orders": 6
+          }
+        },
+        {
+          "source": "semantic.order_review_evidence_v1",
+          "period": [
+            "2018-06-01",
+            "2018-07-01"
+          ],
+          "metric_id": "low_rating_rate",
+          "value": "10.9916951636541280",
+          "unit": "percent",
+          "population": {
+            "eligible_orders": 6167,
+            "reviewed_orders": 6141,
+            "low_rating_orders": 675,
+            "multi_review_orders": 6
+          }
+        }
+      ],
+      "verified_mechanism": false,
+      "scope": "monthly_descriptive_metrics_only",
+      "next_step": "Require independently approved order/seller/carrier linkage to evaluate concentration or attribution",
+      "limitations": [
+        "These aggregate metrics do not establish seller-level concentration",
+        "Purchase-month cohort and metric-specific eligibility apply",
+        "No approved new join or causal inference"
+      ],
+      "tool_trace": [
+        {
+          "capability": "existing_governed_metric_compiler",
+          "source": "semantic.order_delivery_evidence_v1",
+          "metric_id": "late_delivery_rate",
+          "write_executed": false
+        },
+        {
+          "capability": "existing_governed_metric_compiler",
+          "source": "semantic.order_review_evidence_v1",
+          "metric_id": "average_review_score",
+          "write_executed": false
+        },
+        {
+          "capability": "existing_governed_metric_compiler",
+          "source": "semantic.order_review_evidence_v1",
+          "metric_id": "low_rating_rate",
+          "write_executed": false
+        }
+      ]
+    },
+    "INC_009": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2018-04-01"
+      ],
+      "requested_domains": [
+        "documents",
+        "regional"
+      ],
+      "evidence_requirements": [
+        "versioned source documents with trustworthy timestamps",
+        "source trust and precedence review",
+        "region-linked eligible orders and capacity logs",
+        "independently approved lost-order definition"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "unified_interpreter",
+        "status": "NEEDS_CLARIFICATION",
+        "reason": "Gemini interpretation could not be verified",
+        "error_type": "InterpretationRejected"
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    },
+    "INC_010": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2017-12-01"
+      ],
+      "requested_domains": [
+        "documents",
+        "returns_quality",
+        "finance"
+      ],
+      "evidence_requirements": [
+        "versioned source documents with trustworthy timestamps",
+        "source trust and precedence review",
+        "order-level returns/refunds with eligibility rules",
+        "seller and product linkage with verified grain",
+        "approved finance metrics and cost breakdown",
+        "independent attribution source and modeled-cost validation"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "unified_interpreter",
+        "status": "NEEDS_CLARIFICATION",
+        "reason": "Gemini interpretation could not be verified",
+        "error_type": "InterpretationRejected"
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    },
+    "INC_011": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [],
+      "requested_domains": [
+        "documents"
+      ],
+      "evidence_requirements": [
+        "versioned source documents with trustworthy timestamps",
+        "source trust and precedence review"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "unified_interpreter",
+        "status": "NOT_YET_SUPPORTED",
+        "reason": "Requested capability is unsupported",
+        "error_type": null
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    },
+    "INC_012": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2018-07-01"
+      ],
+      "requested_domains": [
+        "returns_quality",
+        "finance",
+        "confounding"
+      ],
+      "evidence_requirements": [
+        "order-level returns/refunds with eligibility rules",
+        "seller and product linkage with verified grain",
+        "approved finance metrics and cost breakdown",
+        "independent attribution source and modeled-cost validation",
+        "stratified cohort counts and outcomes",
+        "comparison within relevant confounder strata"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "unified_interpreter",
+        "status": "NEEDS_CLARIFICATION",
+        "reason": "Gemini interpretation could not be verified",
+        "error_type": "InterpretationRejected"
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    }
+  }
+}

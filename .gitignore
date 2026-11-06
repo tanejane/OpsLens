@@ -1,0 +1,70 @@
+# Python environment and testing
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+
+# Additional environment files
+.env.*
+!.env.example
+!.env.phase2d.example
+
+# Node and build outputs
+node_modules/
+.next/
+dist/
+
+# Local files
+*.log
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.backup
+*.pem
+*.key
+Thumbs.db
+.DS_Store
+
+
+# Large datasets - keep local, never upload to Git
+/data/raw/
+/data/processed/
+/data/synthetic/
+
+# Local database storage
+/db/postgres_data/
+/db/pgdata/
+/postgres_data/
+
+# Temporary Git inspection files
+git-preview.txt
+
+# Never commit credentials
+.env
+.env.*
+!.env.example
+!.env.phase2d.example
+
+# Local OpsLens runtime state
+.runtime/
+
+# Python caches everywhere
+__pycache__/
+*.pyc
+*.pyo
+
+# Secrets
+.env
+.env.*
+!.env.example
+!.env.phase2d.example
+
+# Local credential and authentication diagnostics
+/reports/gemini_credential_diagnostic.json
+/reports/live_http_journey_before_credentials.json
+
+# Local validation script — excluded from GitHub
+/scripts/p2_2_validate.py

@@ -1,0 +1,293 @@
+{
+  "version": "4b4.1",
+  "disclaimer": "Diagnostics only; no joins are automatically approved for analytical measures.",
+  "sources": {
+    "behavior.sessions": {
+      "declared_scope": "external_sample",
+      "declared_grain": [
+        "session_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "REJECTED",
+          "result": {
+            "total_rows": 360129,
+            "null_key_rows": 0,
+            "repeated_key_rows": 10584
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2020-11-01T00:00:00",
+            "max_date": "2021-01-31T00:00:00",
+            "total_rows": 360129,
+            "dated_rows": 360129
+          },
+          "declared_coverage": null
+        }
+      },
+      "columns_verified": true,
+      "missing_columns": [],
+      "live_column_count": 17
+    },
+    "catalog.products": {
+      "declared_scope": "marketplace",
+      "declared_grain": [
+        "product_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 32951,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "NO_DATE_COLUMN"
+        }
+      },
+      "columns_verified": true,
+      "missing_columns": [],
+      "live_column_count": 10
+    },
+    "commerce.order_items": {
+      "declared_scope": "marketplace",
+      "declared_grain": [
+        "order_id",
+        "order_item_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 112650,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "NO_DATE_COLUMN"
+        }
+      },
+      "columns_verified": true,
+      "missing_columns": [],
+      "live_column_count": 7
+    },
+    "commerce.orders": {
+      "declared_scope": "marketplace",
+      "declared_grain": [
+        "order_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 99441,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-09-04T21:15:19",
+            "max_date": "2018-10-17T17:30:18",
+            "total_rows": 99441,
+            "dated_rows": 99441
+          },
+          "declared_coverage": null
+        }
+      },
+      "columns_verified": true,
+      "missing_columns": [],
+      "live_column_count": 8
+    },
+    "cx.effective_reviews": {
+      "declared_scope": "effective_marketplace",
+      "declared_grain": [
+        "review_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "REJECTED",
+          "result": {
+            "total_rows": 99224,
+            "null_key_rows": 0,
+            "repeated_key_rows": 814
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-10-02T00:00:00",
+            "max_date": "2018-08-31T00:00:00",
+            "total_rows": 99224,
+            "dated_rows": 99224
+          },
+          "declared_coverage": null
+        }
+      },
+      "columns_verified": true,
+      "missing_columns": [],
+      "live_column_count": 9
+    },
+    "operations.delivery_effective": {
+      "declared_scope": "effective_marketplace",
+      "declared_grain": [
+        "order_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 99441,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-09-04T21:15:19",
+            "max_date": "2018-10-17T17:30:18",
+            "total_rows": 99441,
+            "dated_rows": 99441
+          },
+          "declared_coverage": null
+        }
+      },
+      "columns_verified": true,
+      "missing_columns": [],
+      "live_column_count": 10
+    },
+    "semantic.daily_commerce": {
+      "declared_scope": "effective_marketplace",
+      "declared_grain": [
+        "business_date"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 616,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-09-04",
+            "max_date": "2018-09-03",
+            "total_rows": 616,
+            "dated_rows": 616
+          },
+          "declared_coverage": null
+        }
+      },
+      "columns_verified": true,
+      "missing_columns": [],
+      "live_column_count": 6
+    },
+    "semantic.order_economics": {
+      "declared_scope": "effective_marketplace",
+      "declared_grain": [
+        "order_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 98666,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-09-04T21:15:19",
+            "max_date": "2018-09-03T09:06:57",
+            "total_rows": 98666,
+            "dated_rows": 98666
+          },
+          "declared_coverage": null
+        }
+      },
+      "columns_verified": true,
+      "missing_columns": [],
+      "live_column_count": 12
+    },
+    "semantic.product_mix_effective": {
+      "declared_scope": "incident_specific",
+      "declared_grain": [
+        "order_id",
+        "order_item_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "MISSING_COLUMNS"
+        },
+        "coverage": {
+          "status": "NO_DATE_COLUMN"
+        }
+      },
+      "columns_verified": true,
+      "missing_columns": [],
+      "live_column_count": 11
+    }
+  },
+  "relationships": {
+    "orders_to_items": {
+      "left": "commerce.orders",
+      "right": "commerce.order_items",
+      "cardinality": "one_to_many",
+      "fanout_risk": true,
+      "status": "ERROR",
+      "error": "MCP run_readonly_sql unavailable: {'ok': False, 'tool': 'run_readonly_sql', 'data': None, 'error': '(psycopg.errors.QueryCanceled) canceling statement due to statement timeout\\n[SQL: SELECT * FROM (SELECT COUNT(*) AS child_rows, COUNT(*) FILTER (WHERE c.\"order_id\" IS NULL) AS null_keys, COUNT(*) FILTER (WHERE c.\"order_id\" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM \"commerce\".\"orders\" p WHERE p.\"order_id\"=c.\"order_id\")) AS unmatched"
+    },
+    "items_to_products": {
+      "left": "commerce.order_items",
+      "right": "catalog.products",
+      "cardinality": "many_to_one",
+      "fanout_risk": false,
+      "status": "ERROR",
+      "error": "MCP run_readonly_sql unavailable: {'ok': False, 'tool': 'run_readonly_sql', 'data': None, 'error': '(psycopg.errors.QueryCanceled) canceling statement due to statement timeout\\n[SQL: SELECT * FROM (SELECT COUNT(*) AS child_rows, COUNT(*) FILTER (WHERE c.\"product_id\" IS NULL) AS null_keys, COUNT(*) FILTER (WHERE c.\"product_id\" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM \"commerce\".\"order_items\" p WHERE p.\"product_id\"=c.\"product_id\"))"
+    },
+    "orders_to_economics": {
+      "left": "commerce.orders",
+      "right": "semantic.order_economics",
+      "cardinality": "one_to_one",
+      "fanout_risk": false,
+      "status": "ERROR",
+      "error": "MCP run_readonly_sql unavailable: {'ok': False, 'tool': 'run_readonly_sql', 'data': None, 'error': '(psycopg.errors.QueryCanceled) canceling statement due to statement timeout\\n[SQL: SELECT * FROM (SELECT COUNT(*) AS child_rows, COUNT(*) FILTER (WHERE c.\"order_id\" IS NULL) AS null_keys, COUNT(*) FILTER (WHERE c.\"order_id\" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM \"commerce\".\"orders\" p WHERE p.\"order_id\"=c.\"order_id\")) AS unmatched"
+    },
+    "orders_to_reviews": {
+      "left": "commerce.orders",
+      "right": "cx.effective_reviews",
+      "cardinality": "one_to_many",
+      "fanout_risk": true,
+      "status": "ERROR",
+      "error": "MCP run_readonly_sql unavailable: {'ok': False, 'tool': 'run_readonly_sql', 'data': None, 'error': '(psycopg.errors.QueryCanceled) canceling statement due to statement timeout\\n[SQL: SELECT * FROM (SELECT COUNT(*) AS child_rows, COUNT(*) FILTER (WHERE c.\"order_id\" IS NULL) AS null_keys, COUNT(*) FILTER (WHERE c.\"order_id\" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM \"commerce\".\"orders\" p WHERE p.\"order_id\"=c.\"order_id\")) AS unmatched"
+    },
+    "orders_to_delivery": {
+      "left": "commerce.orders",
+      "right": "operations.delivery_effective",
+      "cardinality": "one_to_one",
+      "fanout_risk": false,
+      "status": "ERROR",
+      "error": "MCP run_readonly_sql unavailable: {'ok': False, 'tool': 'run_readonly_sql', 'data': None, 'error': '(psycopg.errors.QueryCanceled) canceling statement due to statement timeout\\n[SQL: SELECT * FROM (SELECT COUNT(*) AS child_rows, COUNT(*) FILTER (WHERE c.\"order_id\" IS NULL) AS null_keys, COUNT(*) FILTER (WHERE c.\"order_id\" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM \"commerce\".\"orders\" p WHERE p.\"order_id\"=c.\"order_id\")) AS unmatched"
+    },
+    "orders_to_product_mix": {
+      "left": "commerce.orders",
+      "right": "semantic.product_mix_effective",
+      "cardinality": "one_to_many",
+      "fanout_risk": true,
+      "status": "ERROR",
+      "error": "MCP run_readonly_sql unavailable: {'ok': False, 'tool': 'run_readonly_sql', 'data': None, 'error': '(psycopg.errors.QueryCanceled) canceling statement due to statement timeout\\n[SQL: SELECT * FROM (SELECT COUNT(*) AS child_rows, COUNT(*) FILTER (WHERE c.\"order_id\" IS NULL) AS null_keys, COUNT(*) FILTER (WHERE c.\"order_id\" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM \"commerce\".\"orders\" p WHERE p.\"order_id\"=c.\"order_id\")) AS unmatched"
+    }
+  }
+}

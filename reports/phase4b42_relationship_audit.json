@@ -1,0 +1,482 @@
+{
+  "version": "4b4.2",
+  "disclaimer": "Read-only diagnostics. Nothing is automatically authorized for execution.",
+  "sources": {
+    "commerce.orders": {
+      "declared_scope": "marketplace",
+      "declared_grain": [
+        "order_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 99441,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-09-04T21:15:19",
+            "max_date": "2018-10-17T17:30:18",
+            "total_rows": 99441,
+            "dated_rows": 99441
+          },
+          "declared_coverage": null
+        }
+      },
+      "live_columns": [
+        "customer_id",
+        "order_approved_at",
+        "order_delivered_carrier_date",
+        "order_delivered_customer_date",
+        "order_estimated_delivery_date",
+        "order_id",
+        "order_purchase_timestamp",
+        "order_status"
+      ],
+      "missing_columns": [],
+      "columns_verified": true
+    },
+    "commerce.order_items": {
+      "declared_scope": "marketplace",
+      "declared_grain": [
+        "order_id",
+        "order_item_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 112650,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "NO_DATE_COLUMN"
+        }
+      },
+      "live_columns": [
+        "freight_value",
+        "order_id",
+        "order_item_id",
+        "price",
+        "product_id",
+        "seller_id",
+        "shipping_limit_date"
+      ],
+      "missing_columns": [],
+      "columns_verified": true
+    },
+    "catalog.products": {
+      "declared_scope": "marketplace",
+      "declared_grain": [
+        "product_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 32951,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "NO_DATE_COLUMN"
+        }
+      },
+      "live_columns": [
+        "category",
+        "product_category_name",
+        "product_description_lenght",
+        "product_height_cm",
+        "product_id",
+        "product_length_cm",
+        "product_name_lenght",
+        "product_photos_qty",
+        "product_weight_g",
+        "product_width_cm"
+      ],
+      "missing_columns": [],
+      "columns_verified": true
+    },
+    "semantic.order_economics": {
+      "declared_scope": "effective_marketplace",
+      "declared_grain": [
+        "order_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 98666,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-09-04T21:15:19",
+            "max_date": "2018-09-03T09:06:57",
+            "total_rows": 98666,
+            "dated_rows": 98666
+          },
+          "declared_coverage": null
+        }
+      },
+      "live_columns": [
+        "cogs",
+        "contribution_profit",
+        "effective_cogs",
+        "effective_contribution_profit",
+        "effective_revenue",
+        "inc006_incentive_cost",
+        "inc006_incremental_revenue",
+        "inc006_marketing_cost",
+        "order_id",
+        "order_purchase_timestamp",
+        "regional_revenue_multiplier",
+        "revenue"
+      ],
+      "missing_columns": [],
+      "columns_verified": true
+    },
+    "semantic.daily_commerce": {
+      "declared_scope": "effective_marketplace",
+      "declared_grain": [
+        "business_date"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 616,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-09-04",
+            "max_date": "2018-09-03",
+            "total_rows": 616,
+            "dated_rows": 616
+          },
+          "declared_coverage": null
+        }
+      },
+      "live_columns": [
+        "business_date",
+        "cogs",
+        "contribution_margin",
+        "contribution_profit",
+        "orders",
+        "revenue"
+      ],
+      "missing_columns": [],
+      "columns_verified": true
+    },
+    "semantic.product_mix_effective": {
+      "declared_scope": "incident_specific",
+      "declared_grain": [
+        "order_id",
+        "order_item_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "MISSING_COLUMNS"
+        },
+        "coverage": {
+          "status": "NO_DATE_COLUMN"
+        }
+      },
+      "live_columns": [
+        "baseline_cogs",
+        "baseline_gross_profit",
+        "baseline_revenue",
+        "category",
+        "demand_weight_multiplier",
+        "effective_cogs",
+        "effective_gross_profit",
+        "effective_revenue",
+        "mix_override_reason",
+        "order_id",
+        "product_id"
+      ],
+      "missing_columns": [],
+      "columns_verified": true
+    },
+    "cx.effective_reviews": {
+      "declared_scope": "effective_marketplace",
+      "declared_grain": [
+        "review_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "REJECTED",
+          "result": {
+            "total_rows": 99224,
+            "null_key_rows": 0,
+            "repeated_key_rows": 814
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-10-02T00:00:00",
+            "max_date": "2018-08-31T00:00:00",
+            "total_rows": 99224,
+            "dated_rows": 99224
+          },
+          "declared_coverage": null
+        }
+      },
+      "live_columns": [
+        "effective_review_score",
+        "incident_extra_delivery_delay_days",
+        "order_id",
+        "review_answer_timestamp",
+        "review_comment_message",
+        "review_comment_title",
+        "review_creation_date",
+        "review_id",
+        "review_score"
+      ],
+      "missing_columns": [],
+      "columns_verified": true
+    },
+    "operations.delivery_effective": {
+      "declared_scope": "effective_marketplace",
+      "declared_grain": [
+        "order_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "VERIFIED",
+          "result": {
+            "total_rows": 99441,
+            "null_key_rows": 0,
+            "repeated_key_rows": 0
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2016-09-04T21:15:19",
+            "max_date": "2018-10-17T17:30:18",
+            "total_rows": 99441,
+            "dated_rows": 99441
+          },
+          "declared_coverage": null
+        }
+      },
+      "live_columns": [
+        "baseline_delivered_customer_date",
+        "effective_delivered_customer_date",
+        "final_effective_delivered_customer_date",
+        "inc002_extra_delay_days",
+        "inc004_extra_delay_days",
+        "inc008_extra_delay_days",
+        "order_estimated_delivery_date",
+        "order_id",
+        "order_purchase_timestamp",
+        "regional_capacity_impact"
+      ],
+      "missing_columns": [],
+      "columns_verified": true
+    },
+    "behavior.sessions": {
+      "declared_scope": "external_sample",
+      "declared_grain": [
+        "session_id"
+      ],
+      "checks": {
+        "grain": {
+          "status": "REJECTED",
+          "result": {
+            "total_rows": 360129,
+            "null_key_rows": 0,
+            "repeated_key_rows": 10584
+          }
+        },
+        "coverage": {
+          "status": "MEASURED",
+          "result": {
+            "min_date": "2020-11-01T00:00:00",
+            "max_date": "2021-01-31T00:00:00",
+            "total_rows": 360129,
+            "dated_rows": 360129
+          },
+          "declared_coverage": null
+        }
+      },
+      "live_columns": [
+        "add_to_cart_count",
+        "begin_checkout_count",
+        "country",
+        "device_category",
+        "did_checkout_abandon",
+        "did_purchase",
+        "page_view_count",
+        "purchase_count",
+        "purchase_revenue",
+        "session_date",
+        "session_id",
+        "session_key",
+        "traffic_campaign",
+        "traffic_medium",
+        "traffic_source",
+        "user_pseudo_id",
+        "view_item_count"
+      ],
+      "missing_columns": [],
+      "columns_verified": true
+    }
+  },
+  "relationships": {
+    "orders_to_items": {
+      "cardinality": "one_to_many",
+      "child": "commerce.order_items",
+      "child_key": "order_id",
+      "parent": "commerce.orders",
+      "parent_key": "order_id",
+      "fanout_risk": true,
+      "measure_safe": false,
+      "execution_approved": false,
+      "parent_key_audit": {
+        "total_rows": 99441,
+        "null_key_rows": 0,
+        "repeated_key_rows": 0
+      },
+      "foreign_key_audit": {
+        "child_rows": 112650,
+        "null_fk_rows": 0,
+        "orphan_fk_rows": 0
+      },
+      "status": "STRUCTURALLY_VERIFIED"
+    },
+    "items_to_products": {
+      "cardinality": "many_to_one",
+      "child": "commerce.order_items",
+      "child_key": "product_id",
+      "parent": "catalog.products",
+      "parent_key": "product_id",
+      "fanout_risk": false,
+      "measure_safe": false,
+      "execution_approved": false,
+      "parent_key_audit": {
+        "total_rows": 32951,
+        "null_key_rows": 0,
+        "repeated_key_rows": 0
+      },
+      "foreign_key_audit": {
+        "child_rows": 112650,
+        "null_fk_rows": 0,
+        "orphan_fk_rows": 0
+      },
+      "status": "STRUCTURALLY_VERIFIED"
+    },
+    "orders_to_economics": {
+      "cardinality": "one_to_one",
+      "child": "semantic.order_economics",
+      "child_key": "order_id",
+      "parent": "commerce.orders",
+      "parent_key": "order_id",
+      "fanout_risk": false,
+      "measure_safe": false,
+      "execution_approved": false,
+      "parent_key_audit": {
+        "total_rows": 99441,
+        "null_key_rows": 0,
+        "repeated_key_rows": 0
+      },
+      "foreign_key_audit": {
+        "child_rows": 98666,
+        "null_fk_rows": 0,
+        "orphan_fk_rows": 0
+      },
+      "status": "STRUCTURALLY_VERIFIED"
+    },
+    "orders_to_reviews": {
+      "cardinality": "one_to_many",
+      "child": "cx.effective_reviews",
+      "child_key": "order_id",
+      "parent": "commerce.orders",
+      "parent_key": "order_id",
+      "fanout_risk": true,
+      "measure_safe": false,
+      "execution_approved": false,
+      "parent_key_audit": {
+        "total_rows": 99441,
+        "null_key_rows": 0,
+        "repeated_key_rows": 0
+      },
+      "foreign_key_audit": {
+        "child_rows": 99224,
+        "null_fk_rows": 0,
+        "orphan_fk_rows": 0
+      },
+      "status": "STRUCTURALLY_VERIFIED"
+    },
+    "orders_to_delivery": {
+      "cardinality": "one_to_one",
+      "child": "operations.delivery_effective",
+      "child_key": "order_id",
+      "parent": "commerce.orders",
+      "parent_key": "order_id",
+      "fanout_risk": false,
+      "measure_safe": false,
+      "execution_approved": false,
+      "parent_key_audit": {
+        "total_rows": 99441,
+        "null_key_rows": 0,
+        "repeated_key_rows": 0
+      },
+      "foreign_key_audit": {
+        "child_rows": 99441,
+        "null_fk_rows": 0,
+        "orphan_fk_rows": 0
+      },
+      "status": "STRUCTURALLY_VERIFIED"
+    },
+    "orders_to_product_mix": {
+      "cardinality": "one_to_many",
+      "child": "semantic.product_mix_effective",
+      "child_key": "order_id",
+      "parent": "commerce.orders",
+      "parent_key": "order_id",
+      "fanout_risk": true,
+      "measure_safe": false,
+      "execution_approved": false,
+      "parent_key_audit": {
+        "total_rows": 99441,
+        "null_key_rows": 0,
+        "repeated_key_rows": 0
+      },
+      "foreign_key_audit": {
+        "child_rows": 4831,
+        "null_fk_rows": 0,
+        "orphan_fk_rows": 0
+      },
+      "status": "STRUCTURALLY_VERIFIED"
+    }
+  },
+  "grain_investigations": [
+    {
+      "source": "cx.effective_reviews",
+      "repeated_key_rows": 814,
+      "recommendation": "Inspect duplicate values and source semantics. Do not revise grain or deduplicate automatically."
+    },
+    {
+      "source": "behavior.sessions",
+      "repeated_key_rows": 10584,
+      "recommendation": "Inspect duplicate values and source semantics. Do not revise grain or deduplicate automatically."
+    }
+  ]
+}

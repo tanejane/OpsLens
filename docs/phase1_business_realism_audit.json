@@ -1,0 +1,88 @@
+{
+  "incident_month": "2018-03-01",
+  "affected_categories": [
+    "health_beauty",
+    "watches_gifts",
+    "bed_bath_table"
+  ],
+  "incident_pattern": {
+    "revenue_growth_mom": 0.16469821893518266,
+    "contribution_profit_growth_mom": -0.42204034334580887,
+    "gross_margin_change_pp": -2.2593792270934445,
+    "contribution_margin_change_pp": -6.868843813148786,
+    "cogs_growth_mom": 0.18514430635563905,
+    "marketing_cost_growth_mom": 0.5361374644065997
+  },
+  "supplier_cost_growth_median": 0.08658604753630061,
+  "growthmax_total_spend": 80000.00000000001,
+  "checks": [
+    {
+      "check": "No negative revenue",
+      "passed": true,
+      "value": 0,
+      "note": "Observed Olist item prices should not become negative."
+    },
+    {
+      "check": "COGS populated",
+      "passed": true,
+      "value": 0.0,
+      "note": "Synthetic cost join should cover essentially all order lines."
+    },
+    {
+      "check": "Reasonable gross margins",
+      "passed": true,
+      "value": 0.9887904648004379,
+      "note": "Most order-level gross margins should fall inside a broad plausible range."
+    },
+    {
+      "check": "Reasonable contribution margins",
+      "passed": true,
+      "value": 0.97018223096102,
+      "note": "Contribution margin may be negative for acquired/returned orders but should not be wildly implausible for most orders."
+    },
+    {
+      "check": "Returns are sparse",
+      "passed": true,
+      "value": 0.04443273265359901,
+      "note": "Synthetic returns should remain a minority of delivered orders."
+    },
+    {
+      "check": "Campaign attribution is sparse",
+      "passed": true,
+      "value": 0.06271663997729715,
+      "note": "Most orders should not be force-attributed to campaigns."
+    },
+    {
+      "check": "Marketing spend non-negative",
+      "passed": true,
+      "value": 605.42,
+      "note": "Daily campaign spend must never be negative."
+    },
+    {
+      "check": "Inventory non-negative",
+      "passed": true,
+      "value": 0,
+      "note": "Inventory cannot be negative in this simplified model."
+    },
+    {
+      "check": "Supplier shock visible",
+      "passed": true,
+      "value": 0.08658604753630061,
+      "note": "Affected categories should show a clearly observable cost increase."
+    },
+    {
+      "check": "GrowthMax exists",
+      "passed": true,
+      "value": 1,
+      "note": "The controlled campaign must exist exactly once."
+    },
+    {
+      "check": "GrowthMax has material spend",
+      "passed": true,
+      "value": 80000.00000000001,
+      "note": "The campaign should be large enough to matter to profitability."
+    }
+  ],
+  "verdict": "STRONG",
+  "verdict_explanation": "The controlled incident already exhibits the flagship pattern: revenue increased while contribution profit and margin deteriorated."
+}

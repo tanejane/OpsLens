@@ -1,0 +1,43 @@
+{
+  "status": "LIVE_MCP_VALIDATED",
+  "source": "semantic.order_delivery_evidence_v1",
+  "period": [
+    "2018-06-01",
+    "2018-07-01"
+  ],
+  "population": {
+    "eligible_orders": 6167,
+    "lateness_eligible_orders": 6096,
+    "late_orders": 85,
+    "duration_eligible_orders": 6096,
+    "missing_actual": 71,
+    "missing_estimated": 0,
+    "missing_purchase": 0
+  },
+  "metrics": {
+    "late_delivery_rate": {
+      "value": "1.3943569553805774",
+      "unit": "percent"
+    },
+    "average_delivery_days": {
+      "value": "9.32189345852167784527",
+      "unit": "days"
+    },
+    "delivered_order_count": {
+      "value": "6096",
+      "unit": "orders"
+    },
+    "delivery_evidence_coverage": {
+      "value": "98.8487108804929463",
+      "unit": "percent"
+    }
+  },
+  "causal_claim": false,
+  "limitations": [
+    "Purchase-time cohorts; not delivery-completion cohorts",
+    "Actual delivery dates may include modeled incident adjustments",
+    "Orders missing delivery timestamps are excluded from lateness denominator",
+    "Nonempty period is not certification of continuous coverage",
+    "Descriptive; no causal inference"
+  ]
+}

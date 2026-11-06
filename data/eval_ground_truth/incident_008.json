@@ -1,0 +1,31 @@
+{
+  "incident_id": "INC_008",
+  "name": "Customer Experience Decline",
+  "incident_month": "2018-06-01",
+  "affected_sellers": [
+    "6560211a19b47992c3666cc44a7e94c0",
+    "955fee9216a65b617aa5c0531780ce60"
+  ],
+  "affected_orders": 113,
+  "true_causes": [
+    {
+      "cause": "late_delivery_concentration",
+      "importance": "primary"
+    },
+    {
+      "cause": "specific_seller_quality_issue",
+      "importance": "secondary"
+    }
+  ],
+  "decoys": [
+    "product_category_mix_alone",
+    "payment_method_mix"
+  ],
+  "required_evidence": [
+    "cx_incident_overrides",
+    "orders",
+    "reviews",
+    "sellers"
+  ],
+  "status": "IMPLEMENTED"
+}

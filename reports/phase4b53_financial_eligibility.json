@@ -1,0 +1,280 @@
+{
+  "phase": "4B.5.3",
+  "status": "REVIEW_ELIGIBLE",
+  "periods": [
+    {
+      "period": [
+        "2017-11-01",
+        "2017-12-01"
+      ],
+      "status": "RECONCILED_FOR_REVIEW",
+      "checks": [
+        {
+          "name": "ONE_ROW_PER_ORDER",
+          "passed": true,
+          "detail": "No order-grain fanout"
+        },
+        {
+          "name": "ITEM_PARTITION",
+          "passed": true,
+          "detail": "All orders classified by item presence"
+        },
+        {
+          "name": "ITEMS_EQUAL_FINANCIAL_POPULATION",
+          "passed": true,
+          "detail": "No order ID mismatch in either direction"
+        },
+        {
+          "name": "STATUS_BREAKDOWN_BALANCES",
+          "passed": true,
+          "detail": "Statuses describe exclusions, not eligibility policy"
+        },
+        {
+          "name": "FINANCE_GRAIN_MATCHES",
+          "passed": true,
+          "detail": "Finance population unique at order grain"
+        },
+        {
+          "name": "PERIOD_AND_ITEM_INTEGRITY",
+          "passed": true,
+          "detail": "No unmatched finance IDs, wrong dates, or finance without items"
+        },
+        {
+          "name": "COVERAGE",
+          "passed": true,
+          "detail": "Nonempty source coverage"
+        },
+        {
+          "name": "DAILY_REVENUE",
+          "passed": true,
+          "detail": "Difference 2.31E-8; tolerance 0.05"
+        },
+        {
+          "name": "DAILY_COGS",
+          "passed": true,
+          "detail": "Difference 5E-10; tolerance 0.05"
+        },
+        {
+          "name": "DAILY_PROFIT",
+          "passed": true,
+          "detail": "Difference 1.1E-10; tolerance 0.05"
+        },
+        {
+          "name": "DAILY_ORDER_POPULATION",
+          "passed": true,
+          "detail": "Daily order count refers to financial population"
+        },
+        {
+          "name": "VALID_MARGIN_DENOMINATOR",
+          "passed": true,
+          "detail": "Ratios use summed financial revenue as denominator"
+        }
+      ],
+      "measurements": {
+        "placed_orders": 7544,
+        "orders_with_items": 7451,
+        "orders_without_items": 93,
+        "financial_orders": 7451,
+        "excluded_statuses": {
+          "canceled_missing": 7,
+          "unavailable_missing": 84,
+          "created_missing": 2,
+          "other_missing": 0,
+          "null_status_missing": 0
+        },
+        "effective_revenue": 1032768.8668000235,
+        "effective_cogs": 648554.9228199996,
+        "effective_contribution_profit": 125283.94685899992,
+        "effective_gross_margin_pct": 37.2023166393938,
+        "effective_contribution_margin_pct": 12.130879511035728
+      },
+      "execution_approved": false
+    },
+    {
+      "period": [
+        "2018-03-01",
+        "2018-04-01"
+      ],
+      "status": "RECONCILED_FOR_REVIEW",
+      "checks": [
+        {
+          "name": "ONE_ROW_PER_ORDER",
+          "passed": true,
+          "detail": "No order-grain fanout"
+        },
+        {
+          "name": "ITEM_PARTITION",
+          "passed": true,
+          "detail": "All orders classified by item presence"
+        },
+        {
+          "name": "ITEMS_EQUAL_FINANCIAL_POPULATION",
+          "passed": true,
+          "detail": "No order ID mismatch in either direction"
+        },
+        {
+          "name": "STATUS_BREAKDOWN_BALANCES",
+          "passed": true,
+          "detail": "Statuses describe exclusions, not eligibility policy"
+        },
+        {
+          "name": "FINANCE_GRAIN_MATCHES",
+          "passed": true,
+          "detail": "Finance population unique at order grain"
+        },
+        {
+          "name": "PERIOD_AND_ITEM_INTEGRITY",
+          "passed": true,
+          "detail": "No unmatched finance IDs, wrong dates, or finance without items"
+        },
+        {
+          "name": "COVERAGE",
+          "passed": true,
+          "detail": "Nonempty source coverage"
+        },
+        {
+          "name": "DAILY_REVENUE",
+          "passed": true,
+          "detail": "Difference 2.65E-8; tolerance 0.05"
+        },
+        {
+          "name": "DAILY_COGS",
+          "passed": true,
+          "detail": "Difference 4E-10; tolerance 0.05"
+        },
+        {
+          "name": "DAILY_PROFIT",
+          "passed": true,
+          "detail": "Difference 2E-11; tolerance 0.05"
+        },
+        {
+          "name": "DAILY_ORDER_POPULATION",
+          "passed": true,
+          "detail": "Daily order count refers to financial population"
+        },
+        {
+          "name": "VALID_MARGIN_DENOMINATOR",
+          "passed": true,
+          "detail": "Ratios use summed financial revenue as denominator"
+        }
+      ],
+      "measurements": {
+        "placed_orders": 7211,
+        "orders_with_items": 7188,
+        "orders_without_items": 23,
+        "financial_orders": 7188,
+        "excluded_statuses": {
+          "canceled_missing": 6,
+          "unavailable_missing": 17,
+          "created_missing": 0,
+          "other_missing": 0,
+          "null_status_missing": 0
+        },
+        "effective_revenue": 983213.4400000282,
+        "effective_cogs": 636445.5252000004,
+        "effective_contribution_profit": 66524.91676800002,
+        "effective_gross_margin_pct": 35.26883387599114,
+        "effective_contribution_margin_pct": 6.766070729057376
+      },
+      "execution_approved": false
+    },
+    {
+      "period": [
+        "2018-06-01",
+        "2018-07-01"
+      ],
+      "status": "RECONCILED_FOR_REVIEW",
+      "checks": [
+        {
+          "name": "ONE_ROW_PER_ORDER",
+          "passed": true,
+          "detail": "No order-grain fanout"
+        },
+        {
+          "name": "ITEM_PARTITION",
+          "passed": true,
+          "detail": "All orders classified by item presence"
+        },
+        {
+          "name": "ITEMS_EQUAL_FINANCIAL_POPULATION",
+          "passed": true,
+          "detail": "No order ID mismatch in either direction"
+        },
+        {
+          "name": "STATUS_BREAKDOWN_BALANCES",
+          "passed": true,
+          "detail": "Statuses describe exclusions, not eligibility policy"
+        },
+        {
+          "name": "FINANCE_GRAIN_MATCHES",
+          "passed": true,
+          "detail": "Finance population unique at order grain"
+        },
+        {
+          "name": "PERIOD_AND_ITEM_INTEGRITY",
+          "passed": true,
+          "detail": "No unmatched finance IDs, wrong dates, or finance without items"
+        },
+        {
+          "name": "COVERAGE",
+          "passed": true,
+          "detail": "Nonempty source coverage"
+        },
+        {
+          "name": "DAILY_REVENUE",
+          "passed": true,
+          "detail": "Difference 1.63E-8; tolerance 0.05"
+        },
+        {
+          "name": "DAILY_COGS",
+          "passed": true,
+          "detail": "Difference 2E-9; tolerance 0.05"
+        },
+        {
+          "name": "DAILY_PROFIT",
+          "passed": true,
+          "detail": "Difference 2.5E-10; tolerance 0.05"
+        },
+        {
+          "name": "DAILY_ORDER_POPULATION",
+          "passed": true,
+          "detail": "Daily order count refers to financial population"
+        },
+        {
+          "name": "VALID_MARGIN_DENOMINATOR",
+          "passed": true,
+          "detail": "Ratios use summed financial revenue as denominator"
+        }
+      ],
+      "measurements": {
+        "placed_orders": 6167,
+        "orders_with_items": 6160,
+        "orders_without_items": 7,
+        "financial_orders": 6160,
+        "excluded_statuses": {
+          "canceled_missing": 3,
+          "unavailable_missing": 4,
+          "created_missing": 0,
+          "other_missing": 0,
+          "null_status_missing": 0
+        },
+        "effective_revenue": 865124.3100000175,
+        "effective_cogs": 547946.590799998,
+        "effective_contribution_profit": 158039.3137829998,
+        "effective_gross_margin_pct": 36.66267558705096,
+        "effective_contribution_margin_pct": 18.267815614035467
+      },
+      "execution_approved": false
+    }
+  ],
+  "execution_approved": false,
+  "provenance": {
+    "population": "Observed: finance rows correspond to commerce orders with >=1 order item. Traced to build_order_profitability(); not a general accounting recognition policy.",
+    "base_revenue": "Sum of observed order-item prices",
+    "cogs": "Modeled unit costs from generated cost history",
+    "profit": "Derived using modeled fulfillment/processing/marketing/incentive costs and refunds",
+    "effective_adjustments": "Regional revenue multiplier and INC006 incremental revenue, COGS, marketing, incentives",
+    "agent_boundary": "Only commerce and approved semantic sources; staging forbidden for agent runtime"
+  },
+  "disclaimer": "Read-only reconciliation, not accounting certification or independent causal evidence. No new metric/dimension/join approval."
+}

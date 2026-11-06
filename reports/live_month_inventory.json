@@ -1,0 +1,350 @@
+{
+  "data": {
+    "columns": [
+      "month",
+      "orders",
+      "eligible",
+      "late"
+    ],
+    "rows": [
+      {
+        "month": "2016-09-01",
+        "orders": 4,
+        "eligible": 1,
+        "late": 1
+      },
+      {
+        "month": "2016-10-01",
+        "orders": 324,
+        "eligible": 270,
+        "late": 3
+      },
+      {
+        "month": "2016-12-01",
+        "orders": 1,
+        "eligible": 1,
+        "late": 0
+      },
+      {
+        "month": "2017-01-01",
+        "orders": 800,
+        "eligible": 750,
+        "late": 23
+      },
+      {
+        "month": "2017-02-01",
+        "orders": 1780,
+        "eligible": 1653,
+        "late": 53
+      },
+      {
+        "month": "2017-03-01",
+        "orders": 2682,
+        "eligible": 2546,
+        "late": 142
+      },
+      {
+        "month": "2017-04-01",
+        "orders": 2404,
+        "eligible": 2303,
+        "late": 181
+      },
+      {
+        "month": "2017-05-01",
+        "orders": 3700,
+        "eligible": 3545,
+        "late": 128
+      },
+      {
+        "month": "2017-06-01",
+        "orders": 3245,
+        "eligible": 3135,
+        "late": 121
+      },
+      {
+        "month": "2017-07-01",
+        "orders": 4026,
+        "eligible": 3872,
+        "late": 136
+      },
+      {
+        "month": "2017-08-01",
+        "orders": 4331,
+        "eligible": 4193,
+        "late": 139
+      },
+      {
+        "month": "2017-09-01",
+        "orders": 4285,
+        "eligible": 4150,
+        "late": 216
+      },
+      {
+        "month": "2017-10-01",
+        "orders": 4631,
+        "eligible": 4478,
+        "late": 237
+      },
+      {
+        "month": "2017-11-01",
+        "orders": 7544,
+        "eligible": 7288,
+        "late": 1043
+      },
+      {
+        "month": "2017-12-01",
+        "orders": 5673,
+        "eligible": 5513,
+        "late": 462
+      },
+      {
+        "month": "2018-01-01",
+        "orders": 7269,
+        "eligible": 7069,
+        "late": 464
+      },
+      {
+        "month": "2018-02-01",
+        "orders": 6728,
+        "eligible": 6556,
+        "late": 1049
+      },
+      {
+        "month": "2018-03-01",
+        "orders": 7211,
+        "eligible": 7003,
+        "late": 1496
+      },
+      {
+        "month": "2018-04-01",
+        "orders": 6939,
+        "eligible": 6798,
+        "late": 361
+      },
+      {
+        "month": "2018-05-01",
+        "orders": 6873,
+        "eligible": 6749,
+        "late": 556
+      },
+      {
+        "month": "2018-06-01",
+        "orders": 6167,
+        "eligible": 6096,
+        "late": 85
+      },
+      {
+        "month": "2018-07-01",
+        "orders": 6292,
+        "eligible": 6156,
+        "late": 276
+      },
+      {
+        "month": "2018-08-01",
+        "orders": 6512,
+        "eligible": 6351,
+        "late": 710
+      },
+      {
+        "month": "2018-09-01",
+        "orders": 16,
+        "eligible": 0,
+        "late": 0
+      },
+      {
+        "month": "2018-10-01",
+        "orders": 4,
+        "eligible": 0,
+        "late": 0
+      }
+    ]
+  },
+  "trace": [
+    {
+      "tool": "run_readonly_sql",
+      "arguments": {
+        "query": "SELECT DATE_TRUNC('month',order_purchase_time)::date AS month, COUNT(*) AS orders, COUNT(*) FILTER (WHERE lateness_eligible) AS eligible, COUNT(*) FILTER (WHERE is_late) AS late FROM semantic.order_delivery_evidence_v1 GROUP BY 1 ORDER BY 1",
+        "purpose": "Live checkpoint: identify observed periods for evidence-dependent branch verification",
+        "expected_grain": "one purchase month",
+        "max_rows": 50,
+        "timeout_ms": 20000
+      },
+      "response": {
+        "ok": true,
+        "tool": "run_readonly_sql",
+        "data": {
+          "columns": [
+            "month",
+            "orders",
+            "eligible",
+            "late"
+          ],
+          "rows": [
+            {
+              "month": "2016-09-01",
+              "orders": 4,
+              "eligible": 1,
+              "late": 1
+            },
+            {
+              "month": "2016-10-01",
+              "orders": 324,
+              "eligible": 270,
+              "late": 3
+            },
+            {
+              "month": "2016-12-01",
+              "orders": 1,
+              "eligible": 1,
+              "late": 0
+            },
+            {
+              "month": "2017-01-01",
+              "orders": 800,
+              "eligible": 750,
+              "late": 23
+            },
+            {
+              "month": "2017-02-01",
+              "orders": 1780,
+              "eligible": 1653,
+              "late": 53
+            },
+            {
+              "month": "2017-03-01",
+              "orders": 2682,
+              "eligible": 2546,
+              "late": 142
+            },
+            {
+              "month": "2017-04-01",
+              "orders": 2404,
+              "eligible": 2303,
+              "late": 181
+            },
+            {
+              "month": "2017-05-01",
+              "orders": 3700,
+              "eligible": 3545,
+              "late": 128
+            },
+            {
+              "month": "2017-06-01",
+              "orders": 3245,
+              "eligible": 3135,
+              "late": 121
+            },
+            {
+              "month": "2017-07-01",
+              "orders": 4026,
+              "eligible": 3872,
+              "late": 136
+            },
+            {
+              "month": "2017-08-01",
+              "orders": 4331,
+              "eligible": 4193,
+              "late": 139
+            },
+            {
+              "month": "2017-09-01",
+              "orders": 4285,
+              "eligible": 4150,
+              "late": 216
+            },
+            {
+              "month": "2017-10-01",
+              "orders": 4631,
+              "eligible": 4478,
+              "late": 237
+            },
+            {
+              "month": "2017-11-01",
+              "orders": 7544,
+              "eligible": 7288,
+              "late": 1043
+            },
+            {
+              "month": "2017-12-01",
+              "orders": 5673,
+              "eligible": 5513,
+              "late": 462
+            },
+            {
+              "month": "2018-01-01",
+              "orders": 7269,
+              "eligible": 7069,
+              "late": 464
+            },
+            {
+              "month": "2018-02-01",
+              "orders": 6728,
+              "eligible": 6556,
+              "late": 1049
+            },
+            {
+              "month": "2018-03-01",
+              "orders": 7211,
+              "eligible": 7003,
+              "late": 1496
+            },
+            {
+              "month": "2018-04-01",
+              "orders": 6939,
+              "eligible": 6798,
+              "late": 361
+            },
+            {
+              "month": "2018-05-01",
+              "orders": 6873,
+              "eligible": 6749,
+              "late": 556
+            },
+            {
+              "month": "2018-06-01",
+              "orders": 6167,
+              "eligible": 6096,
+              "late": 85
+            },
+            {
+              "month": "2018-07-01",
+              "orders": 6292,
+              "eligible": 6156,
+              "late": 276
+            },
+            {
+              "month": "2018-08-01",
+              "orders": 6512,
+              "eligible": 6351,
+              "late": 710
+            },
+            {
+              "month": "2018-09-01",
+              "orders": 16,
+              "eligible": 0,
+              "late": 0
+            },
+            {
+              "month": "2018-10-01",
+              "orders": 4,
+              "eligible": 0,
+              "late": 0
+            }
+          ]
+        },
+        "error": null,
+        "meta": {
+          "purpose": "Live checkpoint: identify observed periods for evidence-dependent branch verification",
+          "expected_grain": "one purchase month",
+          "relations": [
+            "semantic.order_delivery_evidence_v1"
+          ],
+          "row_count": 25,
+          "row_cap": 50,
+          "timeout_ms": 20000,
+          "latency_ms": 10056.64
+        }
+      }
+    }
+  ]
+}

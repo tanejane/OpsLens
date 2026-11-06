@@ -1,0 +1,27 @@
+﻿ SELECT p.order_id,
+    p.order_purchase_timestamp,
+    p.revenue,
+    p.freight_charged,
+    p.cogs,
+    p.refund_amount,
+    p.fulfillment_cost,
+    p.payment_processing_cost,
+    p.campaign_id,
+    p.marketing_cost,
+    p.gross_profit,
+    p.contribution_profit,
+    p.gross_margin_pct,
+    p.contribution_margin_pct,
+    p.campaign_incentive_rate,
+    p.campaign_incentive_cost,
+    COALESCE(rc.recognized_revenue_multiplier, 1.0::double precision) AS regional_revenue_multiplier,
+    COALESCE(m6.incremental_revenue, 0.0::double precision) AS inc006_incremental_revenue,
+    COALESCE(m6.incremental_cogs, 0.0::double precision) AS inc006_incremental_cogs,
+    COALESCE(m6.inc006_allocated_marketing_cost, 0.0::double precision) AS inc006_marketing_cost,
+    COALESCE(m6.inc006_campaign_incentive_cost, 0.0::double precision) AS inc006_incentive_cost,
+    COALESCE(p.revenue, 0.0::double precision) * COALESCE(rc.recognized_revenue_multiplier, 1.0::double precision) + COALESCE(m6.incremental_revenue, 0.0::double precision) AS effective_revenue,
+    COALESCE(p.cogs, 0.0::double precision) + COALESCE(m6.incremental_cogs, 0.0::double precision) AS effective_cogs,
+    COALESCE(p.contribution_profit, 0.0::double precision) + COALESCE(m6.incremental_revenue, 0.0::double precision) - COALESCE(m6.incremental_cogs, 0.0::double precision) - COALESCE(m6.inc006_allocated_marketing_cost, 0.0::double precision) - COALESCE(m6.inc006_campaign_incentive_cost, 0.0::double precision) - COALESCE(p.revenue, 0.0::double precision) * (1.0::double precision - COALESCE(rc.recognized_revenue_multiplier, 1.0::double precision)) AS effective_contribution_profit
+   FROM staging.order_profitability p
+     LEFT JOIN staging.regional_capacity_overrides rc USING (order_id)
+     LEFT JOIN staging.inc006_effective_marketing_economics m6 USING (order_id);

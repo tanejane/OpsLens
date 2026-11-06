@@ -1,0 +1,52 @@
+{
+  "checks_passed": 9,
+  "checks_total": 9,
+  "verdict": "PASS",
+  "checks": [
+    {
+      "name": "INC_002 override table non-empty",
+      "passed": true,
+      "value": "190"
+    },
+    {
+      "name": "INC_002 modeled revenue loss is material but plausible",
+      "passed": true,
+      "value": "0.1763081540796289"
+    },
+    {
+      "name": "INC_002 contains both lost-order and delay mechanisms",
+      "passed": true,
+      "value": "['delayed_fulfillment', 'lost_order_capacity']"
+    },
+    {
+      "name": "INC_003 injected defect returns >= 3",
+      "passed": true,
+      "value": "53"
+    },
+    {
+      "name": "INC_003 exactly two affected SKUs",
+      "passed": true,
+      "value": "2"
+    },
+    {
+      "name": "INC_003 one affected seller",
+      "passed": true,
+      "value": "1"
+    },
+    {
+      "name": "INC_004 delayed orders >= 10",
+      "passed": true,
+      "value": "154"
+    },
+    {
+      "name": "INC_004 all injected delays are positive",
+      "passed": true,
+      "value": "4"
+    },
+    {
+      "name": "INC_004 seller cluster has exactly 3 sellers",
+      "passed": true,
+      "value": "3"
+    }
+  ]
+}

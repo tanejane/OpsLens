@@ -1,0 +1,29 @@
+{
+  "incident_id": "INC_006",
+  "name": "Unprofitable Marketing Growth",
+  "incident_month": "2017-11-01",
+  "campaign_id": "CMP_EFFICIENCY_01",
+  "attributed_orders": 1451,
+  "true_causes": [
+    {
+      "cause": "paid_acquisition_cost_growth",
+      "importance": "primary",
+      "mechanism": "62k campaign spend allocated to attributed orders"
+    },
+    {
+      "cause": "campaign_incentive_cost",
+      "importance": "secondary",
+      "mechanism": "4% merchant-funded incentive on attributed revenue"
+    }
+  ],
+  "decoys": [
+    "campaign_generated_no_revenue",
+    "returns_are_primary"
+  ],
+  "required_evidence": [
+    "inc006_campaign",
+    "inc006_order_marketing_economics",
+    "order_profitability"
+  ],
+  "status": "IMPLEMENTED"
+}

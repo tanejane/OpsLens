@@ -1,0 +1,44 @@
+{
+  "INC_005": {
+    "baseline_revenue": 624401.69,
+    "effective_revenue": 618498.6015999999,
+    "baseline_gross_margin": 0.3777840485985872,
+    "effective_gross_margin": 0.3730583058071353,
+    "margin_change_pp": -0.4725742791451937,
+    "low_margin_share_baseline": 0.08300616547017996,
+    "low_margin_share_effective": 0.10726194534374191,
+    "low_margin_share_change_pp": 2.425577987356195
+  },
+  "INC_006": {
+    "baseline_revenue": 1010271.3699999999,
+    "effective_revenue": 1032768.8668000001,
+    "revenue_growth_pct": 0.022268766064310164,
+    "baseline_contribution_profit": 186363.675079,
+    "effective_contribution_profit": 125283.946859,
+    "contribution_profit_growth_pct": -0.32774481504567965,
+    "baseline_contribution_margin": 0.18446892648160468,
+    "effective_contribution_margin": 0.12130879511036011,
+    "contribution_margin_change_pp": -6.316013137124457,
+    "campaign_spend": 61999.99859999999,
+    "campaign_incentive_cost": 7499.1656,
+    "incremental_revenue": 22497.4968
+  },
+  "INC_007": {
+    "affected_category": "health_beauty",
+    "affected_lines": 30,
+    "baseline_category_revenue": 96460.36,
+    "modeled_lost_revenue": 5770.794499999999,
+    "modeled_category_revenue_loss_pct": 0.059825554248397986,
+    "average_recognized_multiplier_during_stockout": 0.15000000000000002
+  },
+  "INC_008": {
+    "affected_orders": 113,
+    "average_added_delay_days": 4.460176991150442,
+    "baseline_avg_review_score": 3.982300884955752,
+    "effective_avg_review_score": 2.685840707964602,
+    "review_score_change": -1.2964601769911503,
+    "baseline_negative_review_rate": 0.1415929203539823,
+    "effective_negative_review_rate": 0.25663716814159293,
+    "negative_review_rate_change_pp": 11.504424778761063
+  }
+}

@@ -1,0 +1,39 @@
+﻿{
+  "status": "LIVE_MCP_VALIDATED",
+  "period": [
+    "2018-06-01",
+    "2018-07-01"
+  ],
+  "source": "semantic.order_review_evidence_v1",
+  "population": {
+    "eligible_orders": 6167,
+    "reviewed_orders": 6141,
+    "low_rating_orders": 675,
+    "multi_review_orders": 6
+  },
+  "metrics": {
+    "average_review_score": {
+      "value": "4.25362318840579710145",
+      "unit": "score_1_to_5"
+    },
+    "low_rating_rate": {
+      "value": "10.9916951636541280",
+      "unit": "percent"
+    },
+    "review_coverage": {
+      "value": "99.5784011675044592",
+      "unit": "percent"
+    },
+    "reviewed_order_count": {
+      "value": "6141",
+      "unit": "orders"
+    }
+  },
+  "causal_claim": false,
+  "limitations": [
+    "Purchase-time cohorts, not review-submission-time cohorts",
+    "Effective review scores may include modeled incident adjustments",
+    "Nonempty source data do not certify continuous coverage",
+    "Order-level mean of non-null scores is a documented modeling choice, not a unique ground truth"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "incident_id": "INC_007",
+  "name": "Stockout Revenue Loss",
+  "incident_month": "2018-05-01",
+  "affected_category": "health_beauty",
+  "affected_products": [
+    "6cdd53843498f92890544667809f1595",
+    "bb50f2e236e5eea0100680137654686c",
+    "2b4609f8948be18874494203496bc318"
+  ],
+  "true_causes": [
+    {
+      "cause": "stockout_of_top_selling_products",
+      "importance": "primary",
+      "mechanism": "availability falls to 15% for three historically strong products during a 13-day window"
+    }
+  ],
+  "decoys": [
+    "customer_demand_collapse",
+    "seller_price_increase"
+  ],
+  "required_evidence": [
+    "stockout_events",
+    "inventory_weekly",
+    "order_items",
+    "products"
+  ],
+  "status": "IMPLEMENTED"
+}

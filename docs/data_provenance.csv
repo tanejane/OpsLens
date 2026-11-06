@@ -1,0 +1,10 @@
+asset,provenance_type,definition
+orders/order_items/products/payments/reviews/sellers,real,Olist public anonymised dataset
+product_cost_history,synthetic,Derived from real product selling-price distribution + category margin assumptions
+returns,synthetic,Probability conditioned on real review score and delivery performance
+marketing_campaigns,synthetic,Controlled campaign calendar used for evaluation
+marketing_spend_daily,synthetic,Allocated from campaign budget using deterministic seeded variation
+inventory_weekly,synthetic,Conditioned on observed weekly product demand
+order_profitability,derived,Real observed revenue combined with synthetic costs and operational assumptions
+daily_pnl,derived,Aggregation of order_profitability
+eval_ground_truth,hidden synthetic truth,"Known incident mechanisms, never exposed to the agent"

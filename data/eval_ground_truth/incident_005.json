@@ -1,0 +1,33 @@
+{
+  "incident_id": "INC_005",
+  "name": "Margin Dilution From Product Mix",
+  "incident_month": "2017-09-01",
+  "low_margin_categories_promoted": [
+    "electronics",
+    "telephony",
+    "computers_accessories"
+  ],
+  "high_margin_categories_deemphasized": [
+    "watches_gifts",
+    "health_beauty",
+    "perfumery"
+  ],
+  "true_causes": [
+    {
+      "cause": "mix_shift_to_lower_margin_categories",
+      "importance": "primary",
+      "mechanism": "effective demand weighting rises 28% for low-margin categories and falls 18% for high-margin categories"
+    }
+  ],
+  "decoys": [
+    "broad_supplier_cost_increase",
+    "across_the_board_price_cut"
+  ],
+  "required_evidence": [
+    "product_mix_overrides",
+    "order_items",
+    "products",
+    "order_profitability"
+  ],
+  "status": "IMPLEMENTED"
+}

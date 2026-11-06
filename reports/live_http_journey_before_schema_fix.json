@@ -1,0 +1,3997 @@
+{
+  "scope": "Actual Next.js proxy to FastAPI, real MCP/PostgreSQL; Gemini unavailable unless configured",
+  "results": [
+    {
+      "question": "Compare late versus on-time order ratings in March 2018.",
+      "http_status": 200,
+      "latency_seconds": 23.314,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "Compare late versus on-time order ratings in March 2018.",
+        "payload": {
+          "route": "delivery_review_comparison",
+          "status": "MEASURED_WITH_LIMITATIONS",
+          "executable": true,
+          "causal_claim": false,
+          "reason": "Late orders averaged -1.942771094471905295683062799 rating points relative to on-time orders among reviewed orders.",
+          "evidence": {
+            "evidence_id": "delivery-review:2018-03-01:2018-04-01",
+            "period": [
+              "2018-03-01",
+              "2018-04-01"
+            ],
+            "sources": [
+              "semantic.order_delivery_evidence_v1",
+              "semantic.order_review_evidence_v1"
+            ],
+            "cohorts": {
+              "on_time": {
+                "low": 563,
+                "cohort": "on_time",
+                "orders": 5507,
+                "reviewed": 5485,
+                "score_sum": 23159.5,
+                "multi_review_orders": 30,
+                "average_score": "4.222333637192342752962625342",
+                "low_rating_rate_pct": "10.26435733819507748404740201",
+                "review_coverage_pct": "99.60050844379880152533139640",
+                "missing_reviews": 22
+              },
+              "late": {
+                "low": 905,
+                "cohort": "late",
+                "orders": 1496,
+                "reviewed": 1463,
+                "score_sum": 3335,
+                "multi_review_orders": 7,
+                "average_score": "2.279562542720437457279562543",
+                "low_rating_rate_pct": "61.85919343814080656185919344",
+                "review_coverage_pct": "97.79411764705882352941176471",
+                "missing_reviews": 33
+              },
+              "unclassified": {
+                "low": 158,
+                "cohort": "unclassified",
+                "orders": 208,
+                "reviewed": 200,
+                "score_sum": 336,
+                "multi_review_orders": 1,
+                "average_score": "1.68",
+                "low_rating_rate_pct": "79",
+                "review_coverage_pct": "96.15384615384615384615384615",
+                "missing_reviews": 8
+              }
+            },
+            "validation": {
+              "invalid_grain": 0,
+              "misaligned": 0,
+              "invalid_scores": 0
+            },
+            "total_orders": 7211,
+            "missing_review_rows": 0,
+            "late_minus_on_time_score": "-1.942771094471905295683062799",
+            "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+            "limitations": [
+              "Descriptive association, not a causal effect.",
+              "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+              "Effective delivery dates and review scores may include modeled incident adjustments.",
+              "Review respondents may differ from orders without reviews."
+            ],
+            "causal_claim": false
+          },
+          "limitations": [
+            "Descriptive association, not a causal effect.",
+            "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+            "Effective delivery dates and review scores may include modeled incident adjustments.",
+            "Review respondents may differ from orders without reviews."
+          ],
+          "next_steps": [
+            "Compare review coverage before interpreting the rating difference.",
+            "Repeat this comparison in another purchase month to assess whether the pattern persists."
+          ],
+          "execution_trace": [
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "WITH d AS (\n SELECT order_id, COUNT(*) AS n, MIN(order_purchase_time) AS purchased,\n MIN(effective_delivery_time) AS actual, MIN(promised_delivery_time) AS promised\n FROM semantic.order_delivery_evidence_v1\n WHERE order_purchase_time >= DATE '2018-03-01' AND order_purchase_time < DATE '2018-04-01' GROUP BY order_id\n), r AS (\n SELECT order_id, COUNT(*) AS n, MIN(purchase_time) AS purchased,\n MIN(order_score) AS score, MAX(review_records) AS records\n FROM semantic.order_review_evidence_v1 GROUP BY order_id\n), joined AS (\n SELECT d.*, r.n AS rn, r.purchased AS rpurchased, r.score, r.records,\n CASE WHEN actual IS NULL OR promised IS NULL THEN 'unclassified'\n WHEN actual > promised THEN 'late' ELSE 'on_time' END AS cohort\n FROM d LEFT JOIN r ON d.order_id=r.order_id\n), grouped AS (\n SELECT cohort, COUNT(*) AS orders, COUNT(score) AS reviewed,\n COUNT(*) FILTER (WHERE score <= 2) AS low,\n COALESCE(SUM(score),0) AS score_sum,\n COUNT(*) FILTER (WHERE records > 1) AS multi_review_orders\n FROM joined GROUP BY cohort\n)\nSELECT (SELECT COUNT(*) FROM joined) AS total,\n (SELECT COUNT(*) FROM joined WHERE n <> 1 OR rn > 1 OR order_id IS NULL) AS invalid_grain,\n (SELECT COUNT(*) FROM joined WHERE rn IS NOT NULL AND purchased IS DISTINCT FROM rpurchased) AS misaligned,\n (SELECT COUNT(*) FROM joined WHERE score < 1 OR score > 5) AS invalid_scores,\n (SELECT COUNT(*) FROM joined WHERE rn IS NULL) AS missing_review_rows,\n COALESCE((SELECT jsonb_agg(to_jsonb(grouped)) FROM grouped),'[]'::jsonb) AS cohorts",
+                "purpose": "Governed late versus on-time review comparison",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "total",
+                    "invalid_grain",
+                    "misaligned",
+                    "invalid_scores",
+                    "missing_review_rows",
+                    "cohorts"
+                  ],
+                  "rows": [
+                    {
+                      "total": 7211,
+                      "invalid_grain": 0,
+                      "misaligned": 0,
+                      "invalid_scores": 0,
+                      "missing_review_rows": 0,
+                      "cohorts": [
+                        {
+                          "low": 563,
+                          "cohort": "on_time",
+                          "orders": 5507,
+                          "reviewed": 5485,
+                          "score_sum": 23159.5,
+                          "multi_review_orders": 30
+                        },
+                        {
+                          "low": 905,
+                          "cohort": "late",
+                          "orders": 1496,
+                          "reviewed": 1463,
+                          "score_sum": 3335,
+                          "multi_review_orders": 7
+                        },
+                        {
+                          "low": 158,
+                          "cohort": "unclassified",
+                          "orders": 208,
+                          "reviewed": 200,
+                          "score_sum": 336,
+                          "multi_review_orders": 1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed late versus on-time review comparison",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_delivery_evidence_v1",
+                    "semantic.order_review_evidence_v1"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 1645.49
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*)::bigint AS eligible_orders,\nCOUNT(DISTINCT order_id)::bigint AS distinct_orders,\nCOUNT(*) FILTER (WHERE lateness_eligible)::bigint AS lateness_eligible_orders,\nCOUNT(*) FILTER (WHERE is_late IS TRUE)::bigint AS late_orders,\nCOUNT(*) FILTER (WHERE duration_eligible)::bigint AS duration_eligible_orders,\nCOUNT(*) FILTER (WHERE effective_delivery_time IS NULL)::bigint AS missing_actual,\nCOUNT(*) FILTER (WHERE promised_delivery_time IS NULL)::bigint AS missing_estimated,\nCOUNT(*) FILTER (WHERE order_purchase_time IS NULL)::bigint AS missing_purchase,\nCOUNT(*) FILTER (WHERE duration_eligible AND (delivery_days IS NULL OR delivery_days < 0))::bigint AS invalid_duration,\nCOUNT(*) FILTER (WHERE (lateness_eligible IS DISTINCT FROM (effective_delivery_time IS NOT NULL AND promised_delivery_time IS NOT NULL)) OR (lateness_eligible AND is_late IS DISTINCT FROM (effective_delivery_time > promised_delivery_time)) OR (NOT lateness_eligible AND is_late IS NOT NULL))::bigint AS invalid_late_flags,\nAVG(delivery_days) FILTER (WHERE duration_eligible) AS mean_delivery_days,\n(100.0 * COUNT(*) FILTER (WHERE is_late IS TRUE) / NULLIF(COUNT(*) FILTER (WHERE lateness_eligible),0)) AS late_rate_pct,\n(100.0 * COUNT(*) FILTER (WHERE lateness_eligible) / NULLIF(COUNT(*),0)) AS lateness_coverage_pct\nFROM semantic.order_delivery_evidence_v1\nWHERE order_purchase_time >= DATE '2018-03-01' AND order_purchase_time < DATE '2018-04-01'",
+                "purpose": "4C15 governed delivery metric delivery_evidence_coverage",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_orders",
+                    "distinct_orders",
+                    "lateness_eligible_orders",
+                    "late_orders",
+                    "duration_eligible_orders",
+                    "missing_actual",
+                    "missing_estimated",
+                    "missing_purchase",
+                    "invalid_duration",
+                    "invalid_late_flags",
+                    "mean_delivery_days",
+                    "late_rate_pct",
+                    "lateness_coverage_pct"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_orders": 7211,
+                      "distinct_orders": 7211,
+                      "lateness_eligible_orders": 7003,
+                      "late_orders": 1496,
+                      "duration_eligible_orders": 7003,
+                      "missing_actual": 208,
+                      "missing_estimated": 0,
+                      "missing_purchase": 0,
+                      "invalid_duration": 0,
+                      "invalid_late_flags": 0,
+                      "mean_delivery_days": "16.3014101744093801",
+                      "late_rate_pct": "21.3622733114379552",
+                      "lateness_coverage_pct": "97.1155179586742477"
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "4C15 governed delivery metric delivery_evidence_coverage",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_delivery_evidence_v1"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 152.34
+                }
+              }
+            }
+          ],
+          "supporting_analyses": [
+            {
+              "capability": "delivery_missingness",
+              "evidence": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.1155179586742477",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "population": {
+                  "eligible_orders": 7211,
+                  "lateness_eligible_orders": 7003,
+                  "late_orders": 1496,
+                  "duration_eligible_orders": 7003,
+                  "missing_actual": 208,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              },
+              "conclusion": "Delivery timestamps support classifying 97.1155179586742477% of this purchase cohort; 208 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+            }
+          ],
+          "conclusions": [
+            "Late orders averaged -1.942771094471905295683062799 rating points relative to on-time orders among reviewed orders.",
+            "Delivery timestamps support classifying 97.1155179586742477% of this purchase cohort; 208 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+          ],
+          "orchestration": {
+            "steps_used": 2,
+            "tools_used": 2,
+            "trace": [
+              {
+                "step": 1,
+                "capability": "initial_governed_investigation",
+                "reason": "Resolve the question through existing governed routes",
+                "decision": "COMPLETED"
+              },
+              {
+                "step": 2,
+                "capability": "delivery_missingness",
+                "reason": "Unclassified deliveries could change how broadly the rating comparison applies.",
+                "decision": "VALIDATED",
+                "source": "semantic.order_delivery_evidence_v1"
+              }
+            ],
+            "stop_reason": "QUESTION_ADDRESSED",
+            "budgets": {
+              "steps": 4,
+              "tools": 40,
+              "seconds": 120
+            },
+            "causal_claim": false
+          },
+          "validated_evidence": [
+            {
+              "producer": "agent.delivery_review_comparison.validate",
+              "result": {
+                "evidence_id": "delivery-review:2018-03-01:2018-04-01",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "sources": [
+                  "semantic.order_delivery_evidence_v1",
+                  "semantic.order_review_evidence_v1"
+                ],
+                "cohorts": {
+                  "on_time": {
+                    "low": 563,
+                    "cohort": "on_time",
+                    "orders": 5507,
+                    "reviewed": 5485,
+                    "score_sum": 23159.5,
+                    "multi_review_orders": 30,
+                    "average_score": "4.222333637192342752962625342",
+                    "low_rating_rate_pct": "10.26435733819507748404740201",
+                    "review_coverage_pct": "99.60050844379880152533139640",
+                    "missing_reviews": 22
+                  },
+                  "late": {
+                    "low": 905,
+                    "cohort": "late",
+                    "orders": 1496,
+                    "reviewed": 1463,
+                    "score_sum": 3335,
+                    "multi_review_orders": 7,
+                    "average_score": "2.279562542720437457279562543",
+                    "low_rating_rate_pct": "61.85919343814080656185919344",
+                    "review_coverage_pct": "97.79411764705882352941176471",
+                    "missing_reviews": 33
+                  },
+                  "unclassified": {
+                    "low": 158,
+                    "cohort": "unclassified",
+                    "orders": 208,
+                    "reviewed": 200,
+                    "score_sum": 336,
+                    "multi_review_orders": 1,
+                    "average_score": "1.68",
+                    "low_rating_rate_pct": "79",
+                    "review_coverage_pct": "96.15384615384615384615384615",
+                    "missing_reviews": 8
+                  }
+                },
+                "validation": {
+                  "invalid_grain": 0,
+                  "misaligned": 0,
+                  "invalid_scores": 0
+                },
+                "total_orders": 7211,
+                "missing_review_rows": 0,
+                "late_minus_on_time_score": "-1.942771094471905295683062799",
+                "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+                "limitations": [
+                  "Descriptive association, not a causal effect.",
+                  "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+                  "Effective delivery dates and review scores may include modeled incident adjustments.",
+                  "Review respondents may differ from orders without reviews."
+                ],
+                "causal_claim": false
+              }
+            },
+            {
+              "producer": "agent.phase4c15_delivery.validate_metric",
+              "result": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.1155179586742477",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "population": {
+                  "eligible_orders": 7211,
+                  "lateness_eligible_orders": 7003,
+                  "late_orders": 1496,
+                  "duration_eligible_orders": 7003,
+                  "missing_actual": 208,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              }
+            }
+          ],
+          "context_provenance": {
+            "original_question": "Compare late versus on-time order ratings in March 2018.",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [],
+            "source_turn": null,
+            "session_id": "CExRfiPD2FzI9e5Z3Fvei6p8iEIL91VNFt546cfbOHY",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "question": "Are delivery delays concentrated among sellers?",
+      "http_status": 200,
+      "latency_seconds": 8.783,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "Are delivery delays concentrated among sellers?",
+        "payload": {
+          "route": "session_context",
+          "status": "NEEDS_CLARIFICATION",
+          "executable": false,
+          "causal_claim": false,
+          "reason": "Please confirm the purchase month and year for the seller comparison.",
+          "execution_trace": [],
+          "validated_evidence": [],
+          "context_provenance": {
+            "original_question": "Are delivery delays concentrated among sellers?",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [
+              {
+                "field": "period",
+                "value": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "source": "last_validated_result"
+              }
+            ],
+            "source_turn": 1,
+            "session_id": "CExRfiPD2FzI9e5Z3Fvei6p8iEIL91VNFt546cfbOHY",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "question": "What about February?",
+      "http_status": 200,
+      "latency_seconds": 7.648,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "What about February?",
+        "payload": {
+          "route": "delivery_review_comparison",
+          "status": "MEASURED_WITH_LIMITATIONS",
+          "executable": true,
+          "causal_claim": false,
+          "reason": "Late orders averaged -2.050711838794044478339428252 rating points relative to on-time orders among reviewed orders.",
+          "evidence": {
+            "evidence_id": "delivery-review:2018-02-01:2018-03-01",
+            "period": [
+              "2018-02-01",
+              "2018-03-01"
+            ],
+            "sources": [
+              "semantic.order_delivery_evidence_v1",
+              "semantic.order_review_evidence_v1"
+            ],
+            "cohorts": {
+              "on_time": {
+                "low": 580,
+                "cohort": "on_time",
+                "orders": 5507,
+                "reviewed": 5473,
+                "score_sum": 23028.833333333332,
+                "multi_review_orders": 70,
+                "average_score": "4.207716669711918874474693952",
+                "low_rating_rate_pct": "10.59747853097021743102503198",
+                "review_coverage_pct": "99.38260395859814781187579444",
+                "missing_reviews": 34
+              },
+              "late": {
+                "low": 673,
+                "cohort": "late",
+                "orders": 1049,
+                "reviewed": 1035,
+                "score_sum": 2232.5,
+                "multi_review_orders": 13,
+                "average_score": "2.157004830917874396135265700",
+                "low_rating_rate_pct": "65.02415458937198067632850242",
+                "review_coverage_pct": "98.66539561487130600571973308",
+                "missing_reviews": 14
+              },
+              "unclassified": {
+                "low": 131,
+                "cohort": "unclassified",
+                "orders": 172,
+                "reviewed": 164,
+                "score_sum": 274.5,
+                "multi_review_orders": 2,
+                "average_score": "1.673780487804878048780487805",
+                "low_rating_rate_pct": "79.87804878048780487804878049",
+                "review_coverage_pct": "95.34883720930232558139534884",
+                "missing_reviews": 8
+              }
+            },
+            "validation": {
+              "invalid_grain": 0,
+              "misaligned": 0,
+              "invalid_scores": 0
+            },
+            "total_orders": 6728,
+            "missing_review_rows": 0,
+            "late_minus_on_time_score": "-2.050711838794044478339428252",
+            "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+            "limitations": [
+              "Descriptive association, not a causal effect.",
+              "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+              "Effective delivery dates and review scores may include modeled incident adjustments.",
+              "Review respondents may differ from orders without reviews."
+            ],
+            "causal_claim": false
+          },
+          "limitations": [
+            "Descriptive association, not a causal effect.",
+            "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+            "Effective delivery dates and review scores may include modeled incident adjustments.",
+            "Review respondents may differ from orders without reviews."
+          ],
+          "next_steps": [
+            "Compare review coverage before interpreting the rating difference.",
+            "Repeat this comparison in another purchase month to assess whether the pattern persists."
+          ],
+          "execution_trace": [
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "WITH d AS (\n SELECT order_id, COUNT(*) AS n, MIN(order_purchase_time) AS purchased,\n MIN(effective_delivery_time) AS actual, MIN(promised_delivery_time) AS promised\n FROM semantic.order_delivery_evidence_v1\n WHERE order_purchase_time >= DATE '2018-02-01' AND order_purchase_time < DATE '2018-03-01' GROUP BY order_id\n), r AS (\n SELECT order_id, COUNT(*) AS n, MIN(purchase_time) AS purchased,\n MIN(order_score) AS score, MAX(review_records) AS records\n FROM semantic.order_review_evidence_v1 GROUP BY order_id\n), joined AS (\n SELECT d.*, r.n AS rn, r.purchased AS rpurchased, r.score, r.records,\n CASE WHEN actual IS NULL OR promised IS NULL THEN 'unclassified'\n WHEN actual > promised THEN 'late' ELSE 'on_time' END AS cohort\n FROM d LEFT JOIN r ON d.order_id=r.order_id\n), grouped AS (\n SELECT cohort, COUNT(*) AS orders, COUNT(score) AS reviewed,\n COUNT(*) FILTER (WHERE score <= 2) AS low,\n COALESCE(SUM(score),0) AS score_sum,\n COUNT(*) FILTER (WHERE records > 1) AS multi_review_orders\n FROM joined GROUP BY cohort\n)\nSELECT (SELECT COUNT(*) FROM joined) AS total,\n (SELECT COUNT(*) FROM joined WHERE n <> 1 OR rn > 1 OR order_id IS NULL) AS invalid_grain,\n (SELECT COUNT(*) FROM joined WHERE rn IS NOT NULL AND purchased IS DISTINCT FROM rpurchased) AS misaligned,\n (SELECT COUNT(*) FROM joined WHERE score < 1 OR score > 5) AS invalid_scores,\n (SELECT COUNT(*) FROM joined WHERE rn IS NULL) AS missing_review_rows,\n COALESCE((SELECT jsonb_agg(to_jsonb(grouped)) FROM grouped),'[]'::jsonb) AS cohorts",
+                "purpose": "Governed late versus on-time review comparison",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "total",
+                    "invalid_grain",
+                    "misaligned",
+                    "invalid_scores",
+                    "missing_review_rows",
+                    "cohorts"
+                  ],
+                  "rows": [
+                    {
+                      "total": 6728,
+                      "invalid_grain": 0,
+                      "misaligned": 0,
+                      "invalid_scores": 0,
+                      "missing_review_rows": 0,
+                      "cohorts": [
+                        {
+                          "low": 580,
+                          "cohort": "on_time",
+                          "orders": 5507,
+                          "reviewed": 5473,
+                          "score_sum": 23028.833333333332,
+                          "multi_review_orders": 70
+                        },
+                        {
+                          "low": 673,
+                          "cohort": "late",
+                          "orders": 1049,
+                          "reviewed": 1035,
+                          "score_sum": 2232.5,
+                          "multi_review_orders": 13
+                        },
+                        {
+                          "low": 131,
+                          "cohort": "unclassified",
+                          "orders": 172,
+                          "reviewed": 164,
+                          "score_sum": 274.5,
+                          "multi_review_orders": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed late versus on-time review comparison",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_delivery_evidence_v1",
+                    "semantic.order_review_evidence_v1"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 1173.09
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*)::bigint AS eligible_orders,\nCOUNT(DISTINCT order_id)::bigint AS distinct_orders,\nCOUNT(*) FILTER (WHERE lateness_eligible)::bigint AS lateness_eligible_orders,\nCOUNT(*) FILTER (WHERE is_late IS TRUE)::bigint AS late_orders,\nCOUNT(*) FILTER (WHERE duration_eligible)::bigint AS duration_eligible_orders,\nCOUNT(*) FILTER (WHERE effective_delivery_time IS NULL)::bigint AS missing_actual,\nCOUNT(*) FILTER (WHERE promised_delivery_time IS NULL)::bigint AS missing_estimated,\nCOUNT(*) FILTER (WHERE order_purchase_time IS NULL)::bigint AS missing_purchase,\nCOUNT(*) FILTER (WHERE duration_eligible AND (delivery_days IS NULL OR delivery_days < 0))::bigint AS invalid_duration,\nCOUNT(*) FILTER (WHERE (lateness_eligible IS DISTINCT FROM (effective_delivery_time IS NOT NULL AND promised_delivery_time IS NOT NULL)) OR (lateness_eligible AND is_late IS DISTINCT FROM (effective_delivery_time > promised_delivery_time)) OR (NOT lateness_eligible AND is_late IS NOT NULL))::bigint AS invalid_late_flags,\nAVG(delivery_days) FILTER (WHERE duration_eligible) AS mean_delivery_days,\n(100.0 * COUNT(*) FILTER (WHERE is_late IS TRUE) / NULLIF(COUNT(*) FILTER (WHERE lateness_eligible),0)) AS late_rate_pct,\n(100.0 * COUNT(*) FILTER (WHERE lateness_eligible) / NULLIF(COUNT(*),0)) AS lateness_coverage_pct\nFROM semantic.order_delivery_evidence_v1\nWHERE order_purchase_time >= DATE '2018-02-01' AND order_purchase_time < DATE '2018-03-01'",
+                "purpose": "4C15 governed delivery metric delivery_evidence_coverage",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_orders",
+                    "distinct_orders",
+                    "lateness_eligible_orders",
+                    "late_orders",
+                    "duration_eligible_orders",
+                    "missing_actual",
+                    "missing_estimated",
+                    "missing_purchase",
+                    "invalid_duration",
+                    "invalid_late_flags",
+                    "mean_delivery_days",
+                    "late_rate_pct",
+                    "lateness_coverage_pct"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_orders": 6728,
+                      "distinct_orders": 6728,
+                      "lateness_eligible_orders": 6556,
+                      "late_orders": 1049,
+                      "duration_eligible_orders": 6556,
+                      "missing_actual": 172,
+                      "missing_estimated": 0,
+                      "missing_purchase": 0,
+                      "invalid_duration": 0,
+                      "invalid_late_flags": 0,
+                      "mean_delivery_days": "16.94714315095869206643",
+                      "late_rate_pct": "16.0006101281269067",
+                      "lateness_coverage_pct": "97.4435196195005945"
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "4C15 governed delivery metric delivery_evidence_coverage",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_delivery_evidence_v1"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 98.59
+                }
+              }
+            }
+          ],
+          "supporting_analyses": [
+            {
+              "capability": "delivery_missingness",
+              "evidence": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.4435196195005945",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "population": {
+                  "eligible_orders": 6728,
+                  "lateness_eligible_orders": 6556,
+                  "late_orders": 1049,
+                  "duration_eligible_orders": 6556,
+                  "missing_actual": 172,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              },
+              "conclusion": "Delivery timestamps support classifying 97.4435196195005945% of this purchase cohort; 172 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+            }
+          ],
+          "conclusions": [
+            "Late orders averaged -2.050711838794044478339428252 rating points relative to on-time orders among reviewed orders.",
+            "Delivery timestamps support classifying 97.4435196195005945% of this purchase cohort; 172 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+          ],
+          "orchestration": {
+            "steps_used": 2,
+            "tools_used": 2,
+            "trace": [
+              {
+                "step": 1,
+                "capability": "initial_governed_investigation",
+                "reason": "Resolve the question through existing governed routes",
+                "decision": "COMPLETED"
+              },
+              {
+                "step": 2,
+                "capability": "delivery_missingness",
+                "reason": "Unclassified deliveries could change how broadly the rating comparison applies.",
+                "decision": "VALIDATED",
+                "source": "semantic.order_delivery_evidence_v1"
+              }
+            ],
+            "stop_reason": "QUESTION_ADDRESSED",
+            "budgets": {
+              "steps": 4,
+              "tools": 40,
+              "seconds": 120
+            },
+            "causal_claim": false
+          },
+          "validated_evidence": [
+            {
+              "producer": "agent.delivery_review_comparison.validate",
+              "result": {
+                "evidence_id": "delivery-review:2018-02-01:2018-03-01",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "sources": [
+                  "semantic.order_delivery_evidence_v1",
+                  "semantic.order_review_evidence_v1"
+                ],
+                "cohorts": {
+                  "on_time": {
+                    "low": 580,
+                    "cohort": "on_time",
+                    "orders": 5507,
+                    "reviewed": 5473,
+                    "score_sum": 23028.833333333332,
+                    "multi_review_orders": 70,
+                    "average_score": "4.207716669711918874474693952",
+                    "low_rating_rate_pct": "10.59747853097021743102503198",
+                    "review_coverage_pct": "99.38260395859814781187579444",
+                    "missing_reviews": 34
+                  },
+                  "late": {
+                    "low": 673,
+                    "cohort": "late",
+                    "orders": 1049,
+                    "reviewed": 1035,
+                    "score_sum": 2232.5,
+                    "multi_review_orders": 13,
+                    "average_score": "2.157004830917874396135265700",
+                    "low_rating_rate_pct": "65.02415458937198067632850242",
+                    "review_coverage_pct": "98.66539561487130600571973308",
+                    "missing_reviews": 14
+                  },
+                  "unclassified": {
+                    "low": 131,
+                    "cohort": "unclassified",
+                    "orders": 172,
+                    "reviewed": 164,
+                    "score_sum": 274.5,
+                    "multi_review_orders": 2,
+                    "average_score": "1.673780487804878048780487805",
+                    "low_rating_rate_pct": "79.87804878048780487804878049",
+                    "review_coverage_pct": "95.34883720930232558139534884",
+                    "missing_reviews": 8
+                  }
+                },
+                "validation": {
+                  "invalid_grain": 0,
+                  "misaligned": 0,
+                  "invalid_scores": 0
+                },
+                "total_orders": 6728,
+                "missing_review_rows": 0,
+                "late_minus_on_time_score": "-2.050711838794044478339428252",
+                "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+                "limitations": [
+                  "Descriptive association, not a causal effect.",
+                  "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+                  "Effective delivery dates and review scores may include modeled incident adjustments.",
+                  "Review respondents may differ from orders without reviews."
+                ],
+                "causal_claim": false
+              }
+            },
+            {
+              "producer": "agent.phase4c15_delivery.validate_metric",
+              "result": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.4435196195005945",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "population": {
+                  "eligible_orders": 6728,
+                  "lateness_eligible_orders": 6556,
+                  "late_orders": 1049,
+                  "duration_eligible_orders": 6556,
+                  "missing_actual": 172,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              }
+            }
+          ],
+          "context_provenance": {
+            "original_question": "What about February?",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [
+              {
+                "field": "year",
+                "value": "2018",
+                "source": "last_validated_result"
+              }
+            ],
+            "source_turn": 1,
+            "session_id": "CExRfiPD2FzI9e5Z3Fvei6p8iEIL91VNFt546cfbOHY",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "question": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+      "http_status": 200,
+      "latency_seconds": 12.983,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+        "payload": {
+          "route": "investigation",
+          "status": "EVIDENCE_RANKED_NOT_CAUSAL",
+          "executable": true,
+          "causal_claim": false,
+          "focus": "revenue_profit_divergence",
+          "periods": {
+            "before": [
+              "2018-02-01",
+              "2018-03-01"
+            ],
+            "after": [
+              "2018-03-01",
+              "2018-04-01"
+            ]
+          },
+          "premise": {
+            "revenue_increased": true,
+            "contribution_profit_decreased": true,
+            "revenue_delta": "139034.7300000047",
+            "contribution_profit_delta": "-48578.12892400001",
+            "divergence_confirmed": true
+          },
+          "findings": [
+            {
+              "component": "effective_revenue",
+              "delta": "139034.7300000047",
+              "contribution_to_profit_delta": "139034.7300000047"
+            },
+            {
+              "component": "effective_cogs",
+              "delta": "99426.0906999991",
+              "contribution_to_profit_delta": "-99426.0906999991"
+            },
+            {
+              "component": "other_net_charges_residual",
+              "delta": "88186.76822400561",
+              "contribution_to_profit_delta": "-88186.76822400561",
+              "limitation": "Residual includes all other modeled charges and adjustments; it is NOT a verified marketing/refund/fulfillment breakdown."
+            }
+          ],
+          "metric_results": {
+            "effective_revenue": {
+              "intent": "compare",
+              "metric_id": "effective_revenue",
+              "measurement": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_revenue",
+                "value": "983213.4400000107",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 7188,
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              },
+              "causal_claim": false,
+              "status": "MEASURED_WITH_SCOPE_LIMITS",
+              "before": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_revenue",
+                "value": "844178.710000006",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 6694,
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              },
+              "comparison": {
+                "absolute_change": "139034.7300000047",
+                "change_unit": "money",
+                "relative_change_pct": "16.46982189351869722119459621",
+                "relative_change_note": "Descriptive only; differing periods may have seasonality/mix effects"
+              }
+            },
+            "effective_contribution_profit": {
+              "intent": "compare",
+              "metric_id": "effective_contribution_profit",
+              "measurement": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_contribution_profit",
+                "value": "66524.91676800018",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 7188,
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              },
+              "causal_claim": false,
+              "status": "MEASURED_WITH_SCOPE_LIMITS",
+              "before": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_contribution_profit",
+                "value": "115103.04569200019",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 6694,
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              },
+              "comparison": {
+                "absolute_change": "-48578.12892400001",
+                "change_unit": "money",
+                "relative_change_pct": "-42.20403433458082035712911628",
+                "relative_change_note": "Descriptive only; differing periods may have seasonality/mix effects"
+              }
+            },
+            "effective_cogs": {
+              "intent": "compare",
+              "metric_id": "effective_cogs",
+              "measurement": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_cogs",
+                "value": "636445.5251999993",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 7188,
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              },
+              "causal_claim": false,
+              "status": "MEASURED_WITH_SCOPE_LIMITS",
+              "before": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_cogs",
+                "value": "537019.4345000002",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 6694,
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              },
+              "comparison": {
+                "absolute_change": "99426.0906999991",
+                "change_unit": "money",
+                "relative_change_pct": "18.51443063556372334065662737",
+                "relative_change_note": "Descriptive only; differing periods may have seasonality/mix effects"
+              }
+            }
+          },
+          "evidence": {
+            "effective_revenue": {
+              "before": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_revenue",
+                "value": "844178.710000006",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 6694,
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              },
+              "after": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_revenue",
+                "value": "983213.4400000107",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 7188,
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              }
+            },
+            "effective_contribution_profit": {
+              "before": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_contribution_profit",
+                "value": "115103.04569200019",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 6694,
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              },
+              "after": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_contribution_profit",
+                "value": "66524.91676800018",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 7188,
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              }
+            },
+            "effective_cogs": {
+              "before": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_cogs",
+                "value": "537019.4345000002",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 6694,
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              },
+              "after": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_cogs",
+                "value": "636445.5251999993",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 7188,
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ],
+                "verification_checks": [
+                  "ONE_ROW_PER_ORDER",
+                  "ITEM_PARTITION",
+                  "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                  "STATUS_BREAKDOWN_BALANCES",
+                  "FINANCE_GRAIN_MATCHES",
+                  "PERIOD_AND_ITEM_INTEGRITY",
+                  "COVERAGE",
+                  "DAILY_REVENUE",
+                  "DAILY_COGS",
+                  "DAILY_PROFIT",
+                  "DAILY_ORDER_POPULATION",
+                  "VALID_MARGIN_DENOMINATOR"
+                ]
+              }
+            }
+          },
+          "limitations": [
+            "Accounting contribution is not causal identification",
+            "Costs and incident adjustments are partly synthetic or modeled",
+            "Other adjustments are a balancing residual, not a known causal mechanism",
+            "No dimension/category allocations or joins have been approved",
+            "Nonempty period coverage does not establish continuous completeness",
+            "Ranks measured accounting movements, not causal root causes",
+            "Financial data include modeled or synthetic cost components",
+            "No cross-domain joins, cohort comparisons, or statistical causal tests were performed",
+            "Only the supplied two periods were evaluated; completeness across all dates is not certified"
+          ],
+          "investigation_status": "DESCRIPTIVE_DECOMPOSITION_ONLY",
+          "stage_results": {
+            "premise_and_accounting_bridge": {
+              "route": "investigation",
+              "status": "DESCRIPTIVE_DECOMPOSITION_ONLY",
+              "executable": true,
+              "causal_claim": false,
+              "focus": "revenue_profit_divergence",
+              "periods": {
+                "before": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "after": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ]
+              },
+              "premise": {
+                "revenue_increased": true,
+                "contribution_profit_decreased": true,
+                "revenue_delta": "139034.7300000047",
+                "contribution_profit_delta": "-48578.12892400001",
+                "divergence_confirmed": true
+              },
+              "findings": [
+                {
+                  "component": "effective_revenue",
+                  "delta": "139034.7300000047",
+                  "contribution_to_profit_delta": "139034.7300000047"
+                },
+                {
+                  "component": "effective_cogs",
+                  "delta": "99426.0906999991",
+                  "contribution_to_profit_delta": "-99426.0906999991"
+                },
+                {
+                  "component": "other_net_charges_residual",
+                  "delta": "88186.76822400561",
+                  "contribution_to_profit_delta": "-88186.76822400561",
+                  "limitation": "Residual includes all other modeled charges and adjustments; it is NOT a verified marketing/refund/fulfillment breakdown."
+                }
+              ],
+              "metric_results": {
+                "effective_revenue": {
+                  "intent": "compare",
+                  "metric_id": "effective_revenue",
+                  "measurement": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_revenue",
+                    "value": "983213.4400000107",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "causal_claim": false,
+                  "status": "MEASURED_WITH_SCOPE_LIMITS",
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_revenue",
+                    "value": "844178.710000006",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "comparison": {
+                    "absolute_change": "139034.7300000047",
+                    "change_unit": "money",
+                    "relative_change_pct": "16.46982189351869722119459621",
+                    "relative_change_note": "Descriptive only; differing periods may have seasonality/mix effects"
+                  }
+                },
+                "effective_contribution_profit": {
+                  "intent": "compare",
+                  "metric_id": "effective_contribution_profit",
+                  "measurement": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_contribution_profit",
+                    "value": "66524.91676800018",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "causal_claim": false,
+                  "status": "MEASURED_WITH_SCOPE_LIMITS",
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_contribution_profit",
+                    "value": "115103.04569200019",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "comparison": {
+                    "absolute_change": "-48578.12892400001",
+                    "change_unit": "money",
+                    "relative_change_pct": "-42.20403433458082035712911628",
+                    "relative_change_note": "Descriptive only; differing periods may have seasonality/mix effects"
+                  }
+                },
+                "effective_cogs": {
+                  "intent": "compare",
+                  "metric_id": "effective_cogs",
+                  "measurement": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_cogs",
+                    "value": "636445.5251999993",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "causal_claim": false,
+                  "status": "MEASURED_WITH_SCOPE_LIMITS",
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_cogs",
+                    "value": "537019.4345000002",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "comparison": {
+                    "absolute_change": "99426.0906999991",
+                    "change_unit": "money",
+                    "relative_change_pct": "18.51443063556372334065662737",
+                    "relative_change_note": "Descriptive only; differing periods may have seasonality/mix effects"
+                  }
+                }
+              },
+              "evidence": {
+                "effective_revenue": {
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_revenue",
+                    "value": "844178.710000006",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "after": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_revenue",
+                    "value": "983213.4400000107",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  }
+                },
+                "effective_contribution_profit": {
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_contribution_profit",
+                    "value": "115103.04569200019",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "after": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_contribution_profit",
+                    "value": "66524.91676800018",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  }
+                },
+                "effective_cogs": {
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_cogs",
+                    "value": "537019.4345000002",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "after": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_cogs",
+                    "value": "636445.5251999993",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  }
+                }
+              },
+              "hypotheses_not_tested": [
+                "Marketing spend changes",
+                "Refund changes",
+                "Fulfillment/payment costs",
+                "Product mix",
+                "Incident-specific adjustments"
+              ],
+              "limitations": [
+                "This is a descriptive accounting bridge, not causal root-cause attribution",
+                "Other net charges are a residual; component-level breakdown has not been governed or verified",
+                "The finance layer contains modeled costs and incident adjustments",
+                "Period source non-emptiness does not independently certify continuous coverage",
+                "Different periods may differ in seasonality, mix, population and exposure"
+              ],
+              "next_step": "Register and verify auditable cost-component metrics before testing individual drivers"
+            },
+            "reconciled_cost_components": {
+              "route": "investigation",
+              "status": "DESCRIPTIVE_DECOMPOSITION_ONLY",
+              "executable": true,
+              "causal_claim": false,
+              "focus": "revenue_profit_divergence",
+              "periods": {
+                "before": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "after": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ]
+              },
+              "premise": {
+                "revenue_increased": true,
+                "contribution_profit_decreased": true,
+                "revenue_delta": "139034.7300000047",
+                "contribution_profit_delta": "-48578.12892400001",
+                "divergence_confirmed": true
+              },
+              "findings": [
+                {
+                  "component": "effective_revenue",
+                  "delta": "139034.7300000047",
+                  "contribution_to_profit_delta": "139034.7300000047"
+                },
+                {
+                  "component": "effective_cogs",
+                  "delta": "99426.0906999991",
+                  "contribution_to_profit_delta": "-99426.0906999991"
+                },
+                {
+                  "component": "other_net_charges_residual",
+                  "delta": "88186.76822400561",
+                  "contribution_to_profit_delta": "-88186.76822400561",
+                  "limitation": "Residual includes all other modeled charges and adjustments; it is NOT a verified marketing/refund/fulfillment breakdown."
+                }
+              ],
+              "metric_results": {
+                "effective_revenue": {
+                  "intent": "compare",
+                  "metric_id": "effective_revenue",
+                  "measurement": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_revenue",
+                    "value": "983213.4400000107",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "causal_claim": false,
+                  "status": "MEASURED_WITH_SCOPE_LIMITS",
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_revenue",
+                    "value": "844178.710000006",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "comparison": {
+                    "absolute_change": "139034.7300000047",
+                    "change_unit": "money",
+                    "relative_change_pct": "16.46982189351869722119459621",
+                    "relative_change_note": "Descriptive only; differing periods may have seasonality/mix effects"
+                  }
+                },
+                "effective_contribution_profit": {
+                  "intent": "compare",
+                  "metric_id": "effective_contribution_profit",
+                  "measurement": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_contribution_profit",
+                    "value": "66524.91676800018",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "causal_claim": false,
+                  "status": "MEASURED_WITH_SCOPE_LIMITS",
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_contribution_profit",
+                    "value": "115103.04569200019",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "comparison": {
+                    "absolute_change": "-48578.12892400001",
+                    "change_unit": "money",
+                    "relative_change_pct": "-42.20403433458082035712911628",
+                    "relative_change_note": "Descriptive only; differing periods may have seasonality/mix effects"
+                  }
+                },
+                "effective_cogs": {
+                  "intent": "compare",
+                  "metric_id": "effective_cogs",
+                  "measurement": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_cogs",
+                    "value": "636445.5251999993",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "causal_claim": false,
+                  "status": "MEASURED_WITH_SCOPE_LIMITS",
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_cogs",
+                    "value": "537019.4345000002",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "comparison": {
+                    "absolute_change": "99426.0906999991",
+                    "change_unit": "money",
+                    "relative_change_pct": "18.51443063556372334065662737",
+                    "relative_change_note": "Descriptive only; differing periods may have seasonality/mix effects"
+                  }
+                }
+              },
+              "evidence": {
+                "effective_revenue": {
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_revenue",
+                    "value": "844178.710000006",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "after": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_revenue",
+                    "value": "983213.4400000107",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  }
+                },
+                "effective_contribution_profit": {
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_contribution_profit",
+                    "value": "115103.04569200019",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "after": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_contribution_profit",
+                    "value": "66524.91676800018",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  }
+                },
+                "effective_cogs": {
+                  "before": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_cogs",
+                    "value": "537019.4345000002",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 6694,
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  },
+                  "after": {
+                    "kind": "governed_measurement",
+                    "metric_id": "effective_cogs",
+                    "value": "636445.5251999993",
+                    "unit": "money",
+                    "source": "semantic.order_economics",
+                    "source_population_rows": 7188,
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "status": "MEASURED_WITH_SCOPE_LIMITS",
+                    "causal_claim": false,
+                    "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                    "permission": "ephemeral_single_source_total",
+                    "limitations": [
+                      "On-demand reconciliation is not a persistent metric or join approval",
+                      "Source coverage was nonempty, but continuous coverage was not independently certified",
+                      "Financial costs and incident adjustments are partly modeled",
+                      "No causal attribution from period comparisons"
+                    ],
+                    "verification_checks": [
+                      "ONE_ROW_PER_ORDER",
+                      "ITEM_PARTITION",
+                      "ITEMS_EQUAL_FINANCIAL_POPULATION",
+                      "STATUS_BREAKDOWN_BALANCES",
+                      "FINANCE_GRAIN_MATCHES",
+                      "PERIOD_AND_ITEM_INTEGRITY",
+                      "COVERAGE",
+                      "DAILY_REVENUE",
+                      "DAILY_COGS",
+                      "DAILY_PROFIT",
+                      "DAILY_ORDER_POPULATION",
+                      "VALID_MARGIN_DENOMINATOR"
+                    ]
+                  }
+                }
+              },
+              "hypotheses_not_tested": [
+                "Marketing spend changes",
+                "Refund changes",
+                "Fulfillment/payment costs",
+                "Product mix",
+                "Incident-specific adjustments"
+              ],
+              "limitations": [
+                "This is a descriptive accounting bridge, not causal root-cause attribution",
+                "Other net charges are a residual; component-level breakdown has not been governed or verified",
+                "The finance layer contains modeled costs and incident adjustments",
+                "Period source non-emptiness does not independently certify continuous coverage",
+                "Different periods may differ in seasonality, mix, population and exposure"
+              ],
+              "next_step": "Register and verify auditable cost-component metrics before testing individual drivers",
+              "driver_discovery": {
+                "status": "RECONCILED_COMPONENT_BREAKDOWN",
+                "source": "semantic.order_cost_components",
+                "causal_claim": false,
+                "components": [
+                  {
+                    "component": "refund_amount",
+                    "before": "35728.10999999999",
+                    "after": "52847.03999999998",
+                    "delta": "17118.92999999999",
+                    "contribution_to_profit_delta": "-17118.92999999999"
+                  },
+                  {
+                    "component": "fulfillment_cost",
+                    "before": "43669.24869999997",
+                    "after": "50811.53629999988",
+                    "delta": "7142.28759999991",
+                    "contribution_to_profit_delta": "-7142.28759999991"
+                  },
+                  {
+                    "component": "payment_processing_cost",
+                    "before": "20070.652909999902",
+                    "after": "23163.282239999822",
+                    "delta": "3092.629329999920",
+                    "contribution_to_profit_delta": "-3092.629329999920"
+                  },
+                  {
+                    "component": "marketing_cost_effective",
+                    "before": "91937.69000000028",
+                    "after": "141228.93000000017",
+                    "delta": "49291.23999999989",
+                    "contribution_to_profit_delta": "-49291.23999999989"
+                  },
+                  {
+                    "component": "incentive_cost_effective",
+                    "before": "650.5281979999997",
+                    "after": "12192.209492000018",
+                    "delta": "11541.6812940000183",
+                    "contribution_to_profit_delta": "-11541.6812940000183"
+                  },
+                  {
+                    "component": "other_adjustments_residual",
+                    "before": "-5.690517501655279E-13",
+                    "after": "-2.548655730905125E-12",
+                    "delta": "-1.9796039807395971E-12",
+                    "contribution_to_profit_delta": "1.9796039807395971E-12"
+                  }
+                ],
+                "total_other_net_charges_delta": "88186.76822399972632039601926",
+                "period_evidence": {
+                  "before": {
+                    "source": "semantic.order_cost_components",
+                    "period": [
+                      "2018-02-01",
+                      "2018-03-01"
+                    ],
+                    "source_population_rows": 6694,
+                    "components": {
+                      "refund_amount": "35728.10999999999",
+                      "fulfillment_cost": "43669.24869999997",
+                      "payment_processing_cost": "20070.652909999902",
+                      "marketing_cost_effective": "91937.69000000028",
+                      "incentive_cost_effective": "650.5281979999997",
+                      "other_adjustments_residual": "-5.690517501655279E-13"
+                    },
+                    "reconciliation": "RECONCILED_FOR_REVIEW",
+                    "causal_claim": false
+                  },
+                  "after": {
+                    "source": "semantic.order_cost_components",
+                    "period": [
+                      "2018-03-01",
+                      "2018-04-01"
+                    ],
+                    "source_population_rows": 7188,
+                    "components": {
+                      "refund_amount": "52847.03999999998",
+                      "fulfillment_cost": "50811.53629999988",
+                      "payment_processing_cost": "23163.282239999822",
+                      "marketing_cost_effective": "141228.93000000017",
+                      "incentive_cost_effective": "12192.209492000018",
+                      "other_adjustments_residual": "-2.548655730905125E-12"
+                    },
+                    "reconciliation": "RECONCILED_FOR_REVIEW",
+                    "causal_claim": false
+                  }
+                },
+                "limitations": [
+                  "Accounting contribution is not causal identification",
+                  "Costs and incident adjustments are partly synthetic or modeled",
+                  "Other adjustments are a balancing residual, not a known causal mechanism",
+                  "No dimension/category allocations or joins have been approved",
+                  "Nonempty period coverage does not establish continuous completeness"
+                ]
+              }
+            }
+          },
+          "driver_discovery": {
+            "status": "RECONCILED_COMPONENT_BREAKDOWN",
+            "source": "semantic.order_cost_components",
+            "causal_claim": false,
+            "components": [
+              {
+                "component": "refund_amount",
+                "before": "35728.10999999999",
+                "after": "52847.03999999998",
+                "delta": "17118.92999999999",
+                "contribution_to_profit_delta": "-17118.92999999999"
+              },
+              {
+                "component": "fulfillment_cost",
+                "before": "43669.24869999997",
+                "after": "50811.53629999988",
+                "delta": "7142.28759999991",
+                "contribution_to_profit_delta": "-7142.28759999991"
+              },
+              {
+                "component": "payment_processing_cost",
+                "before": "20070.652909999902",
+                "after": "23163.282239999822",
+                "delta": "3092.629329999920",
+                "contribution_to_profit_delta": "-3092.629329999920"
+              },
+              {
+                "component": "marketing_cost_effective",
+                "before": "91937.69000000028",
+                "after": "141228.93000000017",
+                "delta": "49291.23999999989",
+                "contribution_to_profit_delta": "-49291.23999999989"
+              },
+              {
+                "component": "incentive_cost_effective",
+                "before": "650.5281979999997",
+                "after": "12192.209492000018",
+                "delta": "11541.6812940000183",
+                "contribution_to_profit_delta": "-11541.6812940000183"
+              },
+              {
+                "component": "other_adjustments_residual",
+                "before": "-5.690517501655279E-13",
+                "after": "-2.548655730905125E-12",
+                "delta": "-1.9796039807395971E-12",
+                "contribution_to_profit_delta": "1.9796039807395971E-12"
+              }
+            ],
+            "total_other_net_charges_delta": "88186.76822399972632039601926",
+            "period_evidence": {
+              "before": {
+                "source": "semantic.order_cost_components",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "source_population_rows": 6694,
+                "components": {
+                  "refund_amount": "35728.10999999999",
+                  "fulfillment_cost": "43669.24869999997",
+                  "payment_processing_cost": "20070.652909999902",
+                  "marketing_cost_effective": "91937.69000000028",
+                  "incentive_cost_effective": "650.5281979999997",
+                  "other_adjustments_residual": "-5.690517501655279E-13"
+                },
+                "reconciliation": "RECONCILED_FOR_REVIEW",
+                "causal_claim": false
+              },
+              "after": {
+                "source": "semantic.order_cost_components",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "source_population_rows": 7188,
+                "components": {
+                  "refund_amount": "52847.03999999998",
+                  "fulfillment_cost": "50811.53629999988",
+                  "payment_processing_cost": "23163.282239999822",
+                  "marketing_cost_effective": "141228.93000000017",
+                  "incentive_cost_effective": "12192.209492000018",
+                  "other_adjustments_residual": "-2.548655730905125E-12"
+                },
+                "reconciliation": "RECONCILED_FOR_REVIEW",
+                "causal_claim": false
+              }
+            },
+            "limitations": [
+              "Accounting contribution is not causal identification",
+              "Costs and incident adjustments are partly synthetic or modeled",
+              "Other adjustments are a balancing residual, not a known causal mechanism",
+              "No dimension/category allocations or joins have been approved",
+              "Nonempty period coverage does not establish continuous completeness"
+            ]
+          },
+          "hypothesis_evaluation": {
+            "status": "EVIDENCE_RANKED_NOT_CAUSAL",
+            "causal_claim": false,
+            "premise_confirmed": true,
+            "profit_delta": "-48578.12892400001",
+            "hypotheses": [
+              {
+                "hypothesis_id": "financial_component:effective_cogs",
+                "label": "Cost of goods sold",
+                "observed_cost_change": "99426.0906999991",
+                "accounting_profit_impact": "-99426.0906999991",
+                "disposition": "SUPPORTS_PROFIT_PRESSURE",
+                "evidence_type": "reconciled_accounting_contribution",
+                "source": "semantic.order_economics",
+                "causal_claim": false,
+                "next_validation": "Verify attribution mechanism using independent operational data"
+              },
+              {
+                "hypothesis_id": "financial_component:marketing_cost_effective",
+                "label": "Marketing expense",
+                "observed_cost_change": "49291.23999999989",
+                "accounting_profit_impact": "-49291.23999999989",
+                "disposition": "SUPPORTS_PROFIT_PRESSURE",
+                "evidence_type": "reconciled_accounting_contribution",
+                "source": "semantic.order_cost_components",
+                "causal_claim": false,
+                "next_validation": "Verify attribution mechanism using independent operational data"
+              },
+              {
+                "hypothesis_id": "financial_component:refund_amount",
+                "label": "Refund expense",
+                "observed_cost_change": "17118.92999999999",
+                "accounting_profit_impact": "-17118.92999999999",
+                "disposition": "SUPPORTS_PROFIT_PRESSURE",
+                "evidence_type": "reconciled_accounting_contribution",
+                "source": "semantic.order_cost_components",
+                "causal_claim": false,
+                "next_validation": "Verify attribution mechanism using independent operational data"
+              },
+              {
+                "hypothesis_id": "financial_component:incentive_cost_effective",
+                "label": "Campaign incentives",
+                "observed_cost_change": "11541.6812940000183",
+                "accounting_profit_impact": "-11541.6812940000183",
+                "disposition": "SUPPORTS_PROFIT_PRESSURE",
+                "evidence_type": "reconciled_accounting_contribution",
+                "source": "semantic.order_cost_components",
+                "causal_claim": false,
+                "next_validation": "Verify attribution mechanism using independent operational data"
+              },
+              {
+                "hypothesis_id": "financial_component:fulfillment_cost",
+                "label": "Fulfillment expense",
+                "observed_cost_change": "7142.28759999991",
+                "accounting_profit_impact": "-7142.28759999991",
+                "disposition": "SUPPORTS_PROFIT_PRESSURE",
+                "evidence_type": "reconciled_accounting_contribution",
+                "source": "semantic.order_cost_components",
+                "causal_claim": false,
+                "next_validation": "Verify attribution mechanism using independent operational data"
+              }
+            ],
+            "hypotheses_evaluated": 7,
+            "hypotheses_returned": 5,
+            "untested": {
+              "campaign_incrementality": "Marketing spend alone cannot establish incremental campaign return",
+              "product_mix": "Item-level financial allocations are not governed for product/category profit",
+              "customer_cohorts": "No verified cohort-level contribution-profit evidence provided",
+              "operational_causation": "Accounting movement does not identify the operational cause"
+            },
+            "limitations": [
+              "Ranks measured accounting movements, not causal root causes",
+              "Financial data include modeled or synthetic cost components",
+              "No cross-domain joins, cohort comparisons, or statistical causal tests were performed",
+              "Only the supplied two periods were evaluated; completeness across all dates is not certified"
+            ]
+          },
+          "order_normalized_evidence": {
+            "status": "RECONCILED_INTENSITY_COMPARISON",
+            "population_basis": "financially eligible orders with items",
+            "before_orders": 6694,
+            "after_orders": 7188,
+            "components": [
+              {
+                "component": "refund_amount",
+                "before_per_order": "5.337333432925005975500448163",
+                "after_per_order": "7.352120200333887033945464663",
+                "change_per_order": "2.014786767408881058445016500",
+                "causal_claim": false
+              },
+              {
+                "component": "fulfillment_cost",
+                "before_per_order": "6.523640379444273976695548252",
+                "after_per_order": "7.068939385086238174735670562",
+                "change_per_order": "0.545299005641964198040122310",
+                "causal_claim": false
+              },
+              {
+                "component": "payment_processing_cost",
+                "before_per_order": "2.998304886465476844935763370",
+                "after_per_order": "3.222493355592629660545353367",
+                "change_per_order": "0.224188469127152815609589997",
+                "causal_claim": false
+              },
+              {
+                "component": "marketing_cost_effective",
+                "before_per_order": "13.73434269495074394980579624",
+                "after_per_order": "19.64787562604342932665553701",
+                "change_per_order": "5.91353293109268537684974077",
+                "causal_claim": false
+              },
+              {
+                "component": "incentive_cost_effective",
+                "before_per_order": "0.09718078846728409023005676725",
+                "after_per_order": "1.696189411797442682248191430",
+                "change_per_order": "1.599008623330158592018134663",
+                "causal_claim": false
+              },
+              {
+                "component": "other_adjustments_residual",
+                "before_per_order": "-8.500922470354465192709889453E-17",
+                "after_per_order": "-3.545709141492939621591541458E-16",
+                "change_per_order": "-2.695616894457493102320552513E-16",
+                "causal_claim": false
+              }
+            ],
+            "causal_claim": false,
+            "limitations": [
+              "Per-order averages reflect different order cohorts and do not identify causality",
+              "Financial charge data include modeled or synthetic values"
+            ]
+          },
+          "adaptive": {
+            "steps_used": 3,
+            "trace": [
+              {
+                "step": 1,
+                "capability": "premise_and_accounting_bridge",
+                "decision": "EXECUTED",
+                "reason": "Required to verify question before examining drivers"
+              },
+              {
+                "step": 2,
+                "capability": "reconciled_cost_components",
+                "decision": "RECONCILED_COMPONENT_BREAKDOWN",
+                "reason": "Unexplained net-charge movement warrants approved cost-component inspection"
+              },
+              {
+                "step": 3,
+                "capability": "per_order_intensity",
+                "decision": "EXECUTED_NO_NEW_SQL",
+                "reason": "Test whether total cost pressures can be explained solely by greater order volume"
+              }
+            ],
+            "stop_reason": "NO_MORE_APPROVED_HYPOTHESIS_TOOLS",
+            "untested": {
+              "campaign_incrementality": "Marketing spend alone cannot establish incremental campaign return",
+              "product_mix": "Item-level financial allocations are not governed for product/category profit",
+              "customer_cohorts": "No verified cohort-level contribution-profit evidence provided",
+              "operational_causation": "Accounting movement does not identify the operational cause"
+            },
+            "causal_claim": false
+          },
+          "capability_discovery": {
+            "status": "READY_FOR_EXISTING_EXECUTOR",
+            "intent": "financial_divergence",
+            "executable": true,
+            "steps": [
+              {
+                "capability": "finance_premise",
+                "executor": "phase4c3_investigation",
+                "evidence": "effective_revenue/effective_contribution_profit/effective_cogs",
+                "limitations": [
+                  "Modelled costs",
+                  "Descriptive; cannot establish causation"
+                ]
+              },
+              {
+                "capability": "finance_cost_components",
+                "executor": "phase4c4_drivers",
+                "evidence": "refund/marketing/fulfilment/incentive/processing totals",
+                "limitations": [
+                  "Modelled financial charges"
+                ]
+              },
+              {
+                "capability": "finance_per_order_intensity",
+                "executor": "phase4c7_adaptive",
+                "evidence": "per-eligible-order costs",
+                "limitations": [
+                  "Different cohorts; no causal inference"
+                ]
+              }
+            ],
+            "missing": [],
+            "max_steps": 3,
+            "reason": "Execution is still independently gated by existing audited modules",
+            "causal_claim": false
+          },
+          "language": {
+            "original_question": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+            "interpreted_question": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+            "corrections": [],
+            "policy": "explicit_lexical_rules_v1"
+          },
+          "explanation_plan": {
+            "status": "VALIDATED",
+            "explanation_type": "finance_divergence",
+            "evidence_refs": [
+              "premise.divergence_confirmed",
+              "premise.revenue_delta",
+              "premise.contribution_profit_delta"
+            ]
+          },
+          "execution_trace": [
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS placed, COUNT(DISTINCT o.order_id) AS placed_distinct,\n       COUNT(*) FILTER(WHERE i.order_id IS NOT NULL) AS with_items,\n       COUNT(*) FILTER(WHERE NOT i.order_id IS NOT NULL) AS without_items,\n       COUNT(*) FILTER(WHERE e.order_id IS NOT NULL) AS represented,\n       COUNT(*) FILTER(WHERE i.order_id IS NOT NULL AND e.order_id IS NULL) AS item_missing_finance,\n       COUNT(*) FILTER(WHERE NOT i.order_id IS NOT NULL AND e.order_id IS NOT NULL) AS finance_missing_item,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status='canceled') AS canceled_missing,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status='unavailable') AS unavailable_missing,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status='created') AS created_missing,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status NOT IN ('canceled','unavailable','created')) AS other_missing,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status IS NULL) AS null_status_missing\n       FROM \"commerce\".\"orders\" o\n       LEFT JOIN (SELECT DISTINCT order_id FROM \"commerce\".\"order_items\") i ON i.order_id=o.order_id\n       LEFT JOIN \"semantic\".\"order_economics\" e ON e.order_id=o.order_id\n       WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-02-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-03-01' LIMIT 1",
+                "purpose": "Finance period integrity: cohort",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "placed",
+                    "placed_distinct",
+                    "with_items",
+                    "without_items",
+                    "represented",
+                    "item_missing_finance",
+                    "finance_missing_item",
+                    "canceled_missing",
+                    "unavailable_missing",
+                    "created_missing",
+                    "other_missing",
+                    "null_status_missing"
+                  ],
+                  "rows": [
+                    {
+                      "placed": 6728,
+                      "placed_distinct": 6728,
+                      "with_items": 6694,
+                      "without_items": 34,
+                      "represented": 6694,
+                      "item_missing_finance": 0,
+                      "finance_missing_item": 0,
+                      "canceled_missing": 3,
+                      "unavailable_missing": 30,
+                      "created_missing": 1,
+                      "other_missing": 0,
+                      "null_status_missing": 0
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Finance period integrity: cohort",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "commerce.order_items",
+                    "commerce.orders",
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 380
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS rows, COUNT(DISTINCT e.order_id) AS unique_orders,\n      SUM(e.effective_revenue) AS revenue, SUM(e.effective_cogs) AS cogs,\n      SUM(e.effective_contribution_profit) AS profit\n      FROM \"semantic\".\"order_economics\" e WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-02-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-03-01' LIMIT 1",
+                "purpose": "Finance period integrity: finance",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "rows",
+                    "unique_orders",
+                    "revenue",
+                    "cogs",
+                    "profit"
+                  ],
+                  "rows": [
+                    {
+                      "rows": 6694,
+                      "unique_orders": 6694,
+                      "revenue": 844178.7100000241,
+                      "cogs": 537019.4345000003,
+                      "profit": 115103.04569199975
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Finance period integrity: finance",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 107.82
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS days, SUM(d.revenue) AS revenue, SUM(d.cogs) AS cogs,\n      SUM(d.contribution_profit) AS profit, SUM(d.orders) AS orders\n      FROM \"semantic\".\"daily_commerce\" d WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(d.\"business_date\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(d.\"business_date\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-02-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(d.\"business_date\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(d.\"business_date\"::text), '')::timestamp ELSE NULL END) < DATE '2018-03-01' LIMIT 1",
+                "purpose": "Finance period integrity: daily",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "days",
+                    "revenue",
+                    "cogs",
+                    "profit",
+                    "orders"
+                  ],
+                  "rows": [
+                    {
+                      "days": 28,
+                      "revenue": 844178.7100000017,
+                      "cogs": 537019.4345,
+                      "profit": 115103.04569200003,
+                      "orders": "6694"
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Finance period integrity: daily",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.daily_commerce"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 137.85
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS financial_rows,\n      COUNT(*) FILTER(WHERE o.order_id IS NULL) AS finance_only,\n      COUNT(*) FILTER(WHERE o.order_id IS NOT NULL AND NOT ((CASE WHEN pg_input_is_valid(NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-02-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-03-01')) AS period_mismatch,\n      COUNT(*) FILTER(WHERE i.order_id IS NULL) AS no_items\n      FROM \"semantic\".\"order_economics\" e\n      LEFT JOIN \"commerce\".\"orders\" o ON o.order_id=e.order_id\n      LEFT JOIN (SELECT DISTINCT order_id FROM \"commerce\".\"order_items\") i ON i.order_id=e.order_id\n      WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-02-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-03-01' LIMIT 1",
+                "purpose": "Finance period integrity: integrity",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "financial_rows",
+                    "finance_only",
+                    "period_mismatch",
+                    "no_items"
+                  ],
+                  "rows": [
+                    {
+                      "financial_rows": 6694,
+                      "finance_only": 0,
+                      "period_mismatch": 0,
+                      "no_items": 0
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Finance period integrity: integrity",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "commerce.order_items",
+                    "commerce.orders",
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 182.46
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS eligible_source_rows, SUM(t0.\"effective_revenue\") AS metric_value FROM \"semantic\".\"order_economics\" t0 WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-02-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-03-01' LIMIT 1",
+                "purpose": "Governed financial metric effective_revenue",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_source_rows",
+                    "metric_value"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_source_rows": 6694,
+                      "metric_value": 844178.710000006
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed financial metric effective_revenue",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 105.43
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS placed, COUNT(DISTINCT o.order_id) AS placed_distinct,\n       COUNT(*) FILTER(WHERE i.order_id IS NOT NULL) AS with_items,\n       COUNT(*) FILTER(WHERE NOT i.order_id IS NOT NULL) AS without_items,\n       COUNT(*) FILTER(WHERE e.order_id IS NOT NULL) AS represented,\n       COUNT(*) FILTER(WHERE i.order_id IS NOT NULL AND e.order_id IS NULL) AS item_missing_finance,\n       COUNT(*) FILTER(WHERE NOT i.order_id IS NOT NULL AND e.order_id IS NOT NULL) AS finance_missing_item,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status='canceled') AS canceled_missing,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status='unavailable') AS unavailable_missing,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status='created') AS created_missing,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status NOT IN ('canceled','unavailable','created')) AS other_missing,\n       COUNT(*) FILTER(WHERE e.order_id IS NULL AND o.order_status IS NULL) AS null_status_missing\n       FROM \"commerce\".\"orders\" o\n       LEFT JOIN (SELECT DISTINCT order_id FROM \"commerce\".\"order_items\") i ON i.order_id=o.order_id\n       LEFT JOIN \"semantic\".\"order_economics\" e ON e.order_id=o.order_id\n       WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-03-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-04-01' LIMIT 1",
+                "purpose": "Finance period integrity: cohort",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "placed",
+                    "placed_distinct",
+                    "with_items",
+                    "without_items",
+                    "represented",
+                    "item_missing_finance",
+                    "finance_missing_item",
+                    "canceled_missing",
+                    "unavailable_missing",
+                    "created_missing",
+                    "other_missing",
+                    "null_status_missing"
+                  ],
+                  "rows": [
+                    {
+                      "placed": 7211,
+                      "placed_distinct": 7211,
+                      "with_items": 7188,
+                      "without_items": 23,
+                      "represented": 7188,
+                      "item_missing_finance": 0,
+                      "finance_missing_item": 0,
+                      "canceled_missing": 6,
+                      "unavailable_missing": 17,
+                      "created_missing": 0,
+                      "other_missing": 0,
+                      "null_status_missing": 0
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Finance period integrity: cohort",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "commerce.order_items",
+                    "commerce.orders",
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 193.87
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS rows, COUNT(DISTINCT e.order_id) AS unique_orders,\n      SUM(e.effective_revenue) AS revenue, SUM(e.effective_cogs) AS cogs,\n      SUM(e.effective_contribution_profit) AS profit\n      FROM \"semantic\".\"order_economics\" e WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-03-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-04-01' LIMIT 1",
+                "purpose": "Finance period integrity: finance",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "rows",
+                    "unique_orders",
+                    "revenue",
+                    "cogs",
+                    "profit"
+                  ],
+                  "rows": [
+                    {
+                      "rows": 7188,
+                      "unique_orders": 7188,
+                      "revenue": 983213.4400000282,
+                      "cogs": 636445.5252000004,
+                      "profit": 66524.91676800002
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Finance period integrity: finance",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 112.76
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS days, SUM(d.revenue) AS revenue, SUM(d.cogs) AS cogs,\n      SUM(d.contribution_profit) AS profit, SUM(d.orders) AS orders\n      FROM \"semantic\".\"daily_commerce\" d WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(d.\"business_date\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(d.\"business_date\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-03-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(d.\"business_date\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(d.\"business_date\"::text), '')::timestamp ELSE NULL END) < DATE '2018-04-01' LIMIT 1",
+                "purpose": "Finance period integrity: daily",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "days",
+                    "revenue",
+                    "cogs",
+                    "profit",
+                    "orders"
+                  ],
+                  "rows": [
+                    {
+                      "days": 31,
+                      "revenue": 983213.4400000017,
+                      "cogs": 636445.5252,
+                      "profit": 66524.916768,
+                      "orders": "7188"
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Finance period integrity: daily",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.daily_commerce"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 166.56
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS financial_rows,\n      COUNT(*) FILTER(WHERE o.order_id IS NULL) AS finance_only,\n      COUNT(*) FILTER(WHERE o.order_id IS NOT NULL AND NOT ((CASE WHEN pg_input_is_valid(NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-03-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(o.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-04-01')) AS period_mismatch,\n      COUNT(*) FILTER(WHERE i.order_id IS NULL) AS no_items\n      FROM \"semantic\".\"order_economics\" e\n      LEFT JOIN \"commerce\".\"orders\" o ON o.order_id=e.order_id\n      LEFT JOIN (SELECT DISTINCT order_id FROM \"commerce\".\"order_items\") i ON i.order_id=e.order_id\n      WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-03-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(e.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-04-01' LIMIT 1",
+                "purpose": "Finance period integrity: integrity",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "financial_rows",
+                    "finance_only",
+                    "period_mismatch",
+                    "no_items"
+                  ],
+                  "rows": [
+                    {
+                      "financial_rows": 7188,
+                      "finance_only": 0,
+                      "period_mismatch": 0,
+                      "no_items": 0
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Finance period integrity: integrity",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "commerce.order_items",
+                    "commerce.orders",
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 192.25
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS eligible_source_rows, SUM(t0.\"effective_revenue\") AS metric_value FROM \"semantic\".\"order_economics\" t0 WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-03-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-04-01' LIMIT 1",
+                "purpose": "Governed financial metric effective_revenue",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_source_rows",
+                    "metric_value"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_source_rows": 7188,
+                      "metric_value": 983213.4400000107
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed financial metric effective_revenue",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 84.22
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS eligible_source_rows, SUM(t0.\"effective_contribution_profit\") AS metric_value FROM \"semantic\".\"order_economics\" t0 WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-02-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-03-01' LIMIT 1",
+                "purpose": "Governed financial metric effective_contribution_profit",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_source_rows",
+                    "metric_value"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_source_rows": 6694,
+                      "metric_value": 115103.04569200019
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed financial metric effective_contribution_profit",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 94.82
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS eligible_source_rows, SUM(t0.\"effective_contribution_profit\") AS metric_value FROM \"semantic\".\"order_economics\" t0 WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-03-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-04-01' LIMIT 1",
+                "purpose": "Governed financial metric effective_contribution_profit",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_source_rows",
+                    "metric_value"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_source_rows": 7188,
+                      "metric_value": 66524.91676800018
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed financial metric effective_contribution_profit",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 94.3
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS eligible_source_rows, SUM(t0.\"effective_cogs\") AS metric_value FROM \"semantic\".\"order_economics\" t0 WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-02-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-03-01' LIMIT 1",
+                "purpose": "Governed financial metric effective_cogs",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_source_rows",
+                    "metric_value"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_source_rows": 6694,
+                      "metric_value": 537019.4345000002
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed financial metric effective_cogs",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 103.62
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS eligible_source_rows, SUM(t0.\"effective_cogs\") AS metric_value FROM \"semantic\".\"order_economics\" t0 WHERE (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) >= DATE '2018-03-01' AND (CASE WHEN pg_input_is_valid(NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), ''), 'timestamp without time zone') THEN NULLIF(BTRIM(t0.\"order_purchase_timestamp\"::text), '')::timestamp ELSE NULL END) < DATE '2018-04-01' LIMIT 1",
+                "purpose": "Governed financial metric effective_cogs",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_source_rows",
+                    "metric_value"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_source_rows": 7188,
+                      "metric_value": 636445.5251999993
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed financial metric effective_cogs",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_economics"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 101.86
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS eligible_source_rows, COUNT(DISTINCT t0.\"order_id\") AS distinct_orders, SUM(t0.\"effective_revenue\") AS \"effective_revenue\", SUM(t0.\"effective_cogs\") AS \"effective_cogs\", SUM(t0.\"effective_contribution_profit\") AS \"effective_contribution_profit\", SUM(t0.\"refund_amount\") AS \"refund_amount\", SUM(t0.\"fulfillment_cost\") AS \"fulfillment_cost\", SUM(t0.\"payment_processing_cost\") AS \"payment_processing_cost\", SUM(t0.\"marketing_cost_effective\") AS \"marketing_cost_effective\", SUM(t0.\"incentive_cost_effective\") AS \"incentive_cost_effective\", SUM(t0.\"other_adjustments_residual\") AS \"other_adjustments_residual\" FROM \"semantic\".\"order_cost_components\" t0 WHERE t0.\"order_purchase_timestamp\" >= DATE '2018-02-01' AND t0.\"order_purchase_timestamp\" < DATE '2018-03-01' LIMIT 1",
+                "purpose": "governed cost component reconciliation: before",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_source_rows",
+                    "distinct_orders",
+                    "effective_revenue",
+                    "effective_cogs",
+                    "effective_contribution_profit",
+                    "refund_amount",
+                    "fulfillment_cost",
+                    "payment_processing_cost",
+                    "marketing_cost_effective",
+                    "incentive_cost_effective",
+                    "other_adjustments_residual"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_source_rows": 6694,
+                      "distinct_orders": 6694,
+                      "effective_revenue": 844178.7100000241,
+                      "effective_cogs": 537019.4345000003,
+                      "effective_contribution_profit": 115103.04569199975,
+                      "refund_amount": 35728.10999999999,
+                      "fulfillment_cost": 43669.24869999997,
+                      "payment_processing_cost": 20070.652909999902,
+                      "marketing_cost_effective": 91937.69000000028,
+                      "incentive_cost_effective": 650.5281979999997,
+                      "other_adjustments_residual": -5.690517501655279e-13
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "governed cost component reconciliation: before",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_cost_components"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 73.55
+                }
+              }
+            },
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*) AS eligible_source_rows, COUNT(DISTINCT t0.\"order_id\") AS distinct_orders, SUM(t0.\"effective_revenue\") AS \"effective_revenue\", SUM(t0.\"effective_cogs\") AS \"effective_cogs\", SUM(t0.\"effective_contribution_profit\") AS \"effective_contribution_profit\", SUM(t0.\"refund_amount\") AS \"refund_amount\", SUM(t0.\"fulfillment_cost\") AS \"fulfillment_cost\", SUM(t0.\"payment_processing_cost\") AS \"payment_processing_cost\", SUM(t0.\"marketing_cost_effective\") AS \"marketing_cost_effective\", SUM(t0.\"incentive_cost_effective\") AS \"incentive_cost_effective\", SUM(t0.\"other_adjustments_residual\") AS \"other_adjustments_residual\" FROM \"semantic\".\"order_cost_components\" t0 WHERE t0.\"order_purchase_timestamp\" >= DATE '2018-03-01' AND t0.\"order_purchase_timestamp\" < DATE '2018-04-01' LIMIT 1",
+                "purpose": "governed cost component reconciliation: after",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_source_rows",
+                    "distinct_orders",
+                    "effective_revenue",
+                    "effective_cogs",
+                    "effective_contribution_profit",
+                    "refund_amount",
+                    "fulfillment_cost",
+                    "payment_processing_cost",
+                    "marketing_cost_effective",
+                    "incentive_cost_effective",
+                    "other_adjustments_residual"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_source_rows": 7188,
+                      "distinct_orders": 7188,
+                      "effective_revenue": 983213.4400000282,
+                      "effective_cogs": 636445.5252000004,
+                      "effective_contribution_profit": 66524.91676800002,
+                      "refund_amount": 52847.03999999998,
+                      "fulfillment_cost": 50811.53629999988,
+                      "payment_processing_cost": 23163.282239999822,
+                      "marketing_cost_effective": 141228.93000000017,
+                      "incentive_cost_effective": 12192.209492000018,
+                      "other_adjustments_residual": -2.548655730905125e-12
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "governed cost component reconciliation: after",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_cost_components"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 75.91
+                }
+              }
+            }
+          ],
+          "orchestration": {
+            "steps_used": 1,
+            "tools_used": 16,
+            "trace": [
+              {
+                "step": 1,
+                "capability": "initial_governed_investigation",
+                "reason": "Resolve the question through existing governed routes",
+                "decision": "COMPLETED"
+              }
+            ],
+            "stop_reason": "EXISTING_COORDINATOR_COMPLETED",
+            "budgets": {
+              "steps": 4,
+              "tools": 40,
+              "seconds": 120
+            },
+            "causal_claim": false
+          },
+          "validated_evidence": [
+            {
+              "producer": "agent.phase4b56_dynamic_period.measurement_evidence",
+              "result": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_revenue",
+                "value": "844178.710000006",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 6694,
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ]
+              }
+            },
+            {
+              "producer": "agent.phase4b56_dynamic_period.measurement_evidence",
+              "result": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_revenue",
+                "value": "983213.4400000107",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 7188,
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ]
+              }
+            },
+            {
+              "producer": "agent.phase4b56_dynamic_period.measurement_evidence",
+              "result": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_contribution_profit",
+                "value": "115103.04569200019",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 6694,
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ]
+              }
+            },
+            {
+              "producer": "agent.phase4b56_dynamic_period.measurement_evidence",
+              "result": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_contribution_profit",
+                "value": "66524.91676800018",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 7188,
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ]
+              }
+            },
+            {
+              "producer": "agent.phase4b56_dynamic_period.measurement_evidence",
+              "result": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_cogs",
+                "value": "537019.4345000002",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 6694,
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ]
+              }
+            },
+            {
+              "producer": "agent.phase4b56_dynamic_period.measurement_evidence",
+              "result": {
+                "kind": "governed_measurement",
+                "metric_id": "effective_cogs",
+                "value": "636445.5251999993",
+                "unit": "money",
+                "source": "semantic.order_economics",
+                "source_population_rows": 7188,
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "causal_claim": false,
+                "period_reconciliation_status": "RECONCILED_FOR_REVIEW",
+                "permission": "ephemeral_single_source_total",
+                "limitations": [
+                  "On-demand reconciliation is not a persistent metric or join approval",
+                  "Source coverage was nonempty, but continuous coverage was not independently certified",
+                  "Financial costs and incident adjustments are partly modeled",
+                  "No causal attribution from period comparisons"
+                ]
+              }
+            },
+            {
+              "producer": "agent.phase4c4_drivers.validate_components",
+              "result": {
+                "source": "semantic.order_cost_components",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "source_population_rows": 6694,
+                "components": {
+                  "refund_amount": "35728.10999999999",
+                  "fulfillment_cost": "43669.24869999997",
+                  "payment_processing_cost": "20070.652909999902",
+                  "marketing_cost_effective": "91937.69000000028",
+                  "incentive_cost_effective": "650.5281979999997",
+                  "other_adjustments_residual": "-5.690517501655279E-13"
+                },
+                "reconciliation": "RECONCILED_FOR_REVIEW",
+                "causal_claim": false
+              }
+            },
+            {
+              "producer": "agent.phase4c4_drivers.validate_components",
+              "result": {
+                "source": "semantic.order_cost_components",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "source_population_rows": 7188,
+                "components": {
+                  "refund_amount": "52847.03999999998",
+                  "fulfillment_cost": "50811.53629999988",
+                  "payment_processing_cost": "23163.282239999822",
+                  "marketing_cost_effective": "141228.93000000017",
+                  "incentive_cost_effective": "12192.209492000018",
+                  "other_adjustments_residual": "-2.548655730905125E-12"
+                },
+                "reconciliation": "RECONCILED_FOR_REVIEW",
+                "causal_claim": false
+              }
+            }
+          ],
+          "context_provenance": {
+            "original_question": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [],
+            "source_turn": 3,
+            "session_id": "CExRfiPD2FzI9e5Z3Fvei6p8iEIL91VNFt546cfbOHY",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "question": "Are delivery delays concentrated among sellers in December 2016?",
+      "http_status": 200,
+      "latency_seconds": 6.196,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "Are delivery delays concentrated among sellers in December 2016?",
+        "payload": {
+          "route": "seller_concentration",
+          "status": "MEASURED_WITH_LIMITATIONS",
+          "executable": true,
+          "causal_claim": false,
+          "seller_intent": true,
+          "evidence": {
+            "status": "MEASURED_WITH_SCOPE_LIMITS",
+            "metric_id": "late_delivery_rate",
+            "value": "0E-20",
+            "unit": "percent",
+            "source": "semantic.order_delivery_evidence_v1",
+            "period": [
+              "2016-12-01",
+              "2017-01-01"
+            ],
+            "population": {
+              "eligible_orders": 1,
+              "lateness_eligible_orders": 1,
+              "late_orders": 0,
+              "duration_eligible_orders": 1,
+              "missing_actual": 0,
+              "missing_estimated": 0,
+              "missing_purchase": 0
+            },
+            "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+            "time_basis": "order_purchase_time",
+            "causal_claim": false,
+            "limitations": [
+              "Purchase-time cohorts; not delivery-completion cohorts",
+              "Actual delivery dates may include modeled incident adjustments",
+              "Orders missing delivery timestamps are excluded from lateness denominator",
+              "Nonempty period is not certification of continuous coverage",
+              "Descriptive; no causal inference"
+            ]
+          },
+          "reason": "0 eligible orders arrived late.",
+          "limitations": [
+            "Purchase-time cohorts; not delivery-completion cohorts",
+            "Actual delivery dates may include modeled incident adjustments",
+            "Orders missing delivery timestamps are excluded from lateness denominator",
+            "Nonempty period is not certification of continuous coverage",
+            "Descriptive; no causal inference"
+          ],
+          "execution_trace": [
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*)::bigint AS eligible_orders,\nCOUNT(DISTINCT order_id)::bigint AS distinct_orders,\nCOUNT(*) FILTER (WHERE lateness_eligible)::bigint AS lateness_eligible_orders,\nCOUNT(*) FILTER (WHERE is_late IS TRUE)::bigint AS late_orders,\nCOUNT(*) FILTER (WHERE duration_eligible)::bigint AS duration_eligible_orders,\nCOUNT(*) FILTER (WHERE effective_delivery_time IS NULL)::bigint AS missing_actual,\nCOUNT(*) FILTER (WHERE promised_delivery_time IS NULL)::bigint AS missing_estimated,\nCOUNT(*) FILTER (WHERE order_purchase_time IS NULL)::bigint AS missing_purchase,\nCOUNT(*) FILTER (WHERE duration_eligible AND (delivery_days IS NULL OR delivery_days < 0))::bigint AS invalid_duration,\nCOUNT(*) FILTER (WHERE (lateness_eligible IS DISTINCT FROM (effective_delivery_time IS NOT NULL AND promised_delivery_time IS NOT NULL)) OR (lateness_eligible AND is_late IS DISTINCT FROM (effective_delivery_time > promised_delivery_time)) OR (NOT lateness_eligible AND is_late IS NOT NULL))::bigint AS invalid_late_flags,\nAVG(delivery_days) FILTER (WHERE duration_eligible) AS mean_delivery_days,\n(100.0 * COUNT(*) FILTER (WHERE is_late IS TRUE) / NULLIF(COUNT(*) FILTER (WHERE lateness_eligible),0)) AS late_rate_pct,\n(100.0 * COUNT(*) FILTER (WHERE lateness_eligible) / NULLIF(COUNT(*),0)) AS lateness_coverage_pct\nFROM semantic.order_delivery_evidence_v1\nWHERE order_purchase_time >= DATE '2016-12-01' AND order_purchase_time < DATE '2017-01-01'",
+                "purpose": "4C15 governed delivery metric late_delivery_rate",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_orders",
+                    "distinct_orders",
+                    "lateness_eligible_orders",
+                    "late_orders",
+                    "duration_eligible_orders",
+                    "missing_actual",
+                    "missing_estimated",
+                    "missing_purchase",
+                    "invalid_duration",
+                    "invalid_late_flags",
+                    "mean_delivery_days",
+                    "late_rate_pct",
+                    "lateness_coverage_pct"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_orders": 1,
+                      "distinct_orders": 1,
+                      "lateness_eligible_orders": 1,
+                      "late_orders": 0,
+                      "duration_eligible_orders": 1,
+                      "missing_actual": 0,
+                      "missing_estimated": 0,
+                      "missing_purchase": 0,
+                      "invalid_duration": 0,
+                      "invalid_late_flags": 0,
+                      "mean_delivery_days": "4.6930208333333333",
+                      "late_rate_pct": "0E-20",
+                      "lateness_coverage_pct": "100.0000000000000000"
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "4C15 governed delivery metric late_delivery_rate",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_delivery_evidence_v1"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 78.11
+                }
+              }
+            }
+          ],
+          "orchestration": {
+            "steps_used": 1,
+            "tools_used": 1,
+            "trace": [
+              {
+                "step": 1,
+                "capability": "initial_governed_investigation",
+                "reason": "Resolve the question through existing governed routes",
+                "decision": "COMPLETED"
+              }
+            ],
+            "stop_reason": "QUESTION_ADDRESSED",
+            "budgets": {
+              "steps": 4,
+              "tools": 40,
+              "seconds": 120
+            },
+            "causal_claim": false
+          },
+          "validated_evidence": [
+            {
+              "producer": "agent.phase4c15_delivery.validate_metric",
+              "result": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "late_delivery_rate",
+                "value": "0E-20",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2016-12-01",
+                  "2017-01-01"
+                ],
+                "population": {
+                  "eligible_orders": 1,
+                  "lateness_eligible_orders": 1,
+                  "late_orders": 0,
+                  "duration_eligible_orders": 1,
+                  "missing_actual": 0,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              }
+            }
+          ],
+          "context_provenance": {
+            "original_question": "Are delivery delays concentrated among sellers in December 2016?",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [],
+            "source_turn": 4,
+            "session_id": "CExRfiPD2FzI9e5Z3Fvei6p8iEIL91VNFt546cfbOHY",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    }
+  ]
+}

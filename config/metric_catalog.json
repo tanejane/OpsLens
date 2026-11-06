@@ -1,0 +1,145 @@
+{
+  "version": "1.0",
+  "principles": {
+    "currency": "Dataset-native commerce currency. Do not relabel as MYR/USD unless explicitly transformed.",
+    "runtime_truth": "Metrics are defined against canonical/effective runtime views, not hidden evaluation ground truth.",
+    "agent_access": "Agent-facing tools may access canonical and semantic schemas only; staging is forbidden.",
+    "causality": "A metric change is evidence of an outcome, not proof of cause. Causes require hypothesis testing."
+  },
+  "metrics": [
+    {
+      "metric_name": "revenue",
+      "domain": "finance",
+      "business_definition": "Effective recognized commerce revenue after runtime operational overrides and controlled incremental marketing effects.",
+      "formula": "SUM(effective_revenue)",
+      "grain": "order, aggregatable to day/month/segment",
+      "source_view": "semantic.order_economics",
+      "time_field": "order_purchase_timestamp",
+      "dimensions": [
+        "business_date"
+      ],
+      "known_limitations": [
+        "Synthetic incident mechanics are controlled evaluation layers built on top of real Olist transactions.",
+        "Revenue movement alone must not be interpreted as profitable growth."
+      ]
+    },
+    {
+      "metric_name": "contribution_profit",
+      "domain": "finance",
+      "business_definition": "Effective contribution profit after modeled revenue recognition, COGS, acquisition spend, and campaign incentive costs represented in the runtime data world.",
+      "formula": "SUM(effective_contribution_profit)",
+      "grain": "order, aggregatable to day/month/segment",
+      "source_view": "semantic.order_economics",
+      "time_field": "order_purchase_timestamp",
+      "dimensions": [
+        "business_date"
+      ],
+      "known_limitations": [
+        "Not equivalent to accounting net income.",
+        "Only modeled variable economics represented in the dataset are included."
+      ]
+    },
+    {
+      "metric_name": "contribution_margin",
+      "domain": "finance",
+      "business_definition": "Effective contribution profit divided by effective recognized revenue.",
+      "formula": "SUM(effective_contribution_profit) / NULLIF(SUM(effective_revenue), 0)",
+      "grain": "aggregated period or segment",
+      "source_view": "semantic.daily_commerce",
+      "time_field": "business_date",
+      "dimensions": [
+        "business_date"
+      ],
+      "known_limitations": [
+        "Should be recomputed as a ratio of sums when aggregating, not averaged across rows."
+      ]
+    },
+    {
+      "metric_name": "orders",
+      "domain": "commerce",
+      "business_definition": "Distinct commerce orders represented in the effective runtime world.",
+      "formula": "COUNT(DISTINCT order_id)",
+      "grain": "day/month/segment",
+      "source_view": "semantic.daily_commerce",
+      "time_field": "business_date",
+      "dimensions": [
+        "business_date"
+      ],
+      "known_limitations": [
+        "Operational incidents may alter recognized revenue without deleting the underlying raw order."
+      ]
+    },
+    {
+      "metric_name": "purchase_session_rate",
+      "domain": "behavior",
+      "business_definition": "Share of canonical GA4 sessions containing at least one purchase event.",
+      "formula": "purchase_sessions / sessions",
+      "grain": "day or behavioral segment",
+      "source_view": "semantic.ga4_funnel_daily",
+      "time_field": "session_date",
+      "dimensions": [
+        "session_date",
+        "device_category",
+        "traffic_source",
+        "traffic_medium",
+        "country"
+      ],
+      "known_limitations": [
+        "GA4 public sample is obfuscated and belongs to a separate behavioral environment from Olist.",
+        "Do not join GA4 users directly to Olist customers."
+      ]
+    },
+    {
+      "metric_name": "checkout_abandon_rate",
+      "domain": "behavior",
+      "business_definition": "Share of sessions that began checkout but recorded no purchase.",
+      "formula": "checkout_abandon_sessions / checkout_sessions",
+      "grain": "day or behavioral segment",
+      "source_view": "semantic.ga4_funnel_daily",
+      "time_field": "session_date",
+      "dimensions": [
+        "session_date",
+        "device_category",
+        "traffic_source",
+        "traffic_medium",
+        "country"
+      ],
+      "known_limitations": [
+        "Only sessions with begin_checkout are in the denominator.",
+        "Cross-midnight GA4 sessions were consolidated before loading."
+      ]
+    },
+    {
+      "metric_name": "modeled_stockout_lost_revenue",
+      "domain": "inventory",
+      "business_definition": "Controlled modeled revenue not recognized because affected products were unavailable during the stockout evaluation window.",
+      "formula": "SUM(modeled_lost_revenue)",
+      "grain": "product/order line, aggregatable to product/category/period",
+      "source_view": "semantic.stockout_effective_sales",
+      "time_field": "order_purchase_timestamp",
+      "dimensions": [
+        "product_id",
+        "category"
+      ],
+      "known_limitations": [
+        "This is a modeled controlled evaluation metric, not directly observed lost demand."
+      ]
+    },
+    {
+      "metric_name": "effective_review_score",
+      "domain": "cx",
+      "business_definition": "Observed review score adjusted by controlled CX incident effects where applicable.",
+      "formula": "AVG(effective_review_score)",
+      "grain": "order review, aggregatable to seller/period",
+      "source_view": "cx.effective_reviews",
+      "time_field": "review_creation_date",
+      "dimensions": [
+        "order_id"
+      ],
+      "known_limitations": [
+        "Review text/title missingness in Olist remains substantial.",
+        "Average score alone should not replace distributional analysis."
+      ]
+    }
+  ]
+}

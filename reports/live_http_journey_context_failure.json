@@ -1,0 +1,1255 @@
+{
+  "scope": "Actual Next.js proxy to FastAPI, real MCP/PostgreSQL; Gemini unavailable unless configured",
+  "results": [
+    {
+      "question": "Compare late versus on-time order ratings in March 2018.",
+      "http_status": 200,
+      "latency_seconds": 39.894,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "Compare late versus on-time order ratings in March 2018.",
+        "payload": {
+          "route": "delivery_review_comparison",
+          "status": "MEASURED_WITH_LIMITATIONS",
+          "executable": true,
+          "causal_claim": false,
+          "reason": "Late orders averaged -1.942771094471905295683062799 rating points relative to on-time orders among reviewed orders.",
+          "evidence": {
+            "evidence_id": "delivery-review:2018-03-01:2018-04-01",
+            "period": [
+              "2018-03-01",
+              "2018-04-01"
+            ],
+            "sources": [
+              "semantic.order_delivery_evidence_v1",
+              "semantic.order_review_evidence_v1"
+            ],
+            "cohorts": {
+              "on_time": {
+                "low": 563,
+                "cohort": "on_time",
+                "orders": 5507,
+                "reviewed": 5485,
+                "score_sum": 23159.5,
+                "multi_review_orders": 30,
+                "average_score": "4.222333637192342752962625342",
+                "low_rating_rate_pct": "10.26435733819507748404740201",
+                "review_coverage_pct": "99.60050844379880152533139640",
+                "missing_reviews": 22
+              },
+              "late": {
+                "low": 905,
+                "cohort": "late",
+                "orders": 1496,
+                "reviewed": 1463,
+                "score_sum": 3335,
+                "multi_review_orders": 7,
+                "average_score": "2.279562542720437457279562543",
+                "low_rating_rate_pct": "61.85919343814080656185919344",
+                "review_coverage_pct": "97.79411764705882352941176471",
+                "missing_reviews": 33
+              },
+              "unclassified": {
+                "low": 158,
+                "cohort": "unclassified",
+                "orders": 208,
+                "reviewed": 200,
+                "score_sum": 336,
+                "multi_review_orders": 1,
+                "average_score": "1.68",
+                "low_rating_rate_pct": "79",
+                "review_coverage_pct": "96.15384615384615384615384615",
+                "missing_reviews": 8
+              }
+            },
+            "validation": {
+              "invalid_grain": 0,
+              "misaligned": 0,
+              "invalid_scores": 0
+            },
+            "total_orders": 7211,
+            "missing_review_rows": 0,
+            "late_minus_on_time_score": "-1.942771094471905295683062799",
+            "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+            "limitations": [
+              "Descriptive association, not a causal effect.",
+              "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+              "Effective delivery dates and review scores may include modeled incident adjustments.",
+              "Review respondents may differ from orders without reviews."
+            ],
+            "causal_claim": false
+          },
+          "limitations": [
+            "Descriptive association, not a causal effect.",
+            "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+            "Effective delivery dates and review scores may include modeled incident adjustments.",
+            "Review respondents may differ from orders without reviews."
+          ],
+          "next_steps": [
+            "Compare review coverage before interpreting the rating difference.",
+            "Repeat this comparison in another purchase month to assess whether the pattern persists."
+          ],
+          "execution_trace": [
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "WITH d AS (\n SELECT order_id, COUNT(*) AS n, MIN(order_purchase_time) AS purchased,\n MIN(effective_delivery_time) AS actual, MIN(promised_delivery_time) AS promised\n FROM semantic.order_delivery_evidence_v1\n WHERE order_purchase_time >= DATE '2018-03-01' AND order_purchase_time < DATE '2018-04-01' GROUP BY order_id\n), r AS (\n SELECT order_id, COUNT(*) AS n, MIN(purchase_time) AS purchased,\n MIN(order_score) AS score, MAX(review_records) AS records\n FROM semantic.order_review_evidence_v1 GROUP BY order_id\n), joined AS (\n SELECT d.*, r.n AS rn, r.purchased AS rpurchased, r.score, r.records,\n CASE WHEN actual IS NULL OR promised IS NULL THEN 'unclassified'\n WHEN actual > promised THEN 'late' ELSE 'on_time' END AS cohort\n FROM d LEFT JOIN r ON d.order_id=r.order_id\n), grouped AS (\n SELECT cohort, COUNT(*) AS orders, COUNT(score) AS reviewed,\n COUNT(*) FILTER (WHERE score <= 2) AS low,\n COALESCE(SUM(score),0) AS score_sum,\n COUNT(*) FILTER (WHERE records > 1) AS multi_review_orders\n FROM joined GROUP BY cohort\n)\nSELECT (SELECT COUNT(*) FROM joined) AS total,\n (SELECT COUNT(*) FROM joined WHERE n <> 1 OR rn > 1 OR order_id IS NULL) AS invalid_grain,\n (SELECT COUNT(*) FROM joined WHERE rn IS NOT NULL AND purchased IS DISTINCT FROM rpurchased) AS misaligned,\n (SELECT COUNT(*) FROM joined WHERE score < 1 OR score > 5) AS invalid_scores,\n (SELECT COUNT(*) FROM joined WHERE rn IS NULL) AS missing_review_rows,\n COALESCE((SELECT jsonb_agg(to_jsonb(grouped)) FROM grouped),'[]'::jsonb) AS cohorts",
+                "purpose": "Governed late versus on-time review comparison",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "total",
+                    "invalid_grain",
+                    "misaligned",
+                    "invalid_scores",
+                    "missing_review_rows",
+                    "cohorts"
+                  ],
+                  "rows": [
+                    {
+                      "total": 7211,
+                      "invalid_grain": 0,
+                      "misaligned": 0,
+                      "invalid_scores": 0,
+                      "missing_review_rows": 0,
+                      "cohorts": [
+                        {
+                          "low": 563,
+                          "cohort": "on_time",
+                          "orders": 5507,
+                          "reviewed": 5485,
+                          "score_sum": 23159.5,
+                          "multi_review_orders": 30
+                        },
+                        {
+                          "low": 905,
+                          "cohort": "late",
+                          "orders": 1496,
+                          "reviewed": 1463,
+                          "score_sum": 3335,
+                          "multi_review_orders": 7
+                        },
+                        {
+                          "low": 158,
+                          "cohort": "unclassified",
+                          "orders": 208,
+                          "reviewed": 200,
+                          "score_sum": 336,
+                          "multi_review_orders": 1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed late versus on-time review comparison",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_delivery_evidence_v1",
+                    "semantic.order_review_evidence_v1"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 1257.27
+                }
+              }
+            }
+          ],
+          "supporting_analyses": [
+            {
+              "capability": "delivery_missingness",
+              "evidence": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.1155179586742477",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "population": {
+                  "eligible_orders": 7211,
+                  "lateness_eligible_orders": 7003,
+                  "late_orders": 1496,
+                  "duration_eligible_orders": 7003,
+                  "missing_actual": 208,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              },
+              "conclusion": "Delivery timestamps support classifying 97.1155179586742477% of this purchase cohort; 208 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+            }
+          ],
+          "conclusions": [
+            "Late orders averaged -1.942771094471905295683062799 rating points relative to on-time orders among reviewed orders.",
+            "Delivery timestamps support classifying 97.1155179586742477% of this purchase cohort; 208 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+          ],
+          "orchestration": {
+            "steps_used": 2,
+            "tools_used": 2,
+            "trace": [
+              {
+                "step": 1,
+                "capability": "initial_governed_investigation",
+                "reason": "Resolve the question through existing governed routes",
+                "decision": "COMPLETED"
+              },
+              {
+                "step": 2,
+                "capability": "delivery_missingness",
+                "reason": "Unclassified deliveries could change how broadly the rating comparison applies.",
+                "decision": "VALIDATED",
+                "source": "semantic.order_delivery_evidence_v1"
+              }
+            ],
+            "stop_reason": "QUESTION_ADDRESSED",
+            "budgets": {
+              "steps": 4,
+              "tools": 40,
+              "seconds": 120
+            },
+            "causal_claim": false
+          },
+          "validated_evidence": [
+            {
+              "producer": "agent.delivery_review_comparison.validate",
+              "result": {
+                "evidence_id": "delivery-review:2018-03-01:2018-04-01",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "sources": [
+                  "semantic.order_delivery_evidence_v1",
+                  "semantic.order_review_evidence_v1"
+                ],
+                "cohorts": {
+                  "on_time": {
+                    "low": 563,
+                    "cohort": "on_time",
+                    "orders": 5507,
+                    "reviewed": 5485,
+                    "score_sum": 23159.5,
+                    "multi_review_orders": 30,
+                    "average_score": "4.222333637192342752962625342",
+                    "low_rating_rate_pct": "10.26435733819507748404740201",
+                    "review_coverage_pct": "99.60050844379880152533139640",
+                    "missing_reviews": 22
+                  },
+                  "late": {
+                    "low": 905,
+                    "cohort": "late",
+                    "orders": 1496,
+                    "reviewed": 1463,
+                    "score_sum": 3335,
+                    "multi_review_orders": 7,
+                    "average_score": "2.279562542720437457279562543",
+                    "low_rating_rate_pct": "61.85919343814080656185919344",
+                    "review_coverage_pct": "97.79411764705882352941176471",
+                    "missing_reviews": 33
+                  },
+                  "unclassified": {
+                    "low": 158,
+                    "cohort": "unclassified",
+                    "orders": 208,
+                    "reviewed": 200,
+                    "score_sum": 336,
+                    "multi_review_orders": 1,
+                    "average_score": "1.68",
+                    "low_rating_rate_pct": "79",
+                    "review_coverage_pct": "96.15384615384615384615384615",
+                    "missing_reviews": 8
+                  }
+                },
+                "validation": {
+                  "invalid_grain": 0,
+                  "misaligned": 0,
+                  "invalid_scores": 0
+                },
+                "total_orders": 7211,
+                "missing_review_rows": 0,
+                "late_minus_on_time_score": "-1.942771094471905295683062799",
+                "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+                "limitations": [
+                  "Descriptive association, not a causal effect.",
+                  "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+                  "Effective delivery dates and review scores may include modeled incident adjustments.",
+                  "Review respondents may differ from orders without reviews."
+                ],
+                "causal_claim": false
+              }
+            },
+            {
+              "producer": "agent.phase4c15_delivery.validate_metric",
+              "result": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.1155179586742477",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "population": {
+                  "eligible_orders": 7211,
+                  "lateness_eligible_orders": 7003,
+                  "late_orders": 1496,
+                  "duration_eligible_orders": 7003,
+                  "missing_actual": 208,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              }
+            }
+          ],
+          "context_provenance": {
+            "original_question": "Compare late versus on-time order ratings in March 2018.",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [],
+            "source_turn": null,
+            "session_id": "5DgmZXeOL_LDPbvXmGJJr5ybxIbYAFBuGd9dpIWiBYM",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "question": "Are delivery delays concentrated among sellers?",
+      "http_status": 200,
+      "latency_seconds": 6.075,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "Are delivery delays concentrated among sellers?",
+        "payload": {
+          "route": "session_context",
+          "status": "NEEDS_CLARIFICATION",
+          "executable": false,
+          "causal_claim": false,
+          "reason": "Please confirm the purchase month and year for the seller comparison.",
+          "validated_evidence": [],
+          "context_provenance": {
+            "original_question": "Are delivery delays concentrated among sellers?",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [
+              {
+                "field": "period",
+                "value": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "source": "last_validated_result"
+              }
+            ],
+            "source_turn": 1,
+            "session_id": "5DgmZXeOL_LDPbvXmGJJr5ybxIbYAFBuGd9dpIWiBYM",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "question": "What about February?",
+      "http_status": 200,
+      "latency_seconds": 11.745,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "What about February?",
+        "payload": {
+          "route": "delivery_review_comparison",
+          "status": "MEASURED_WITH_LIMITATIONS",
+          "executable": true,
+          "causal_claim": false,
+          "reason": "Late orders averaged -2.050711838794044478339428252 rating points relative to on-time orders among reviewed orders.",
+          "evidence": {
+            "evidence_id": "delivery-review:2018-02-01:2018-03-01",
+            "period": [
+              "2018-02-01",
+              "2018-03-01"
+            ],
+            "sources": [
+              "semantic.order_delivery_evidence_v1",
+              "semantic.order_review_evidence_v1"
+            ],
+            "cohorts": {
+              "on_time": {
+                "low": 580,
+                "cohort": "on_time",
+                "orders": 5507,
+                "reviewed": 5473,
+                "score_sum": 23028.833333333332,
+                "multi_review_orders": 70,
+                "average_score": "4.207716669711918874474693952",
+                "low_rating_rate_pct": "10.59747853097021743102503198",
+                "review_coverage_pct": "99.38260395859814781187579444",
+                "missing_reviews": 34
+              },
+              "late": {
+                "low": 673,
+                "cohort": "late",
+                "orders": 1049,
+                "reviewed": 1035,
+                "score_sum": 2232.5,
+                "multi_review_orders": 13,
+                "average_score": "2.157004830917874396135265700",
+                "low_rating_rate_pct": "65.02415458937198067632850242",
+                "review_coverage_pct": "98.66539561487130600571973308",
+                "missing_reviews": 14
+              },
+              "unclassified": {
+                "low": 131,
+                "cohort": "unclassified",
+                "orders": 172,
+                "reviewed": 164,
+                "score_sum": 274.5,
+                "multi_review_orders": 2,
+                "average_score": "1.673780487804878048780487805",
+                "low_rating_rate_pct": "79.87804878048780487804878049",
+                "review_coverage_pct": "95.34883720930232558139534884",
+                "missing_reviews": 8
+              }
+            },
+            "validation": {
+              "invalid_grain": 0,
+              "misaligned": 0,
+              "invalid_scores": 0
+            },
+            "total_orders": 6728,
+            "missing_review_rows": 0,
+            "late_minus_on_time_score": "-2.050711838794044478339428252",
+            "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+            "limitations": [
+              "Descriptive association, not a causal effect.",
+              "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+              "Effective delivery dates and review scores may include modeled incident adjustments.",
+              "Review respondents may differ from orders without reviews."
+            ],
+            "causal_claim": false
+          },
+          "limitations": [
+            "Descriptive association, not a causal effect.",
+            "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+            "Effective delivery dates and review scores may include modeled incident adjustments.",
+            "Review respondents may differ from orders without reviews."
+          ],
+          "next_steps": [
+            "Compare review coverage before interpreting the rating difference.",
+            "Repeat this comparison in another purchase month to assess whether the pattern persists."
+          ],
+          "execution_trace": [
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "WITH d AS (\n SELECT order_id, COUNT(*) AS n, MIN(order_purchase_time) AS purchased,\n MIN(effective_delivery_time) AS actual, MIN(promised_delivery_time) AS promised\n FROM semantic.order_delivery_evidence_v1\n WHERE order_purchase_time >= DATE '2018-02-01' AND order_purchase_time < DATE '2018-03-01' GROUP BY order_id\n), r AS (\n SELECT order_id, COUNT(*) AS n, MIN(purchase_time) AS purchased,\n MIN(order_score) AS score, MAX(review_records) AS records\n FROM semantic.order_review_evidence_v1 GROUP BY order_id\n), joined AS (\n SELECT d.*, r.n AS rn, r.purchased AS rpurchased, r.score, r.records,\n CASE WHEN actual IS NULL OR promised IS NULL THEN 'unclassified'\n WHEN actual > promised THEN 'late' ELSE 'on_time' END AS cohort\n FROM d LEFT JOIN r ON d.order_id=r.order_id\n), grouped AS (\n SELECT cohort, COUNT(*) AS orders, COUNT(score) AS reviewed,\n COUNT(*) FILTER (WHERE score <= 2) AS low,\n COALESCE(SUM(score),0) AS score_sum,\n COUNT(*) FILTER (WHERE records > 1) AS multi_review_orders\n FROM joined GROUP BY cohort\n)\nSELECT (SELECT COUNT(*) FROM joined) AS total,\n (SELECT COUNT(*) FROM joined WHERE n <> 1 OR rn > 1 OR order_id IS NULL) AS invalid_grain,\n (SELECT COUNT(*) FROM joined WHERE rn IS NOT NULL AND purchased IS DISTINCT FROM rpurchased) AS misaligned,\n (SELECT COUNT(*) FROM joined WHERE score < 1 OR score > 5) AS invalid_scores,\n (SELECT COUNT(*) FROM joined WHERE rn IS NULL) AS missing_review_rows,\n COALESCE((SELECT jsonb_agg(to_jsonb(grouped)) FROM grouped),'[]'::jsonb) AS cohorts",
+                "purpose": "Governed late versus on-time review comparison",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "total",
+                    "invalid_grain",
+                    "misaligned",
+                    "invalid_scores",
+                    "missing_review_rows",
+                    "cohorts"
+                  ],
+                  "rows": [
+                    {
+                      "total": 6728,
+                      "invalid_grain": 0,
+                      "misaligned": 0,
+                      "invalid_scores": 0,
+                      "missing_review_rows": 0,
+                      "cohorts": [
+                        {
+                          "low": 580,
+                          "cohort": "on_time",
+                          "orders": 5507,
+                          "reviewed": 5473,
+                          "score_sum": 23028.833333333332,
+                          "multi_review_orders": 70
+                        },
+                        {
+                          "low": 673,
+                          "cohort": "late",
+                          "orders": 1049,
+                          "reviewed": 1035,
+                          "score_sum": 2232.5,
+                          "multi_review_orders": 13
+                        },
+                        {
+                          "low": 131,
+                          "cohort": "unclassified",
+                          "orders": 172,
+                          "reviewed": 164,
+                          "score_sum": 274.5,
+                          "multi_review_orders": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed late versus on-time review comparison",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_delivery_evidence_v1",
+                    "semantic.order_review_evidence_v1"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 971.11
+                }
+              }
+            }
+          ],
+          "supporting_analyses": [
+            {
+              "capability": "delivery_missingness",
+              "evidence": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.4435196195005945",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "population": {
+                  "eligible_orders": 6728,
+                  "lateness_eligible_orders": 6556,
+                  "late_orders": 1049,
+                  "duration_eligible_orders": 6556,
+                  "missing_actual": 172,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              },
+              "conclusion": "Delivery timestamps support classifying 97.4435196195005945% of this purchase cohort; 172 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+            }
+          ],
+          "conclusions": [
+            "Late orders averaged -2.050711838794044478339428252 rating points relative to on-time orders among reviewed orders.",
+            "Delivery timestamps support classifying 97.4435196195005945% of this purchase cohort; 172 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+          ],
+          "orchestration": {
+            "steps_used": 2,
+            "tools_used": 2,
+            "trace": [
+              {
+                "step": 1,
+                "capability": "initial_governed_investigation",
+                "reason": "Resolve the question through existing governed routes",
+                "decision": "COMPLETED"
+              },
+              {
+                "step": 2,
+                "capability": "delivery_missingness",
+                "reason": "Unclassified deliveries could change how broadly the rating comparison applies.",
+                "decision": "VALIDATED",
+                "source": "semantic.order_delivery_evidence_v1"
+              }
+            ],
+            "stop_reason": "QUESTION_ADDRESSED",
+            "budgets": {
+              "steps": 4,
+              "tools": 40,
+              "seconds": 120
+            },
+            "causal_claim": false
+          },
+          "validated_evidence": [
+            {
+              "producer": "agent.delivery_review_comparison.validate",
+              "result": {
+                "evidence_id": "delivery-review:2018-02-01:2018-03-01",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "sources": [
+                  "semantic.order_delivery_evidence_v1",
+                  "semantic.order_review_evidence_v1"
+                ],
+                "cohorts": {
+                  "on_time": {
+                    "low": 580,
+                    "cohort": "on_time",
+                    "orders": 5507,
+                    "reviewed": 5473,
+                    "score_sum": 23028.833333333332,
+                    "multi_review_orders": 70,
+                    "average_score": "4.207716669711918874474693952",
+                    "low_rating_rate_pct": "10.59747853097021743102503198",
+                    "review_coverage_pct": "99.38260395859814781187579444",
+                    "missing_reviews": 34
+                  },
+                  "late": {
+                    "low": 673,
+                    "cohort": "late",
+                    "orders": 1049,
+                    "reviewed": 1035,
+                    "score_sum": 2232.5,
+                    "multi_review_orders": 13,
+                    "average_score": "2.157004830917874396135265700",
+                    "low_rating_rate_pct": "65.02415458937198067632850242",
+                    "review_coverage_pct": "98.66539561487130600571973308",
+                    "missing_reviews": 14
+                  },
+                  "unclassified": {
+                    "low": 131,
+                    "cohort": "unclassified",
+                    "orders": 172,
+                    "reviewed": 164,
+                    "score_sum": 274.5,
+                    "multi_review_orders": 2,
+                    "average_score": "1.673780487804878048780487805",
+                    "low_rating_rate_pct": "79.87804878048780487804878049",
+                    "review_coverage_pct": "95.34883720930232558139534884",
+                    "missing_reviews": 8
+                  }
+                },
+                "validation": {
+                  "invalid_grain": 0,
+                  "misaligned": 0,
+                  "invalid_scores": 0
+                },
+                "total_orders": 6728,
+                "missing_review_rows": 0,
+                "late_minus_on_time_score": "-2.050711838794044478339428252",
+                "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+                "limitations": [
+                  "Descriptive association, not a causal effect.",
+                  "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+                  "Effective delivery dates and review scores may include modeled incident adjustments.",
+                  "Review respondents may differ from orders without reviews."
+                ],
+                "causal_claim": false
+              }
+            },
+            {
+              "producer": "agent.phase4c15_delivery.validate_metric",
+              "result": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.4435196195005945",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "population": {
+                  "eligible_orders": 6728,
+                  "lateness_eligible_orders": 6556,
+                  "late_orders": 1049,
+                  "duration_eligible_orders": 6556,
+                  "missing_actual": 172,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              }
+            }
+          ],
+          "context_provenance": {
+            "original_question": "What about February?",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [
+              {
+                "field": "year",
+                "value": "2018",
+                "source": "last_validated_result"
+              }
+            ],
+            "source_turn": 1,
+            "session_id": "5DgmZXeOL_LDPbvXmGJJr5ybxIbYAFBuGd9dpIWiBYM",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "question": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+      "http_status": 200,
+      "latency_seconds": 0.029,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+        "payload": {
+          "route": "delivery_review_comparison",
+          "status": "MEASURED_WITH_LIMITATIONS",
+          "executable": true,
+          "causal_claim": false,
+          "reason": "Late orders averaged -2.050711838794044478339428252 rating points relative to on-time orders among reviewed orders.",
+          "evidence": {
+            "evidence_id": "delivery-review:2018-02-01:2018-03-01",
+            "period": [
+              "2018-02-01",
+              "2018-03-01"
+            ],
+            "sources": [
+              "semantic.order_delivery_evidence_v1",
+              "semantic.order_review_evidence_v1"
+            ],
+            "cohorts": {
+              "on_time": {
+                "low": 580,
+                "cohort": "on_time",
+                "orders": 5507,
+                "reviewed": 5473,
+                "score_sum": 23028.833333333332,
+                "multi_review_orders": 70,
+                "average_score": "4.207716669711918874474693952",
+                "low_rating_rate_pct": "10.59747853097021743102503198",
+                "review_coverage_pct": "99.38260395859814781187579444",
+                "missing_reviews": 34
+              },
+              "late": {
+                "low": 673,
+                "cohort": "late",
+                "orders": 1049,
+                "reviewed": 1035,
+                "score_sum": 2232.5,
+                "multi_review_orders": 13,
+                "average_score": "2.157004830917874396135265700",
+                "low_rating_rate_pct": "65.02415458937198067632850242",
+                "review_coverage_pct": "98.66539561487130600571973308",
+                "missing_reviews": 14
+              },
+              "unclassified": {
+                "low": 131,
+                "cohort": "unclassified",
+                "orders": 172,
+                "reviewed": 164,
+                "score_sum": 274.5,
+                "multi_review_orders": 2,
+                "average_score": "1.673780487804878048780487805",
+                "low_rating_rate_pct": "79.87804878048780487804878049",
+                "review_coverage_pct": "95.34883720930232558139534884",
+                "missing_reviews": 8
+              }
+            },
+            "validation": {
+              "invalid_grain": 0,
+              "misaligned": 0,
+              "invalid_scores": 0
+            },
+            "total_orders": 6728,
+            "missing_review_rows": 0,
+            "late_minus_on_time_score": "-2.050711838794044478339428252",
+            "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+            "limitations": [
+              "Descriptive association, not a causal effect.",
+              "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+              "Effective delivery dates and review scores may include modeled incident adjustments.",
+              "Review respondents may differ from orders without reviews."
+            ],
+            "causal_claim": false
+          },
+          "limitations": [
+            "Descriptive association, not a causal effect.",
+            "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+            "Effective delivery dates and review scores may include modeled incident adjustments.",
+            "Review respondents may differ from orders without reviews.",
+            "No approved causal or finer-segment investigation is registered for this comparison. Existing findings remain available."
+          ],
+          "next_steps": [
+            "Compare review coverage before interpreting the rating difference.",
+            "Repeat this comparison in another purchase month to assess whether the pattern persists."
+          ],
+          "execution_trace": [
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "WITH d AS (\n SELECT order_id, COUNT(*) AS n, MIN(order_purchase_time) AS purchased,\n MIN(effective_delivery_time) AS actual, MIN(promised_delivery_time) AS promised\n FROM semantic.order_delivery_evidence_v1\n WHERE order_purchase_time >= DATE '2018-02-01' AND order_purchase_time < DATE '2018-03-01' GROUP BY order_id\n), r AS (\n SELECT order_id, COUNT(*) AS n, MIN(purchase_time) AS purchased,\n MIN(order_score) AS score, MAX(review_records) AS records\n FROM semantic.order_review_evidence_v1 GROUP BY order_id\n), joined AS (\n SELECT d.*, r.n AS rn, r.purchased AS rpurchased, r.score, r.records,\n CASE WHEN actual IS NULL OR promised IS NULL THEN 'unclassified'\n WHEN actual > promised THEN 'late' ELSE 'on_time' END AS cohort\n FROM d LEFT JOIN r ON d.order_id=r.order_id\n), grouped AS (\n SELECT cohort, COUNT(*) AS orders, COUNT(score) AS reviewed,\n COUNT(*) FILTER (WHERE score <= 2) AS low,\n COALESCE(SUM(score),0) AS score_sum,\n COUNT(*) FILTER (WHERE records > 1) AS multi_review_orders\n FROM joined GROUP BY cohort\n)\nSELECT (SELECT COUNT(*) FROM joined) AS total,\n (SELECT COUNT(*) FROM joined WHERE n <> 1 OR rn > 1 OR order_id IS NULL) AS invalid_grain,\n (SELECT COUNT(*) FROM joined WHERE rn IS NOT NULL AND purchased IS DISTINCT FROM rpurchased) AS misaligned,\n (SELECT COUNT(*) FROM joined WHERE score < 1 OR score > 5) AS invalid_scores,\n (SELECT COUNT(*) FROM joined WHERE rn IS NULL) AS missing_review_rows,\n COALESCE((SELECT jsonb_agg(to_jsonb(grouped)) FROM grouped),'[]'::jsonb) AS cohorts",
+                "purpose": "Governed late versus on-time review comparison",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "total",
+                    "invalid_grain",
+                    "misaligned",
+                    "invalid_scores",
+                    "missing_review_rows",
+                    "cohorts"
+                  ],
+                  "rows": [
+                    {
+                      "total": 6728,
+                      "invalid_grain": 0,
+                      "misaligned": 0,
+                      "invalid_scores": 0,
+                      "missing_review_rows": 0,
+                      "cohorts": [
+                        {
+                          "low": 580,
+                          "cohort": "on_time",
+                          "orders": 5507,
+                          "reviewed": 5473,
+                          "score_sum": 23028.833333333332,
+                          "multi_review_orders": 70
+                        },
+                        {
+                          "low": 673,
+                          "cohort": "late",
+                          "orders": 1049,
+                          "reviewed": 1035,
+                          "score_sum": 2232.5,
+                          "multi_review_orders": 13
+                        },
+                        {
+                          "low": 131,
+                          "cohort": "unclassified",
+                          "orders": 172,
+                          "reviewed": 164,
+                          "score_sum": 274.5,
+                          "multi_review_orders": 2
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "Governed late versus on-time review comparison",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_delivery_evidence_v1",
+                    "semantic.order_review_evidence_v1"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 971.11
+                }
+              }
+            }
+          ],
+          "supporting_analyses": [
+            {
+              "capability": "delivery_missingness",
+              "evidence": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.4435196195005945",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "population": {
+                  "eligible_orders": 6728,
+                  "lateness_eligible_orders": 6556,
+                  "late_orders": 1049,
+                  "duration_eligible_orders": 6556,
+                  "missing_actual": 172,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              },
+              "conclusion": "Delivery timestamps support classifying 97.4435196195005945% of this purchase cohort; 172 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+            }
+          ],
+          "conclusions": [
+            "Late orders averaged -2.050711838794044478339428252 rating points relative to on-time orders among reviewed orders.",
+            "Delivery timestamps support classifying 97.4435196195005945% of this purchase cohort; 172 orders lack actual delivery dates and 0 lack promised dates (these counts can overlap)."
+          ],
+          "orchestration": {
+            "steps_used": 2,
+            "tools_used": 2,
+            "trace": [
+              {
+                "step": 1,
+                "capability": "initial_governed_investigation",
+                "reason": "Resolve the question through existing governed routes",
+                "decision": "COMPLETED"
+              },
+              {
+                "step": 2,
+                "capability": "delivery_missingness",
+                "reason": "Unclassified deliveries could change how broadly the rating comparison applies.",
+                "decision": "VALIDATED",
+                "source": "semantic.order_delivery_evidence_v1"
+              }
+            ],
+            "stop_reason": "QUESTION_ADDRESSED",
+            "budgets": {
+              "steps": 4,
+              "tools": 40,
+              "seconds": 120
+            },
+            "causal_claim": false
+          },
+          "validated_evidence": [
+            {
+              "producer": "agent.delivery_review_comparison.validate",
+              "result": {
+                "evidence_id": "delivery-review:2018-02-01:2018-03-01",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "sources": [
+                  "semantic.order_delivery_evidence_v1",
+                  "semantic.order_review_evidence_v1"
+                ],
+                "cohorts": {
+                  "on_time": {
+                    "low": 580,
+                    "cohort": "on_time",
+                    "orders": 5507,
+                    "reviewed": 5473,
+                    "score_sum": 23028.833333333332,
+                    "multi_review_orders": 70,
+                    "average_score": "4.207716669711918874474693952",
+                    "low_rating_rate_pct": "10.59747853097021743102503198",
+                    "review_coverage_pct": "99.38260395859814781187579444",
+                    "missing_reviews": 34
+                  },
+                  "late": {
+                    "low": 673,
+                    "cohort": "late",
+                    "orders": 1049,
+                    "reviewed": 1035,
+                    "score_sum": 2232.5,
+                    "multi_review_orders": 13,
+                    "average_score": "2.157004830917874396135265700",
+                    "low_rating_rate_pct": "65.02415458937198067632850242",
+                    "review_coverage_pct": "98.66539561487130600571973308",
+                    "missing_reviews": 14
+                  },
+                  "unclassified": {
+                    "low": 131,
+                    "cohort": "unclassified",
+                    "orders": 172,
+                    "reviewed": 164,
+                    "score_sum": 274.5,
+                    "multi_review_orders": 2,
+                    "average_score": "1.673780487804878048780487805",
+                    "low_rating_rate_pct": "79.87804878048780487804878049",
+                    "review_coverage_pct": "95.34883720930232558139534884",
+                    "missing_reviews": 8
+                  }
+                },
+                "validation": {
+                  "invalid_grain": 0,
+                  "misaligned": 0,
+                  "invalid_scores": 0
+                },
+                "total_orders": 6728,
+                "missing_review_rows": 0,
+                "late_minus_on_time_score": "-2.050711838794044478339428252",
+                "methodology": "Left join by unique order ID. Purchase-time cohort; late means actual > promised. Each order score is the mean of its non-null effective reviews. Low rating means order score <= 2.",
+                "limitations": [
+                  "Descriptive association, not a causal effect.",
+                  "Missing delivery dates form an unclassified cohort; missing reviews are excluded from rating denominators.",
+                  "Effective delivery dates and review scores may include modeled incident adjustments.",
+                  "Review respondents may differ from orders without reviews."
+                ],
+                "causal_claim": false
+              }
+            },
+            {
+              "producer": "agent.phase4c15_delivery.validate_metric",
+              "result": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "delivery_evidence_coverage",
+                "value": "97.4435196195005945",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2018-02-01",
+                  "2018-03-01"
+                ],
+                "population": {
+                  "eligible_orders": 6728,
+                  "lateness_eligible_orders": 6556,
+                  "late_orders": 1049,
+                  "duration_eligible_orders": 6556,
+                  "missing_actual": 172,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              }
+            }
+          ],
+          "context_provenance": {
+            "original_question": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [],
+            "source_turn": 3,
+            "session_id": "5DgmZXeOL_LDPbvXmGJJr5ybxIbYAFBuGd9dpIWiBYM",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "question": "Are delivery delays concentrated among sellers in December 2016?",
+      "http_status": 200,
+      "latency_seconds": 5.341,
+      "canonical_result": {
+        "schema_version": "opslens.investigation.v1",
+        "question": "Are delivery delays concentrated among sellers in December 2016?",
+        "payload": {
+          "route": "seller_concentration",
+          "status": "MEASURED_WITH_LIMITATIONS",
+          "executable": true,
+          "causal_claim": false,
+          "seller_intent": true,
+          "evidence": {
+            "status": "MEASURED_WITH_SCOPE_LIMITS",
+            "metric_id": "late_delivery_rate",
+            "value": "0E-20",
+            "unit": "percent",
+            "source": "semantic.order_delivery_evidence_v1",
+            "period": [
+              "2016-12-01",
+              "2017-01-01"
+            ],
+            "population": {
+              "eligible_orders": 1,
+              "lateness_eligible_orders": 1,
+              "late_orders": 0,
+              "duration_eligible_orders": 1,
+              "missing_actual": 0,
+              "missing_estimated": 0,
+              "missing_purchase": 0
+            },
+            "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+            "time_basis": "order_purchase_time",
+            "causal_claim": false,
+            "limitations": [
+              "Purchase-time cohorts; not delivery-completion cohorts",
+              "Actual delivery dates may include modeled incident adjustments",
+              "Orders missing delivery timestamps are excluded from lateness denominator",
+              "Nonempty period is not certification of continuous coverage",
+              "Descriptive; no causal inference"
+            ]
+          },
+          "reason": "0 eligible orders arrived late.",
+          "limitations": [
+            "Purchase-time cohorts; not delivery-completion cohorts",
+            "Actual delivery dates may include modeled incident adjustments",
+            "Orders missing delivery timestamps are excluded from lateness denominator",
+            "Nonempty period is not certification of continuous coverage",
+            "Descriptive; no causal inference"
+          ],
+          "execution_trace": [
+            {
+              "tool": "run_readonly_sql",
+              "arguments": {
+                "query": "SELECT COUNT(*)::bigint AS eligible_orders,\nCOUNT(DISTINCT order_id)::bigint AS distinct_orders,\nCOUNT(*) FILTER (WHERE lateness_eligible)::bigint AS lateness_eligible_orders,\nCOUNT(*) FILTER (WHERE is_late IS TRUE)::bigint AS late_orders,\nCOUNT(*) FILTER (WHERE duration_eligible)::bigint AS duration_eligible_orders,\nCOUNT(*) FILTER (WHERE effective_delivery_time IS NULL)::bigint AS missing_actual,\nCOUNT(*) FILTER (WHERE promised_delivery_time IS NULL)::bigint AS missing_estimated,\nCOUNT(*) FILTER (WHERE order_purchase_time IS NULL)::bigint AS missing_purchase,\nCOUNT(*) FILTER (WHERE duration_eligible AND (delivery_days IS NULL OR delivery_days < 0))::bigint AS invalid_duration,\nCOUNT(*) FILTER (WHERE (lateness_eligible IS DISTINCT FROM (effective_delivery_time IS NOT NULL AND promised_delivery_time IS NOT NULL)) OR (lateness_eligible AND is_late IS DISTINCT FROM (effective_delivery_time > promised_delivery_time)) OR (NOT lateness_eligible AND is_late IS NOT NULL))::bigint AS invalid_late_flags,\nAVG(delivery_days) FILTER (WHERE duration_eligible) AS mean_delivery_days,\n(100.0 * COUNT(*) FILTER (WHERE is_late IS TRUE) / NULLIF(COUNT(*) FILTER (WHERE lateness_eligible),0)) AS late_rate_pct,\n(100.0 * COUNT(*) FILTER (WHERE lateness_eligible) / NULLIF(COUNT(*),0)) AS lateness_coverage_pct\nFROM semantic.order_delivery_evidence_v1\nWHERE order_purchase_time >= DATE '2016-12-01' AND order_purchase_time < DATE '2017-01-01'",
+                "purpose": "4C15 governed delivery metric late_delivery_rate",
+                "expected_grain": "one aggregate row",
+                "max_rows": 1,
+                "timeout_ms": 20000
+              },
+              "response": {
+                "ok": true,
+                "tool": "run_readonly_sql",
+                "data": {
+                  "columns": [
+                    "eligible_orders",
+                    "distinct_orders",
+                    "lateness_eligible_orders",
+                    "late_orders",
+                    "duration_eligible_orders",
+                    "missing_actual",
+                    "missing_estimated",
+                    "missing_purchase",
+                    "invalid_duration",
+                    "invalid_late_flags",
+                    "mean_delivery_days",
+                    "late_rate_pct",
+                    "lateness_coverage_pct"
+                  ],
+                  "rows": [
+                    {
+                      "eligible_orders": 1,
+                      "distinct_orders": 1,
+                      "lateness_eligible_orders": 1,
+                      "late_orders": 0,
+                      "duration_eligible_orders": 1,
+                      "missing_actual": 0,
+                      "missing_estimated": 0,
+                      "missing_purchase": 0,
+                      "invalid_duration": 0,
+                      "invalid_late_flags": 0,
+                      "mean_delivery_days": "4.6930208333333333",
+                      "late_rate_pct": "0E-20",
+                      "lateness_coverage_pct": "100.0000000000000000"
+                    }
+                  ]
+                },
+                "error": null,
+                "meta": {
+                  "purpose": "4C15 governed delivery metric late_delivery_rate",
+                  "expected_grain": "one aggregate row",
+                  "relations": [
+                    "semantic.order_delivery_evidence_v1"
+                  ],
+                  "row_count": 1,
+                  "row_cap": 1,
+                  "timeout_ms": 20000,
+                  "latency_ms": 116.88
+                }
+              }
+            }
+          ],
+          "orchestration": {
+            "steps_used": 1,
+            "tools_used": 1,
+            "trace": [
+              {
+                "step": 1,
+                "capability": "initial_governed_investigation",
+                "reason": "Resolve the question through existing governed routes",
+                "decision": "COMPLETED"
+              }
+            ],
+            "stop_reason": "QUESTION_ADDRESSED",
+            "budgets": {
+              "steps": 4,
+              "tools": 40,
+              "seconds": 120
+            },
+            "causal_claim": false
+          },
+          "validated_evidence": [
+            {
+              "producer": "agent.phase4c15_delivery.validate_metric",
+              "result": {
+                "status": "MEASURED_WITH_SCOPE_LIMITS",
+                "metric_id": "late_delivery_rate",
+                "value": "0E-20",
+                "unit": "percent",
+                "source": "semantic.order_delivery_evidence_v1",
+                "period": [
+                  "2016-12-01",
+                  "2017-01-01"
+                ],
+                "population": {
+                  "eligible_orders": 1,
+                  "lateness_eligible_orders": 1,
+                  "late_orders": 0,
+                  "duration_eligible_orders": 1,
+                  "missing_actual": 0,
+                  "missing_estimated": 0,
+                  "missing_purchase": 0
+                },
+                "policy": "late_iff_actual_gt_estimated_on_eligible_orders",
+                "time_basis": "order_purchase_time",
+                "causal_claim": false,
+                "limitations": [
+                  "Purchase-time cohorts; not delivery-completion cohorts",
+                  "Actual delivery dates may include modeled incident adjustments",
+                  "Orders missing delivery timestamps are excluded from lateness denominator",
+                  "Nonempty period is not certification of continuous coverage",
+                  "Descriptive; no causal inference"
+                ]
+              }
+            }
+          ],
+          "context_provenance": {
+            "original_question": "Are delivery delays concentrated among sellers in December 2016?",
+            "policy": "bounded_session_slots_v1",
+            "inherited": [],
+            "source_turn": 4,
+            "session_id": "5DgmZXeOL_LDPbvXmGJJr5ybxIbYAFBuGd9dpIWiBYM",
+            "pending_source_turn": null
+          }
+        }
+      },
+      "error": null
+    }
+  ]
+}

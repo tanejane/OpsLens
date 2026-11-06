@@ -1,0 +1,13 @@
+{
+  "host": "localhost",
+  "port": 5432,
+  "scope": "Connection diagnostic only; no credentials emitted",
+  "tcp": "ConnectionRefusedError",
+  "tcp_seconds": 4.123,
+  "postgres_error": "ConnectionTimeout",
+  "category": "timeout",
+  "postgres_seconds": 10.034,
+  "listener_5432": "none",
+  "postgres_service": "none found",
+  "docker_daemon": "unavailable: dockerDesktopLinuxEngine pipe missing"
+}

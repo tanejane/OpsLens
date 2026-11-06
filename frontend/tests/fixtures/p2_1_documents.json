@@ -1,0 +1,177 @@
+{
+  "schema_version": "opslens.investigation.v1",
+  "question": "Cross-check revenue documents",
+  "payload": {
+    "route": "finance_measure",
+    "status": "MEASURED_WITH_SCOPE_LIMITS",
+    "executable": true,
+    "causal_claim": false,
+    "evidence": {
+      "metric_id": "effective_revenue",
+      "value": "100.00",
+      "unit": "currency",
+      "period": [
+        "2018-03-01",
+        "2018-04-01"
+      ],
+      "source": "semantic.order_economics",
+      "population": {
+        "eligible_orders": 10
+      }
+    },
+    "document_evidence": {
+      "schema_version": "opslens.document-corroboration.v1",
+      "sources": [
+        {
+          "source": {
+            "document_id": "doc1",
+            "chunk_id": "c1",
+            "filename": "finance.md",
+            "source_type": "memo",
+            "trust_level": "internal",
+            "source_date": "2018-04-05",
+            "content": "Version: 1\nRevenue review\nMeasurement: {\"metric_id\": \"effective_revenue\", \"value\": \"100.00\", \"unit\": \"currency\", \"period\": [\"2018-03-01\", \"2018-04-01\"], \"source\": \"semantic.order_economics\", \"population\": {\"eligible_orders\": 10}}"
+          },
+          "content_sha256": "9c8086247be8295aa2b4279da021b9c9fb2f5f37e2fe894a4aad2cff936df56b",
+          "version": "1",
+          "version_status": "DOCUMENT_DECLARED_NOT_REGISTRY_VERIFIED",
+          "date_status": "UNVERIFIED_INFERRED_INDEX_DATE",
+          "disposition": "CORROBORATES",
+          "comparisons": [
+            {
+              "passage": "Measurement: {\"metric_id\": \"effective_revenue\", \"value\": \"100.00\", \"unit\": \"currency\", \"period\": [\"2018-03-01\", \"2018-04-01\"], \"source\": \"semantic.order_economics\", \"population\": {\"eligible_orders\": 10}}",
+              "disposition": "CORROBORATES",
+              "claim": {
+                "metric_id": "effective_revenue",
+                "value": "100.00",
+                "unit": "currency",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "source": "semantic.order_economics",
+                "population": {
+                  "eligible_orders": 10
+                }
+              },
+              "database_references": [
+                "/payload/evidence"
+              ],
+              "database_values": [
+                "100.00"
+              ]
+            }
+          ],
+          "causal_claim": false
+        },
+        {
+          "source": {
+            "document_id": "doc1",
+            "chunk_id": "conflict",
+            "filename": "finance.md",
+            "source_type": "memo",
+            "trust_level": "internal",
+            "source_date": "2018-04-05",
+            "content": "Version: 1\nRevenue review\nMeasurement: {\"metric_id\": \"effective_revenue\", \"value\": \"101\", \"unit\": \"currency\", \"period\": [\"2018-03-01\", \"2018-04-01\"], \"source\": \"semantic.order_economics\", \"population\": {\"eligible_orders\": 10}}"
+          },
+          "content_sha256": "9586e683fb986a24303e98b480664d2298026ede613c494b2f43d48a02ebbb20",
+          "version": "1",
+          "version_status": "DOCUMENT_DECLARED_NOT_REGISTRY_VERIFIED",
+          "date_status": "UNVERIFIED_INFERRED_INDEX_DATE",
+          "disposition": "CONTRADICTS",
+          "comparisons": [
+            {
+              "passage": "Measurement: {\"metric_id\": \"effective_revenue\", \"value\": \"101\", \"unit\": \"currency\", \"period\": [\"2018-03-01\", \"2018-04-01\"], \"source\": \"semantic.order_economics\", \"population\": {\"eligible_orders\": 10}}",
+              "disposition": "CONTRADICTS",
+              "claim": {
+                "metric_id": "effective_revenue",
+                "value": "101",
+                "unit": "currency",
+                "period": [
+                  "2018-03-01",
+                  "2018-04-01"
+                ],
+                "source": "semantic.order_economics",
+                "population": {
+                  "eligible_orders": 10
+                }
+              },
+              "database_references": [
+                "/payload/evidence"
+              ],
+              "database_values": [
+                "100.00"
+              ]
+            }
+          ],
+          "causal_claim": false
+        },
+        {
+          "source": {
+            "document_id": "doc1",
+            "chunk_id": "context",
+            "filename": "finance.md",
+            "source_type": "memo",
+            "trust_level": "internal",
+            "source_date": "2018-04-05",
+            "content": "# Supplier Cost Notice\n\n**Effective:** 2018-03-01\n\nProcurement has confirmed an average **8.5% unit-cost increase** across selected high-volume categories: health_beauty, watches_gifts, bed_bath_table.\n\nThe change reflects a combination of supplier repricing and logistics/input-cost pressure. Finance should monitor category gross margin after the effective date.\n\nSource: Procurement Operations\nStatus: Approved internal notice\n"
+          },
+          "content_sha256": "c9e41dca7dfcd96462bc03fe77291861506daaacf0bb49931ee41c1643baa9ab",
+          "version": null,
+          "version_status": "UNVERIFIED_NOT_IN_INDEX",
+          "date_status": "UNVERIFIED_INFERRED_INDEX_DATE",
+          "disposition": "CONTEXT_ONLY",
+          "comparisons": [],
+          "causal_claim": false
+        }
+      ],
+      "database_measurements": [
+        {
+          "path": "/payload/evidence",
+          "metric_id": "effective_revenue",
+          "value": "100.00",
+          "period": [
+            "2018-03-01",
+            "2018-04-01"
+          ],
+          "source": "semantic.order_economics",
+          "unit": "currency",
+          "population": {
+            "eligible_orders": 10
+          }
+        }
+      ],
+      "limitations": [
+        "Retrieved text is not evidence of causation.",
+        "Index dates are inferred, and authoritative version history is unavailable; current-version certification is not possible.",
+        "Only explicit Measurement JSON claims with matching metric, period, source, unit and population are numerically comparable. Other prose remains context.",
+        "Retrieval is bounded to five passages and cannot certify corpus completeness."
+      ],
+      "causal_claim": false,
+      "status": "ASSESSED",
+      "summary": "Document cross-check: 1 corroborating passages, 1 conflicting passages, 1 context-only passages and 0 outdated or provisional passages."
+    },
+    "conclusions": [
+      "Document cross-check: 1 corroborating passages, 1 conflicting passages, 1 context-only passages and 0 outdated or provisional passages."
+    ],
+    "orchestration": {
+      "steps_used": 1,
+      "tools_used": 1,
+      "trace": [
+        {
+          "step": 1,
+          "capability": "document_corroboration",
+          "reason": "User requested document corroboration of validated measurements",
+          "decision": "ASSESSED"
+        }
+      ],
+      "stop_reason": "ASSESSED",
+      "budgets": {
+        "steps": 4,
+        "tools": 40,
+        "seconds": 120
+      },
+      "causal_claim": false
+    }
+  }
+}

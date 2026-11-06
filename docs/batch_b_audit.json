@@ -1,0 +1,72 @@
+{
+  "checks_passed": 13,
+  "checks_total": 13,
+  "verdict": "PASS",
+  "checks": [
+    {
+      "name": "INC_001\u2013INC_008 months are isolated",
+      "passed": true,
+      "value": "{'INC_001': '2018-03-01', 'INC_002': '2017-07-01', 'INC_003': '2018-01-01', 'INC_004': '2018-08-01', 'INC_005': '2017-09-01', 'INC_006': '2017-11-01', 'INC_007': '2018-05-01', 'INC_008': '2018-06-01'}"
+    },
+    {
+      "name": "INC_005 mix override table non-empty",
+      "passed": true,
+      "value": "4274"
+    },
+    {
+      "name": "INC_005 has both promoted and deemphasized categories",
+      "passed": true,
+      "value": "['mix_shift_away_from_higher_margin', 'mix_shift_toward_lower_margin', 'unchanged']"
+    },
+    {
+      "name": "INC_005 targets 3 low-margin categories",
+      "passed": true,
+      "value": "3"
+    },
+    {
+      "name": "INC_006 enough attributed orders",
+      "passed": true,
+      "value": "1451"
+    },
+    {
+      "name": "INC_006 marketing costs positive",
+      "passed": true,
+      "value": "61999.9986"
+    },
+    {
+      "name": "INC_006 incentive costs positive",
+      "passed": true,
+      "value": "7499.165599999999"
+    },
+    {
+      "name": "INC_007 exactly 3 stockout SKUs",
+      "passed": true,
+      "value": "3"
+    },
+    {
+      "name": "INC_007 stockout availability materially reduced",
+      "passed": true,
+      "value": "0.15"
+    },
+    {
+      "name": "INC_008 enough affected orders",
+      "passed": true,
+      "value": "113"
+    },
+    {
+      "name": "INC_008 delivery delays positive",
+      "passed": true,
+      "value": "3"
+    },
+    {
+      "name": "INC_008 effective review scores do not improve",
+      "passed": true,
+      "value": "113"
+    },
+    {
+      "name": "INC_008 exactly two affected sellers",
+      "passed": true,
+      "value": "2"
+    }
+  ]
+}

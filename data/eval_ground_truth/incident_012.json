@@ -1,0 +1,48 @@
+{
+  "incident_id": "INC_012",
+  "name": "Misleading Correlation",
+  "incident_month": "2018-07-01",
+  "apparent_relationship": {
+    "promo_refund_rate": {
+      "0": 0.04642857142857143,
+      "1": 0.1
+    }
+  },
+  "true_explanation": "order_value_mix_confounding",
+  "subgroup_refund_rates": [
+    {
+      "order_value_band": "high",
+      "promo_exposed": 0,
+      "did_refund": 0.125
+    },
+    {
+      "order_value_band": "high",
+      "promo_exposed": 1,
+      "did_refund": 0.125
+    },
+    {
+      "order_value_band": "low",
+      "promo_exposed": 0,
+      "did_refund": 0.03333333333333333
+    },
+    {
+      "order_value_band": "low",
+      "promo_exposed": 1,
+      "did_refund": 0.03333333333333333
+    }
+  ],
+  "causal_structure": {
+    "order_value_band_affects_promo_exposure": true,
+    "order_value_band_affects_refund_risk": true,
+    "promo_has_within_band_refund_effect": false
+  },
+  "expected_agent_behavior": [
+    "identify aggregate association",
+    "avoid causal claim from aggregate correlation",
+    "segment by order value",
+    "compare promo and non-promo refund rates within strata",
+    "reject promotion-as-primary-cause",
+    "identify order-value mix as the confounder"
+  ],
+  "status": "IMPLEMENTED_V2"
+}

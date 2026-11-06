@@ -1,0 +1,20 @@
+{
+  "incident_id": "INC_010",
+  "name": "Incomplete Evidence",
+  "incident_month": "2017-12-01",
+  "known_evidence": [
+    "higher_fulfillment_expense",
+    "some_customer_refunds"
+  ],
+  "missing_evidence": [
+    "final_supplier_invoice_reconciliation",
+    "final_paid_media_accrual"
+  ],
+  "expected_agent_behavior": [
+    "state uncertainty",
+    "avoid claiming a single confirmed dominant cause",
+    "identify missing evidence",
+    "recommend next validation step"
+  ],
+  "status": "IMPLEMENTED"
+}

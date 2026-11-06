@@ -1,0 +1,87 @@
+{
+  "sufficient": {
+    "steps_used": 1,
+    "tools_used": 0,
+    "trace": [
+      {
+        "step": 1,
+        "capability": "initial",
+        "reason": "Validated cohort comparison",
+        "decision": "VALIDATED"
+      }
+    ],
+    "stop_reason": "QUESTION_ADDRESSED",
+    "budgets": {
+      "steps": 4,
+      "tools": 40,
+      "seconds": 120
+    },
+    "causal_claim": false
+  },
+  "expanded": {
+    "steps_used": 3,
+    "tools_used": 2,
+    "trace": [
+      {
+        "step": 1,
+        "capability": "initial",
+        "reason": "Validated cohort comparison",
+        "decision": "VALIDATED"
+      },
+      {
+        "step": 2,
+        "capability": "delivery_missingness",
+        "reason": "Unclassified deliveries could change how broadly the rating comparison applies.",
+        "decision": "VALIDATED",
+        "source": "semantic.order_delivery_evidence_v1"
+      },
+      {
+        "step": 3,
+        "capability": "review_population_coverage",
+        "reason": "Some delivery orders have no review-view row; inspect the independently governed review population.",
+        "decision": "VALIDATED",
+        "source": "semantic.order_review_evidence_v1"
+      }
+    ],
+    "stop_reason": "QUESTION_ADDRESSED",
+    "budgets": {
+      "steps": 4,
+      "tools": 40,
+      "seconds": 120
+    },
+    "causal_claim": false
+  },
+  "partial": {
+    "steps_used": 3,
+    "tools_used": 2,
+    "trace": [
+      {
+        "step": 1,
+        "capability": "initial",
+        "reason": "Validated cohort comparison",
+        "decision": "VALIDATED"
+      },
+      {
+        "step": 2,
+        "capability": "delivery_missingness",
+        "reason": "Unclassified deliveries could change how broadly the rating comparison applies.",
+        "decision": "VALIDATED",
+        "source": "semantic.order_delivery_evidence_v1"
+      },
+      {
+        "step": 3,
+        "capability": "review_population_coverage",
+        "reason": "Some delivery orders have no review-view row; inspect the independently governed review population.",
+        "decision": "REJECTED_OR_FAILED",
+        "error_type": "RuntimeError"
+      }
+    ],
+    "stop_reason": "FOLLOWUP_UNAVAILABLE_OR_CONTRADICTORY",
+    "budgets": {
+      "steps": 4,
+      "tools": 40,
+      "seconds": 120
+    },
+    "causal_claim": false
+  }
+}

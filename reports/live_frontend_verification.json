@@ -1,0 +1,75 @@
+{
+  "scope": "Actual live MCP captures through production normalizer/components/PDF; not interactive browser verification",
+  "checks": [
+    {
+      "case": "Compare late versus on-time order ratings in March 2018.",
+      "mode": "Business",
+      "canonical_equal": true,
+      "component_chart": true,
+      "pdf_bytes": 94515
+    },
+    {
+      "case": "Compare late versus on-time order ratings in March 2018.",
+      "mode": "Analyst",
+      "canonical_equal": true,
+      "component_chart": true,
+      "pdf_bytes": 107217
+    },
+    {
+      "case": "Are delivery delays concentrated among sellers?",
+      "mode": "Business",
+      "canonical_equal": true,
+      "component_chart": true,
+      "pdf_bytes": 5891056
+    },
+    {
+      "case": "Are delivery delays concentrated among sellers?",
+      "mode": "Analyst",
+      "canonical_equal": true,
+      "component_chart": true,
+      "pdf_bytes": 5897003
+    },
+    {
+      "case": "What about February?",
+      "mode": "Business",
+      "canonical_equal": true,
+      "component_chart": true,
+      "pdf_bytes": 5615232
+    },
+    {
+      "case": "What about February?",
+      "mode": "Analyst",
+      "canonical_equal": true,
+      "component_chart": true,
+      "pdf_bytes": 5621718
+    },
+    {
+      "case": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+      "mode": "Business",
+      "canonical_equal": true,
+      "component_chart": false,
+      "pdf_bytes": 684969
+    },
+    {
+      "case": "Why did revenue rise and contribution profit fall in March 2018 compared with February 2018?",
+      "mode": "Analyst",
+      "canonical_equal": true,
+      "component_chart": false,
+      "pdf_bytes": 767675
+    },
+    {
+      "case": "Are delivery delays concentrated among sellers in December 2016?",
+      "mode": "Business",
+      "canonical_equal": true,
+      "component_chart": false,
+      "pdf_bytes": 41436
+    },
+    {
+      "case": "Are delivery delays concentrated among sellers in December 2016?",
+      "mode": "Analyst",
+      "canonical_equal": true,
+      "component_chart": false,
+      "pdf_bytes": 51150
+    }
+  ]
+}

@@ -1,0 +1,463 @@
+{
+  "status": "OFFLINE_BENCHMARK_CONTRACTS_PASSED",
+  "mode": "validate",
+  "score": {
+    "passed": 113,
+    "total": 113
+  },
+  "incident_evaluation": "NOT_EXECUTED",
+  "checks": [
+    {
+      "name": "all twelve incident truth fixtures",
+      "passed": true
+    },
+    {
+      "name": "all unique probe ids",
+      "passed": true
+    },
+    {
+      "name": "fixture months consistent",
+      "passed": true
+    },
+    {
+      "name": "all unique nonempty prompts",
+      "passed": true
+    },
+    {
+      "name": "no answer/key in prompts",
+      "passed": true
+    },
+    {
+      "name": "INC_001 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_001 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_001 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_001 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_001 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_001 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_001 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_001 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_001 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_002 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_002 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_002 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_002 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_002 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_002 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_002 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_002 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_002 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_003 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_003 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_003 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_003 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_003 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_003 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_003 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_003 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_003 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_004 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_004 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_004 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_004 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_004 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_004 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_004 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_004 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_004 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_005 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_005 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_005 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_005 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_005 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_005 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_005 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_005 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_005 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_006 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_006 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_006 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_006 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_006 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_006 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_006 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_006 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_006 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_007 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_007 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_007 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_007 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_007 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_007 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_007 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_007 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_007 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_008 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_008 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_008 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_008 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_008 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_008 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_008 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_008 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_008 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_009 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_009 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_009 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_009 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_009 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_009 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_009 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_009 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_009 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_010 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_010 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_010 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_010 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_010 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_010 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_010 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_010 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_010 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_011 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_011 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_011 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_011 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_011 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_011 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_011 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_011 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_011 safe abstention not solved",
+      "passed": true
+    },
+    {
+      "name": "INC_012 truth integrity",
+      "passed": true
+    },
+    {
+      "name": "INC_012 external attestation and sources",
+      "passed": true
+    },
+    {
+      "name": "INC_012 model self verification insufficient",
+      "passed": true
+    },
+    {
+      "name": "INC_012 causal claim rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_012 unverified provenance rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_012 generic metric not enough",
+      "passed": true
+    },
+    {
+      "name": "INC_012 route mismatch rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_012 unauthorized approval rejected",
+      "passed": true
+    },
+    {
+      "name": "INC_012 safe abstention not solved",
+      "passed": true
+    }
+  ]
+}

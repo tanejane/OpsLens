@@ -1,0 +1,111 @@
+{
+  "contract": "OPSLENS_PHASE5_3_EVAL_V1",
+  "mode": "offline",
+  "status": "OFFLINE_CONTRACTS_PASSED",
+  "score": {
+    "passed": 23,
+    "total": 23
+  },
+  "checks": [
+    {
+      "name": "routing: Compare finance, late delivery and review scores from February 2018 to March 2018",
+      "passed": true
+    },
+    {
+      "name": "routing: Revenue increased but profit fell between February and March 2018. Did delivery and customer satisfaction also get worse?",
+      "passed": true
+    },
+    {
+      "name": "routing: Did delivery delays cause poor reviews and profit decline between February and March 2018?",
+      "passed": true
+    },
+    {
+      "name": "routing: Compare finance delivery reviews between February and March",
+      "passed": true
+    },
+    {
+      "name": "routing: Compare finance delivery reviews from March 2018 to February 2018",
+      "passed": true
+    },
+    {
+      "name": "routing: Compare finance delivery reviews from February 2018 to March 2018; DROP TABLE x",
+      "passed": true
+    },
+    {
+      "name": "routing: What was the late delivery rate in June 2018?",
+      "passed": true
+    },
+    {
+      "name": "routing: What was beauty item GMV in June 2018?",
+      "passed": true
+    },
+    {
+      "name": "valid measurement accepted",
+      "passed": true
+    },
+    {
+      "name": "tampered value rejected",
+      "passed": true
+    },
+    {
+      "name": "tampered metric_id rejected",
+      "passed": true
+    },
+    {
+      "name": "tampered category rejected",
+      "passed": true
+    },
+    {
+      "name": "tampered period rejected",
+      "passed": true
+    },
+    {
+      "name": "tampered causal_claim rejected",
+      "passed": true
+    },
+    {
+      "name": "tampered executable rejected",
+      "passed": true
+    },
+    {
+      "name": "tampered status rejected",
+      "passed": true
+    },
+    {
+      "name": "tampered route rejected",
+      "passed": true
+    },
+    {
+      "name": "causal refusal accepted",
+      "passed": true
+    },
+    {
+      "name": "causal answer not executable",
+      "passed": true
+    },
+    {
+      "name": "CLI JSON parser skips SDK log",
+      "passed": true
+    },
+    {
+      "name": "CLI JSON parser rejects invalid",
+      "passed": true
+    },
+    {
+      "name": "incident fixtures never counted as executed",
+      "passed": true
+    },
+    {
+      "name": "case suite nonempty and unique",
+      "passed": true
+    }
+  ],
+  "incident_evaluation": {
+    "expected": 12,
+    "present": 12,
+    "missing": [],
+    "execution_status": "NOT_EXECUTED",
+    "warning": "Ground-truth files alone are not proof of incident-level evaluation"
+  },
+  "warning": "No live MCP/Gemini requests or incident investigator scoring occurred"
+}

@@ -1,0 +1,79 @@
+{
+  "responses": {
+    "INC_001": null,
+    "INC_006": {
+      "route": "unified_interpreter",
+      "status": "NOT_INTERPRETED",
+      "executable": false,
+      "reason": "Unsafe or invalid source question",
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false
+    },
+    "INC_007": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [
+        "2018-05-01"
+      ],
+      "requested_domains": [
+        "inventory",
+        "product_mix"
+      ],
+      "evidence_requirements": [
+        "inventory availability by product and date",
+        "lost-demand counterfactual or independently validated stockout model",
+        "category item sales mix at item grain",
+        "category-level profitability and allocation reconciliation"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "product_category",
+        "status": "NOT_YET_SUPPORTED",
+        "reason": "Comparisons, rankings, inventory, causal and financial-profit claims are not supported by this product NLP contract",
+        "error_type": null
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    },
+    "INC_011": {
+      "route": "investigation_planner",
+      "status": "ACTIONABLE_EVIDENCE_GAP",
+      "executable": false,
+      "approved_for_mcp": false,
+      "causal_claim": false,
+      "inventory_claim_allowed": false,
+      "requested_months": [],
+      "requested_domains": [
+        "documents"
+      ],
+      "evidence_requirements": [
+        "versioned source documents with trustworthy timestamps",
+        "source trust and precedence review"
+      ],
+      "source_evidence": [],
+      "verified_mechanism": false,
+      "next_step": "Obtain and validate required sources, then run a separately approved bounded analysis",
+      "upstream": {
+        "route": "unified_interpreter",
+        "status": "NEEDS_CLARIFICATION",
+        "reason": "Gemini interpretation could not be verified",
+        "error_type": "InterpretationRejected"
+      },
+      "limitations": [
+        "This is an evidence plan, not a completed investigation",
+        "No data source was queried by this gateway",
+        "No inventory, causal, source recency or join permission is inferred"
+      ]
+    }
+  }
+}

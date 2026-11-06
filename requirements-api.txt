@@ -1,0 +1,8 @@
+-r requirements-phase3g.txt
+-r requirements-phase3g-gemini.txt
+SQLAlchemy>=2,<3
+psycopg[binary]>=3.2,<4
+sqlglot>=25,<30
+fastembed>=0.7,<1
+fastapi>=0.115,<1
+uvicorn[standard]>=0.34,<1
