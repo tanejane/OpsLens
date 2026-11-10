@@ -26,6 +26,7 @@ def measurements(payload):
 
 def assess(hits,payload,question,*,today=None):
     from retrieval.hybrid import _injection_flag
+    from agent.retrieval_phase3c import _looks_like_prompt_injection
     if not isinstance(hits,list) or len(hits)>5:raise ValueError('Invalid bounded retrieval response')
     today=today or date.today(); db=measurements(payload); entries=[];seen=set()
     terms=set(re.findall(r'[a-z]{4,}',question.lower()))-{'documents','document','notes','reports','what','with','this','that','corroborate','check','evidence'}
@@ -44,7 +45,7 @@ def assess(hits,payload,question,*,today=None):
         try:issued=date.fromisoformat(str(hit.get('source_date'))[:10])
         except ValueError:issued=None
         if not all(isinstance(hit.get(k),str) and 0<len(hit[k])<=512 for k in ('document_id','chunk_id','filename','source_type')):entry['disposition']='MISSING_PROVENANCE'
-        elif hit.get('injection_flag') or hit.get('blocked_from_context') or _injection_flag(text) or INJECTION.search(text):entry['disposition']='REJECTED_INJECTION'
+        elif hit.get('injection_flag') or hit.get('blocked_from_context') or _injection_flag(text) or INJECTION.search(text) or _looks_like_prompt_injection(text):entry['disposition']='REJECTED_INJECTION'
         elif hit.get('trust_level')!='internal':entry['disposition']='REJECTED_TRUST'
         elif issued is None:entry['disposition']='MISSING_DATE'
         elif issued>today:entry['disposition']='FUTURE_DATED'

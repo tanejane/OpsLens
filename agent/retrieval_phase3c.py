@@ -14,6 +14,11 @@ PROMPT_INJECTION_PATTERNS = [
     r"auto[- ]?approve",
     r"bypass (the )?(rules|policy|approval)",
     r"do not follow",
+    r"\bignore\s+(?:your|the|all|any)\s+(?:rules|instructions)\b",
+    r"\breveal\s+(?:the\s+)?(?:hidden|internal)\s+(?:instructions|prompt)\b",
+    r"\bignore\s+(?:all\s+)?prior\s+(?:rules|instructions)\b",
+    r"\breveal\s+(?:any\s+)?hidden\s+system\s+instructions\b",
+    r"\bapprove\s+all\s+pending\s+actions\s+automatically\b",
 ]
 
 

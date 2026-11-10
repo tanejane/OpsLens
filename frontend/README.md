@@ -1,34 +1,23 @@
-# OpsLens frontend (Phase 1)
+# OpsLens frontend
 
-## Local run
-
-From the repository root, start the existing PostgreSQL service and initialize the existing Python environment:
+Next.js/TypeScript interface for the governed OpsLens API. See the root [README](../README.md) for Python/database provisioning, environment settings and limitations.
 
 ```powershell
-docker compose up -d postgres
-python -m pip install -r requirements-api.txt
-```
-
-Set `GOOGLE_API_KEY` (or `GEMINI_API_KEY`) in the backend process environment to enable the existing Gemini interpretation path. Without a key, the API keeps Gemini interpretation disabled and the existing deterministic routes remain available. The API does not receive SQL from the browser; it routes each question through the existing Phase 5.1/5.2E/5.3C runtime and governed MCP tools.
-
-Start the API in one terminal:
-
-```powershell
-python -m uvicorn api:app --reload --host 127.0.0.1 --port 8000
-```
-
-Install and start the separate Next.js app in another terminal:
-
-```powershell
-cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-Open <http://localhost:3000>. Next.js proxies `/api/*` to the local API on port 8000. Keep provider keys in the backend environment only. If your database is not initialized, use the repository's established data-load/setup instructions before running a live investigation. The saved evaluation overview can still be read from the repository report files when PostgreSQL is unavailable.
+Open http://localhost:3000 with the API running at http://127.0.0.1:8000. The Next API proxy uses server-side `OPSLENS_API_URL` when configured. Provider credentials belong only in the backend environment.
 
-## Scope
+The unified workspace provides Overview, Explore, Investigations and Reports. Direct answers retain evidence, population limits and causal restrictions. Collapsed Agent execution diagnostics and owned-session replay remain available. Reload restores a live server session via an opaque browser session ID and an HttpOnly owner cookie; server restarts/expiry require a new investigation. This is not enterprise authentication or permanent browser history.
 
-The first phase implements the overview, investigation workspace, and activity/evaluation summary. Metrics and evidence navigation explain the current scope and are not presented as implemented data browsers. Saved scenario rows are explicitly labeled as evaluation report scenarios, not recent live activity. Evaluation data comes from `reports/phase5_3f_pre_ui_review.json`; the API reports acceptance status from that source without changing the gate.
+PDFs summarize the answer and measurements, with the exact canonical record embedded as `opslens-investigation.json`. Legacy Business/Analyst adapters remain covered by tests, but the application has no global mode toggle.
 
-Investigation results remain in the current browser session only. Persistent history is intentionally not enabled because the application has no authenticated user identity, workspace isolation contract, retention policy, or deletion controls. A future history feature must define those boundaries before saving questions or results to browser or server storage.
+```powershell
+npm test
+npx tsc --noEmit --incremental false
+npm run build
+npm start
+```
+
+Development output uses `.next-dev`; builds use `.next`. Commit `package-lock.json` and use `npm ci` for reproducible frontend installs. Do not commit build output, local environment files or incremental TypeScript metadata.

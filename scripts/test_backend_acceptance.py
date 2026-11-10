@@ -122,7 +122,12 @@ def test_resolved_period_never_needs_provider(monkeypatch,kind):
     target=importlib.import_module('agent.'+kind)
     monkeypatch.setattr(target,'investigate' if kind=='delivery_review_comparison' else 'initial',initial)
     runtime=mod.InvestigationRuntime(None,SimpleNamespace(gemini_enabled=True),None,None,None,None,None,None)
-    out=asyncio.run(runtime._investigate('Resolved question',execution_trace=[],context_action={'kind':kind,'start':'2018-06-01','end':'2018-07-01','detail':False}))
+    question = (
+        'What was the refund rate in June 2018?'
+        if kind == 'refund_concentration'
+        else 'Resolved question'
+    )
+    out=asyncio.run(runtime._investigate(question,execution_trace=[],context_action={'kind':kind,'start':'2018-06-01','end':'2018-07-01','detail':False}))
     assert out['evidence']==measured()['evidence']
 
 def test_explanation_replay_is_exact_and_does_not_call_provider(tmp_path):

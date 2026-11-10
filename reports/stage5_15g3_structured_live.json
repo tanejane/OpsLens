@@ -1,0 +1,88 @@
+{
+  "contract": "opslens.stage5_15g3.structured-smoke.v1",
+  "model": "gemini-3.5-flash-lite",
+  "source_reference_sha256": "e66991b1f39a6ac45c16c8881e8be707e096c91750cba22c2151c78e0f768d76",
+  "attempted": 2,
+  "accepted": 2,
+  "full_structural_matches": 1,
+  "records": [
+    {
+      "id": "F06",
+      "outcome": "ACCEPTED",
+      "error_type": null,
+      "candidate": {
+        "contract": "opslens.structured-intent.v1",
+        "handling": "SUPPORTED_CANDIDATE",
+        "metric": "refund_rate",
+        "period": "2018-06",
+        "operations": [
+          {
+            "kind": "FILTER",
+            "field": "order_value_myr",
+            "operator": "gt",
+            "value": 200
+          },
+          {
+            "kind": "FILTER",
+            "field": "payment_method",
+            "operator": "eq",
+            "value": "credit_card"
+          }
+        ],
+        "clarifications": [],
+        "execution_authorized": false,
+        "completion_eligible": false,
+        "evidence_state": "NOT_ASSESSED"
+      },
+      "comparison": {
+        "handling_match": false,
+        "metric_match": true,
+        "period_match": true,
+        "operations_match": true,
+        "missing_operations": [],
+        "extra_operations": [],
+        "clarification_required_match": true,
+        "parameter_fidelity_assessed": true,
+        "execution_authorized": false
+      },
+      "full_structural_match": false
+    },
+    {
+      "id": "F08",
+      "outcome": "ACCEPTED",
+      "error_type": null,
+      "candidate": {
+        "contract": "opslens.structured-intent.v1",
+        "handling": "CLARIFICATION_REQUIRED",
+        "metric": "refund_rate",
+        "period": null,
+        "operations": [],
+        "clarifications": [
+          "The specific holiday period is not specified. Please provide the start and end dates or the name of the holiday."
+        ],
+        "execution_authorized": false,
+        "completion_eligible": false,
+        "evidence_state": "NOT_ASSESSED"
+      },
+      "comparison": {
+        "handling_match": true,
+        "metric_match": true,
+        "period_match": true,
+        "operations_match": true,
+        "missing_operations": [],
+        "extra_operations": [],
+        "clarification_required_match": true,
+        "parameter_fidelity_assessed": true,
+        "execution_authorized": false
+      },
+      "full_structural_match": true
+    }
+  ],
+  "limitations": [
+    "Development smoke test, not blind evaluation.",
+    "Prompt includes examples related to F06 and F08.",
+    "Clarification wording and completeness not scored.",
+    "No independent adapter or schema capability verification.",
+    "No retries or production execution."
+  ]
+}

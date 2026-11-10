@@ -65,5 +65,10 @@ def canonical_result(question, result):
 
 def investigation_response(question, result):
     record = canonical_result(question, result)
+    # Presentation-only Trace V2 projection of the recorded execution streams.
+    # The original source traces remain unchanged in the canonical record.
+    # This entry point is used by stateless and session-backed API turns.
+    from agent.trace_projection import project_agent_trace
+    record["payload"]["agent_trace_v2"] = project_agent_trace(record["payload"])
     # Retain the legacy field for existing clients during the v1 transition.
     return {"question": question, "result": record["payload"], "canonical_result": record}

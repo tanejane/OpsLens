@@ -13,6 +13,11 @@ def candidates(result,done):
         return [('refund_concentration','The question requests concentration and recorded returns warrant exclusive seller attribution.')] if result.get('refund_intent') is True and evidence.get('population',{}).get('returned_orders',0)>0 and 'refund_concentration' not in done else []
     if result.get('route')=='seller_concentration':
         return [('seller_concentration','The user asked about sellers and validated late orders warrant an exclusive seller partition.')] if result.get('seller_intent') is True and evidence.get('population',{}).get('late_orders',0)>0 and 'seller_concentration' not in done else []
+    if result.get('route')=='investigation' and 'marketing_campaign_composition' not in done:
+        from agent.marketing_followup import eligible
+        if eligible(result):
+            return [('marketing_campaign_composition',
+                     'Validated marketing cost pressure warrants campaign-level inspection.')]
     if result.get('route')!='delivery_review_comparison': return []
     groups=evidence.get('cohorts',{})
     choices=[]
@@ -37,6 +42,21 @@ async def extend(initial,reader,state):
         action,reason=choices[0]
         try:
             state.begin(action,reason)
+            if action=='marketing_campaign_composition':
+                from agent.marketing_followup import analyze
+                proof=await analyze(result,reader)
+                result['marketing_analysis']=deepcopy(proof)
+                supporting.append({
+                    'capability':action,
+                    'evidence_reference':'/payload/marketing_analysis',
+                    'evidence_id':proof['evidence_id'],
+                    'conclusion':proof['conclusion']})
+                result['limitations']=list(dict.fromkeys([
+                    *result.get('limitations',[]),
+                    *proof['limitations']]))
+                state.trace[-1].update(
+                    decision='VALIDATED',source=proof['source'])
+                continue
             if action=='refund_concentration':
                 from agent.refund_concentration import analyze
                 proof=await analyze(result['evidence'],reader)
@@ -86,6 +106,10 @@ async def extend(initial,reader,state):
         result['conclusions']=list(dict.fromkeys([result.get('reason',''),*result.get('conclusions',[]),*[s['conclusion'] for s in supporting]]))
     if stop!='QUESTION_ADDRESSED':
         result['limitations']=[*result.get('limitations',[]),'The additional investigation could not be completed; earlier validated findings remain available.']
-    if result.get('route') not in ('delivery_review_comparison','seller_concentration','refund_concentration'):stop='EXISTING_COORDINATOR_COMPLETED' if 'adaptive' in result else 'NO_RELEVANT_REGISTERED_EXTENSION'
+    if stop=='QUESTION_ADDRESSED' and result.get('route') not in ('delivery_review_comparison','seller_concentration','refund_concentration'):stop='EXISTING_COORDINATOR_COMPLETED' if 'adaptive' in result else 'NO_RELEVANT_REGISTERED_EXTENSION'
+    if (stop=='EXISTING_COORDINATOR_COMPLETED'
+            and any(s['capability']=='marketing_campaign_composition'
+                    for s in supporting)):
+        stop='MARKETING_FOLLOWUP_COMPLETED'
     result['orchestration']=state.snapshot(stop)
     return result

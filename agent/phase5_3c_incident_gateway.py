@@ -63,7 +63,7 @@ def identify(question):
 
 
 def is_finance_bridge(question, plan):
-    months = plan["requested_months"]
+    months = sorted(plan["requested_months"])
 
     if (
         len(months) != 2
@@ -196,7 +196,7 @@ def _finance_retry_candidate(question, plan):
     This only permits a retry through the existing governed
     investigator. It does not approve queries or prove causes.
     """
-    months = plan.get("requested_months", [])
+    months = sorted(plan.get("requested_months", []))
     domains = plan.get("domains", [])
 
     if (
@@ -291,7 +291,7 @@ async def repair(question, previous, finance_investigator, reader):
         return previous
 
     if retry_finance:
-        a, b = plan["requested_months"]
+        a, b = sorted(plan["requested_months"])
 
         from datetime import datetime
 

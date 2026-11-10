@@ -86,12 +86,13 @@ async def run():
     check('no invented source from planner','source_evidence' not in r)
 asyncio.run(run())
 
+from scripts.stage5_governed_wiring import router_verified, repair_verified, compiled_finance_verified
 # Static adapter checks do not import server dependencies.
 router=(ROOT/'agent'/'phase5_2e_multidomain_router.py').read_text(encoding='utf-8')
 cli=(ROOT/'scripts'/'phase5_1_playground.py').read_text(encoding='utf-8')
 check('router still uses vetted three-domain investigator','await investigate(canonical,reader,finance_investigator)' in router)
 check('router requires all three domain signals','if not all((FINANCE.search(question), DELIVERY.search(question), SATISFACTION.search(question))):' in router)
-check('CLI still invokes governed route','await multi_domain_route(q,existing_dispatch,finance_reader,existing_finance_investigator,cohort_audit=cohort_audit)' in cli)
-check('CLI connects repair','await repair_incident(q,response,existing_finance_investigator,finance_reader)' in cli)
+check('CLI still invokes governed route',router_verified())
+check('CLI connects repair',repair_verified())
 check('no modified DB permissions',all(x not in cli for x in ('GRANT INSERT','GRANT UPDATE','GRANT DELETE')))
 print(f'Checks passed: {len(checks)}/{len(checks)}')

@@ -1,0 +1,517 @@
+# Portfolio cleanup audit — 2026-11-10
+
+## Scope and safeguards
+Recursively inventoried 52,687 files (including installed environments, generated builds, runtime artifacts and datasets; Git object internals excluded). Parsed 408 project Python modules without syntax errors and recorded their import map. Source/configuration/documentation references and dynamic file discovery were inspected; installed third-party source was inventoried, not audited line by line. No claim of exhaustive dead-code proof is made.
+
+Initial Git status contained substantial modified and untracked user work. No source, tests, fixtures, historical evidence, databases, environments or user backups were deleted. No commits, pushes, deployments or history edits. Original text hashes were checked; build-generated changes to next-env.d.ts and tsconfig.tsbuildinfo were restored. Only the new ignore rule and this report are intended tracked changes from this cleanup.
+
+## SAFE TO REMOVE — executed
+396 untracked Python/pytest cache files, totaling 3,083,729 bytes at inventory time. Each file was enumerated before deletion, checked inside the workspace, and removed individually. Source/test caches regenerate; validation may recreate some. Installed environment caches and runtime state were excluded.
+
+- `.pytest_cache/`: 5 generated files.
+- `agent/`: 120 generated files.
+- `mcp_server/`: 5 generated files.
+- `retrieval/`: 2 generated files.
+- `scripts/`: 259 generated files.
+- `__pycache__/`: 5 generated files.
+
+The exact proposed and executed paths are listed below. `.gitignore` now excludes `*.tsbuildinfo`; the already-tracked, user-modified `frontend/tsconfig.tsbuildinfo` remains preserved. Ignore rules do not untrack existing files.
+
+## KEEP
+- `api.py`, `dashboard_api.py`, `frontend_origins.py`: API, dashboard/KPI comparison and origin policy.
+- `agent/`, `mcp_server/`, `retrieval/`, `config/`: routing, planning, optional Gemini, governed SQL, evidence validation, causal restrictions and document boundaries. Phase-prefixed names are not evidence of obsolescence.
+- `investigation_sessions.py`, `investigation_traces.py`: ownership/session handling, contextual recovery, audit and replay.
+- `frontend/app/`, `frontend/components/`, `frontend/lib/`: Next proxy, presentation, investigation controls and PDF reporting; preserve current user edits.
+- `scripts/`, `frontend/tests/`: acceptance, safety and regression tests; provisioning and reproducibility scripts.
+- `reports/`, root phase audit JSON/CSV, `docs/`, `data/eval_ground_truth/`, `data/documents/`: historical/release evidence and adversarial fixtures. `scripts/release_query_corpus.py` reads reports via a glob; reports are not disposable merely because old. Stale and injection documents are deliberate fixtures. Ground truth remains excluded from runtime ingestion.
+- `db/`, `sql/`, `finance_view_definition.sql`, all requirements files, `frontend/package-lock.json`, both environment examples: provisioning and reproducible setup.
+- Local ignored datasets, `.runtime/`, `.venv/`, `frontend/node_modules/`, `.next/`, `.next-dev/`: preserved dependencies, state or potentially active builds. Empty `tmp/` directories are harmless.
+
+## REVIEW REQUIRED — no deletion authorized or performed
+The following rollback, patch, replay and historical diagnostic candidates remain. No textual reference alone proves a file unnecessary. Some TS/TSX backups are included by `frontend/tsconfig.json`, and validator backups may match `scripts/p0_2_run_offline.py`'s glob. Root and scripts copies of `opslens_answer_first_patch.py` are byte-identical, but both are untracked user work. Archive inspection found 17 entries and no obvious .env/database/private-key filenames; this is not content certification.
+
+- `api.stage5_15h48_backup.py` — preserve for owner review.
+- `OpsLens-Agent-Audit.zip` — preserve for owner review.
+- `opslens_answer_first_patch.py` — preserve for owner review. References: `scripts/opslens_answer_first_patch.py`.
+- `opslens_presentation_refinement.py` — preserve for owner review.
+- `README_APPLY.md` — preserve for owner review.
+- `replay.json` — preserve for owner review. References: `docs/PHASE5_3B_INCIDENT_BENCHMARK.md`, `docs/PHASE5_3D_ROOT_CAUSE_REPAIR.md`, `docs/audit/FINAL_BACKEND_ACCEPTANCE.md`, `scripts/p2_2_validate.py`.
+- `agent/coverage_stop_gate.stage5_13n_backup.py` — preserve for owner review.
+- `agent/document_corroboration.stage5_12m_backup.py` — preserve for owner review.
+- `agent/evidence_followup.stage5_9_backup.py` — preserve for owner review.
+- `agent/evidence_followup.stage5_backup.py` — preserve for owner review.
+- `agent/marketing_followup.stage5_10_backup.py` — preserve for owner review.
+- `agent/marketing_followup.stage5_10_decoder_backup.py` — preserve for owner review.
+- `agent/phase5_1_explanation.stage5_12r_backup.py` — preserve for owner review.
+- `agent/phase5_3c_incident_gateway.pre_finance_order_fix.py` — preserve for owner review.
+- `agent/refund_routing.stage5_12z_backup.py` — preserve for owner review.
+- `agent/refund_routing.stage5_15h9_backup.py` — preserve for owner review.
+- `agent/refund_semantic_v2.stage5_15h33a_backup.py` — preserve for owner review.
+- `agent/requirement_extractor.stage5_14f1_backup.py` — preserve for owner review.
+- `agent/requirement_extractor.stage5_14f_backup.py` — preserve for owner review.
+- `agent/requirement_extractor.stage5_14g1_backup.py` — preserve for owner review.
+- `agent/requirement_extractor.stage5_14g2_backup.py` — preserve for owner review.
+- `agent/requirement_planner.stage5_14n_backup.py` — preserve for owner review.
+- `agent/retrieval_phase3c.stage5_12g_backup.py` — preserve for owner review.
+- `agent/retrieval_phase3c.stage5_12j_backup.py` — preserve for owner review.
+- `agent/semantic_gemini_proposer.stage5_15e10_backup.py` — preserve for owner review.
+- `agent/semantic_gemini_proposer.stage5_15e5_backup.py` — preserve for owner review.
+- `frontend/app/page.backup-20261107-133850.txt` — preserve for owner review.
+- `frontend/app/page.backup-20261107-164432.txt` — preserve for owner review.
+- `frontend/app/page.before-evidence-redesign.txt` — preserve for owner review.
+- `frontend/app/page.before-gemini-repair-20261107-234015.txt` — preserve for owner review.
+- `frontend/app/page.before-gemini-repair-20261107-234719.txt` — preserve for owner review.
+- `frontend/app/page.before-interpretation-cleanup-20261107-232220.txt` — preserve for owner review.
+- `frontend/app/page.before_presentation_refinement.tsx` — preserve for owner review. References: `opslens_presentation_refinement.py`.
+- `frontend/components/investigation-timeline.backup-20261108-111750.txt` — preserve for owner review.
+- `frontend/lib/report-presentation.before_answer_first.ts` — preserve for owner review. References: `opslens_answer_first_patch.py`, `scripts/opslens_answer_first_patch.py`.
+- `frontend/lib/report-presentation.before_refinement.ts` — preserve for owner review. References: `opslens_presentation_refinement.py`.
+- `reports/live_http_journey_before_credentials.json` — preserve for owner review.
+- `reports/live_http_journey_before_schema_fix.json` — preserve for owner review.
+- `reports/live_http_journey_before_trace_fix.json` — preserve for owner review.
+- `reports/phase5_3d_before_replay.json` — preserve for owner review. References: `docs/PHASE5_3D_ROOT_CAUSE_REPAIR.md`.
+- `scripts/fix_unified_page.py` — preserve for owner review.
+- `scripts/opslens_answer_first_patch.py` — preserve for owner review. References: `opslens_answer_first_patch.py`.
+- `scripts/phase5_1_playground.stage5_12r_backup.py` — preserve for owner review.
+- `scripts/phase5_1_playground.stage5_13l_backup.py` — preserve for owner review.
+- `scripts/phase5_1_playground.stage5_15h42a_backup.py` — preserve for owner review.
+- `scripts/phase5_1_playground.stage5_15h42_backup.py` — preserve for owner review.
+- `scripts/phase5_1_playground.stage5_15h48_backup.py` — preserve for owner review.
+- `scripts/phase5_2e_validate.stage5_12e_backup.py` — preserve for owner review.
+- `scripts/phase5_3c_validate.stage5_12e_backup.py` — preserve for owner review.
+- `scripts/test_backend_acceptance.stage5_15h48a_backup.py` — preserve for owner review.
+
+Also review `frontend/tsconfig.tsbuildinfo` for future untracking after preserving its existing changes. Historical reports and legacy modules remain KEEP until per-file reproducibility/dependency evidence supports retirement.
+
+## Validation
+- Python AST: 408 parsed, no syntax errors.
+- Frontend `npm test`: 55 passed, 26 failed both before and after cache deletion. Failures predate cleanup and involve existing presentation/session/timeline expectations; no UI/test changes made to mask them.
+- `npx tsc --noEmit --incremental false`: passed before and after cleanup.
+- `npm run build`: passed on retry, including lint/type checks, with existing unused-variable warnings (including backup TSX). First attempt failed with EPERM creating a .next/static directory before deletions.
+- `node frontend/tests/export-pdf-qa.mjs`: generated Business and Analyst PDFs; retained under ignored `.runtime/cleanup-audit/`. Generation only, not visual PDF certification.
+- Focused backend pytest suite: 32 passed in 1.63s (cohorts, audit SQL boundary, release SQL policy, trace projection). Standard pytest launcher attempts stalled and were interrupted. A bounded release-contract attempt printed 25 passing indicators but did not finish; it is not counted as a passing suite.
+- Full backend suite: bounded run timed out after 50 seconds while Windows asyncio initialized its socket pair (`socket.accept` / `_fallback_socketpair`), before completing async tests. This is an execution-environment blocker; no cleanup source change explains it.
+- `git diff --check`: existing trailing whitespace in user-edited frontend/app/page.tsx; preserved.
+- Live PostgreSQL reconciliation, Docker provisioning and Gemini benchmarks: not run; these require configured services/data and, for Gemini, external transmission. No production readiness certification.
+
+## GitHub reproducibility and security review
+`.env` is local and ignored. Only `.env.example` and `.env.phase2d.example` are tracked environment files. No tracked .db/.sqlite/.zip or private-key filenames were found. A limited tracked-text scan for common provider keys, private-key headers and credential URLs found no matches; values were never printed. This does not certify every historical report or Git history free of sensitive data. Caches, environments, datasets, local databases and build directories are ignored.
+
+Frontend has a committed lockfile. Backend dependencies are version ranges, not a lock. The release runbook explains provisioning and required datasets; a clone alone lacks ignored raw/processed/synthetic data. The runbook mentions pytest, but requirements-api.txt does not install it; requirements-phase2d.txt declares pytest>=8,<9 while the local environment has pytest 9.2.0. Test dependencies/environment need reconciliation before claiming clean-environment reproducibility. Historical README/frontend descriptions also lag newer session and investigation functionality. Preserve them pending a targeted documentation review.
+
+## Final structure
+```text
+OpsLens/
+  api.py, dashboard_api.py, investigation_sessions.py, investigation_traces.py
+  agent/                 planning, routing, evidence, recovery
+  mcp_server/            governed access and readiness
+  retrieval/             document retrieval
+  config/                metric and response contracts
+  frontend/              app/, components/, lib/, tests/, lockfile
+  scripts/               validation, provisioning, evaluation
+  db/                    init/, migrations/
+  sql/                   reconciliation and audits
+  data/                  documents/, eval_ground_truth/, ignored datasets
+  docs/                  audit/, phase-history/, contracts
+  reports/               retained evaluation evidence
+  requirements-*.txt, .env*.example, docker-compose.yml
+  .runtime/              ignored state and local cleanup audit
+```
+
+## Exact cache deletion manifest
+- `.pytest_cache/.gitignore` — generated cache.
+- `.pytest_cache/CACHEDIR.TAG` — generated cache.
+- `.pytest_cache/README.md` — generated cache.
+- `.pytest_cache/v/cache/lastfailed` — generated cache.
+- `.pytest_cache/v/cache/nodeids` — generated cache.
+- `agent/__pycache__/business_hypotheses.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/business_reasoning.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/completion_policy.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/coverage_stop_gate.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/delivery_review_comparison.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/delivery_review_routing.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/document_corroboration.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/evidence.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/evidence_coverage.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/evidence_followup.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/graph.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/graph_phase3b.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/graph_phase3c.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/graph_phase3e.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/graph_phase3f.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/intent_phase3f.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/investigation_result.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/investigation_state.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/investigator_phase3g.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/marketing_followup.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/mcp_bridge.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4a1_live_context.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4a_context.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4a_planner.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4a_plan_contract.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b1_semantic_playground.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b1_semantic_query.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b2_metric_governance.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b2_metric_playground.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b3_relationship_governance.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b3_relationship_playground.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b41_live_verifier.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b42_relationship_auditor.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b43_graph_planner.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b44_context_grounding.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b44_gemini_interpreter.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b44_nl_playground.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b45_nl_playground.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b45_result_validation.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b4_semantic_map.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b51_metric_contracts.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b52_reconciliation.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b53_eligibility.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b54_governed_finance.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b55_semantic_bridge.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b56_dynamic_period.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b57_nl_dynamic_finance.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b5_semantic_expansion.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b_investigation_playground.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4b_playground_utils.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c10_contract.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c11_satisfaction.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c12_cx_nlp.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c13_cx_compare.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c14_delivery_audit.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c15_delivery.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c16_delivery_nlp.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c17_delivery_compare.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c19_product.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c1_router.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c20_product_nlp.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c21b_aliases.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c21_category_catalog.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c24_language.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c25_clarification.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c26_recovery.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c27a_interpreter.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c2_graph_routing.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c3_investigation.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c4_drivers.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c5_hypotheses.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c6_nl_investigation.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c6_unified_dispatch.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c7_adaptive.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c7_unified_dispatch.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c8_capabilities.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c8_planning.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c8_unified_dispatch.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase4c9_operational_audit.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase5_1_explanation.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase5_1_unified.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase5_2c_three_domain.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase5_2e_multidomain_router.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase5_2f_cohort_evidence.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase5_2_multidomain.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/phase5_3c_incident_gateway.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/planner.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/planner_contract.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/planner_gemini.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/planner_providers.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/policy_phase3f.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/proposal_compiler.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/provider_policy.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/refund_action_policy.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/refund_concentration.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/refund_context_binding.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/refund_metric_binding.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/refund_metric_integrity.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/refund_routing.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/refund_semantic_contract.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/refund_semantic_v2.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/requirement_extractor.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/requirement_planner.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/requirement_preflight.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/retrieval_phase3c.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/schema_adaptive.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/security_guidance.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/seller_concentration.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/seller_routing.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/semantic_alias_evaluation.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/semantic_candidate_intake.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/semantic_gemini_proposer.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/semantic_proposal.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/session_context.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/state.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/structured_capability_gate.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/structured_gemini_proposer.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/structured_semantic_intent.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/trace_projection.cpython-313.pyc` — generated cache.
+- `agent/__pycache__/__init__.cpython-313.pyc` — generated cache.
+- `mcp_server/__pycache__/policy.cpython-313.pyc` — generated cache.
+- `mcp_server/__pycache__/readiness.cpython-313.pyc` — generated cache.
+- `mcp_server/__pycache__/runtime_tools.cpython-313.pyc` — generated cache.
+- `mcp_server/__pycache__/server.cpython-313.pyc` — generated cache.
+- `mcp_server/__pycache__/__init__.cpython-313.pyc` — generated cache.
+- `retrieval/__pycache__/hybrid.cpython-313.pyc` — generated cache.
+- `retrieval/__pycache__/mcp_extension.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/agent_reliability_eval.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/assign_incident_months.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/audit_and_clean_ga4_sessions.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/audit_batch_a_incidents_v2.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/audit_batch_b_business_impact_v3.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/audit_batch_b_incidents.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/audit_batch_c_incidents.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/audit_business_layer.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/build_phase3d_index.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/calibrate_batch_b_v3_fixed.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/check_postgres.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/generate_batch_a_incidents_v5.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/generate_batch_b_incidents_v2.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/generate_batch_c_incidents.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/generate_business_layer.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/inventory_data.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/live_checkpoint.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/live_checkpoint_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/live_http_checkpoint.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/load_phase2b_v3.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/merge_ga4_sessions.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p0_1_validate.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/p0_1_validate.cpython-313-pytest-9.2.0.pyc` — generated cache.
+- `scripts/__pycache__/p0_1_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p0_2_capture.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p0_2_pdf_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p0_2_run_offline.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p0_2_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p0_3_run_offline.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p0_3_validate.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/p0_3_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p1_1_validate.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/p1_1_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p1_2_validate.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/p1_2_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p1_3_validate.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/p1_3_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p2_1_live.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p2_1_validate.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/p2_1_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p2_2_validate.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/p2_2_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p2_3_live.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/p2_3_validate.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/p2_3_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase2c_semantic_tools.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b1_diagnose_query.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b1_validate_date_casts.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b1_validate_semantic_queries.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b2_validate_metrics.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b3_validate_relationships.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b41_validate_verifier.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b41_verify_live_map.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b42_validate_relationships.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b42_verify_relationships.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b43_run_query.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b43_validate_planner.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b44_validate_gemini_schema.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b44_validate_grounding.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b45_validate_results.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b4_inspect_map.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b4_validate_semantic_map.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b51_validate_contracts.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b51_verify_live_metrics.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b52_reconcile_live.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b52_validate_reconciliation.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b53_reconcile_live.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b53_validate_eligibility.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b54_finance_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b54_validate_governed_finance.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b55_semantic_bridge.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b55_validate_bridge.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b56_dynamic_finance.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b56_validate_dynamic.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b571_validate_reliability.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b572_validate_coverage.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b57_nl_finance.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b57_validate_nl.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b5_audit_catalog.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b5_validate_catalog.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4b_validate_investigation.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c10_assess.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c10_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c11b_compare.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c11b_live_mcp.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c11b_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c11_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c11_validate_context_router.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c12_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c12_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c12_validate_ambiguity.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c13_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c13_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c14_assess.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c14_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c15_compare.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c15_live_mcp.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c15_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c16_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c16_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c17_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c17_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c18_assess.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c18_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c19b_compare.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c19b_live_mcp.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c19b_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c19_assess.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c19_policy_regression.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c19_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c1_router_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c1_validate_router.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c20_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c20_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c21b_review.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c21b_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c21_assess.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c21_catalog_lookup.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c21_sql_regression.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c21_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c24b_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c24_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c24_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c25_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c25_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c26_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c26_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c27a_smoke.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c27a_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c2_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c2_validate_routing.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c3_investigate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c3_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c3_validate_investigation.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c4_investigate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c4_validate_drivers.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c5_investigate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c5_validate_hypotheses.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c6_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c6_validate_nl.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c7_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c7_validate_adaptive.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c8_discover.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c8_unified_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c8_validate_capabilities.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c9_assess_audit.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase4c9_validate_operational.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_1b_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_1c_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_1_playground.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_1_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_1_validate_explanation.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2b_assess.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2b_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2c_live.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2c_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2d_assess.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2d_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2e_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2f_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2_live.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_2_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_3b_incident_eval.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_3c_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_3d_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_3e_final_gate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_3e_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_3f_pre_ui_review.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_3f_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase5_3_eval.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase6_api_contract_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/phase6_dashboard_validate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/regenerate_inc012_v2.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/rehearse_release.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/release_benchmark.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/release_checks.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/release_query_corpus.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/restricted_gemini_benchmark.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/setup_phase2d_runtime_role.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/smoke_phase3g_gemini.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/smoke_phase3g_openai.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/smoke_phase4a1_gemini.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/smoke_phase4a_gemini.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/stage5_12c_incident_observations.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/stage5_12_decision_quality.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/stage5_15e3_live_semantic_eval.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/stage5_15e8_semantic_batch.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/stage5_15f4_challenge_eval.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/stage5_15g3_structured_live.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/stage5_governed_wiring.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/stage5_marketing_evidence_profile.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_agent_deadlines.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_agent_scenarios.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_audit_cohorts.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/test_audit_cohorts.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_audit_sql_boundary.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/test_audit_sql_boundary.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_backend_acceptance.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/test_backend_acceptance.cpython-313-pytest-9.2.0.pyc` — generated cache.
+- `scripts/__pycache__/test_backend_acceptance.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_business_hypotheses.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/test_business_hypotheses.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_business_reasoning_v3.cpython-313-pytest-9.2.0.pyc` — generated cache.
+- `scripts/__pycache__/test_finance_gateway_recovery.cpython-313-pytest-9.2.0.pyc` — generated cache.
+- `scripts/__pycache__/test_frontend_origins.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/test_marketing_followup.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_marketing_transport.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_production_budgets.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_release_contract.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/test_release_contract.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_release_sql_policy.cpython-313-pytest-8.4.2.pyc` — generated cache.
+- `scripts/__pycache__/test_release_sql_policy.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_replay_isolation.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_12g_injection_detection.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_12j_real_fixture.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_12m_document_boundary.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_12r_security_guidance.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_12z_refund_scope.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_12_adversarial.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_13g_evidence_coverage.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_13i_completion_policy.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_13l_coverage_gate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_13n_narrative_alignment.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_14d_requirement_extractor.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_14f_extractor_hardening.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_14g1_association_scope.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_14i_requirement_preflight.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_14l_requirement_planner.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_14n_contract_hardening.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15b_semantic_proposal.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15d_candidate_intake.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15e10_vocabulary_guidance.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15e2_gemini_proposer.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15e5_handling_alignment.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15e7_alias_evaluation.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15g1_structured_intent.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15g2_structured_proposer.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15g4_capability_gate.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15h21_refund_contract.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15h29_metric_integrity.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15h31_metric_binding.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15h33_semantic_v2.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15h39_refund_action_policy.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15h46_context_binding.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_stage5_15h8_refund_scope_guard.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/test_trace_projection.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase2b.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase2d_mcp_v2.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase3a.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase3b_v2.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase3c.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase3d.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase3e.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase3e_imports.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase3f.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase3g.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase3g_gemini.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase4a.cpython-313.pyc` — generated cache.
+- `scripts/__pycache__/validate_phase4a1_live.cpython-313.pyc` — generated cache.
+- `__pycache__/api.cpython-313.pyc` — generated cache.
+- `__pycache__/dashboard_api.cpython-313.pyc` — generated cache.
+- `__pycache__/frontend_origins.cpython-313.pyc` — generated cache.
+- `__pycache__/investigation_sessions.cpython-313.pyc` — generated cache.
+- `__pycache__/investigation_traces.cpython-313.pyc` — generated cache.

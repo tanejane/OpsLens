@@ -1,0 +1,196 @@
+{
+  "contract": "opslens.semantic-challenge-reference.v1",
+  "status": "FROZEN_ASSISTANT_ANNOTATED",
+  "source_question_sha256": "99e8fa6cbf49081a1549139d7c8c5354726a28d737bec241bc85e0a8c95adb44",
+  "human_adjudicated": false,
+  "reference_origin": "assistant_proposed_before_model_evaluation",
+  "scored_cases": [
+    {
+      "id": "F01",
+      "question": "Calculate July 2018 refund rates for first-time buyers only.",
+      "handling": "UNSUPPORTED_SCOPE",
+      "period": "2018-07",
+      "obligations": [
+        "refund_rate",
+        "first_time_buyer_population"
+      ],
+      "required_semantic_details": [
+        "July 2018",
+        "refund rate",
+        "first-time buyers only"
+      ]
+    },
+    {
+      "id": "F02",
+      "question": "Show June 2018 refund counts broken down by customer loyalty tier.",
+      "handling": "UNSUPPORTED_SCOPE",
+      "period": "2018-06",
+      "obligations": [
+        "refund_measurement",
+        "loyalty_tier_grouping"
+      ],
+      "required_semantic_details": [
+        "June 2018",
+        "refund counts",
+        "group by loyalty tier"
+      ]
+    },
+    {
+      "id": "F03",
+      "question": "Calculate August 2018 late-delivery rates for weekend orders.",
+      "handling": "UNSUPPORTED_SCOPE",
+      "period": "2018-08",
+      "obligations": [
+        "late_delivery_rate",
+        "weekend_order_population"
+      ],
+      "required_semantic_details": [
+        "August 2018",
+        "late-delivery rate",
+        "weekend orders only"
+      ]
+    },
+    {
+      "id": "F04",
+      "question": "Compare June 2018 refund rates for mobile-app purchases versus web purchases.",
+      "handling": "UNSUPPORTED_SCOPE",
+      "period": "2018-06",
+      "obligations": [
+        "refund_rate",
+        "purchase_channel_comparison"
+      ],
+      "required_semantic_details": [
+        "June 2018",
+        "refund rate",
+        "compare mobile-app versus web purchases"
+      ]
+    },
+    {
+      "id": "F05",
+      "question": "Which shipping carrier caused the most late deliveries in July 2018?",
+      "handling": "UNSUPPORTED_CAUSAL",
+      "period": "2018-07",
+      "obligations": [
+        "late_delivery_measurement",
+        "shipping_carrier_causal_identification"
+      ],
+      "required_semantic_details": [
+        "July 2018",
+        "shipping carrier",
+        "late deliveries",
+        "causal responsibility"
+      ]
+    },
+    {
+      "id": "F06",
+      "question": "Calculate June 2018 refund rates for orders above RM200 paid by credit card.",
+      "handling": "UNSUPPORTED_SCOPE",
+      "period": "2018-06",
+      "obligations": [
+        "refund_rate",
+        "order_value_threshold",
+        "credit_card_payment_population"
+      ],
+      "required_semantic_details": [
+        "June 2018",
+        "refund rate",
+        "order value strictly greater than RM200",
+        "credit-card payment restriction",
+        "both restrictions apply simultaneously"
+      ]
+    },
+    {
+      "id": "F08",
+      "question": "Calculate refund rates for the holiday period.",
+      "handling": "CLARIFICATION_REQUIRED",
+      "period": null,
+      "obligations": [
+        "refund_rate",
+        "holiday_period_ambiguity"
+      ],
+      "required_semantic_details": [
+        "refund rate",
+        "holiday period undefined",
+        "year unspecified",
+        "jurisdiction unspecified"
+      ]
+    },
+    {
+      "id": "F09",
+      "question": "Show June 2018 seller refund counts and summarize descriptively without claiming causation.",
+      "handling": "SUPPORTED_CANDIDATE",
+      "period": "2018-06",
+      "obligations": [
+        "refund_measurement",
+        "seller_breakdown",
+        "noncausal_interpretation"
+      ],
+      "required_semantic_details": [
+        "June 2018",
+        "seller refund counts",
+        "seller breakdown",
+        "descriptive noncausal interpretation"
+      ]
+    },
+    {
+      "id": "F10",
+      "question": "Calculate July 2018 late-delivery rates for customers with at least three previous purchases.",
+      "handling": "UNSUPPORTED_SCOPE",
+      "period": "2018-07",
+      "obligations": [
+        "late_delivery_rate",
+        "prior_purchase_count_threshold"
+      ],
+      "required_semantic_details": [
+        "July 2018",
+        "late-delivery rate",
+        "customers with at least three previous purchases",
+        "previous purchases rather than current-period count"
+      ]
+    }
+  ],
+  "held_cases": [
+    {
+      "id": "F07",
+      "question": "Investigate whether weather conditions explain late deliveries during August 2018.",
+      "provisional_annotation": {
+        "id": "F07",
+        "question": "Investigate whether weather conditions explain late deliveries during August 2018.",
+        "handling": "UNSUPPORTED_CAUSAL",
+        "period": "2018-08",
+        "obligations": [
+          "late_delivery_measurement",
+          "weather_conditions_causal_explanation"
+        ],
+        "required_semantic_details": [
+          "August 2018",
+          "late deliveries",
+          "weather conditions",
+          "explanatory relationship",
+          "causal versus associative intent unresolved"
+        ]
+      },
+      "reason": "Explain may refer to causal explanation or exploratory association. No unique handling reference has been established.",
+      "handling_reference": null,
+      "exclude_from_scored_denominator": true
+    }
+  ],
+  "scoring_policy": {
+    "attempted_scored_denominator": 9,
+    "provider_failures_count_as_nonmatches": true,
+    "candidate_rejections_count_as_nonmatches": true,
+    "exact_obligation_set_required": true,
+    "reviewed_aliases_reported_separately": true,
+    "false_supported_claims_reported_separately": true,
+    "parameter_fidelity": "NOT_ASSESSED",
+    "held_cases_excluded_from_accuracy": true
+  },
+  "limitations": [
+    "Assistant-annotated, not independently adjudicated.",
+    "Challenge questions were authored with knowledge of the existing model prompt and development cases.",
+    "Frozen reference is a reproducible local snapshot, not a cryptographic guarantee of immutability.",
+    "Obligation identifiers do not capture all parameter values, operators, or temporal relationships.",
+    "No reference label authorizes SQL execution or confirms registered analytical capabilities.",
+    "F07 remains unresolved and is not scored."
+  ]
+}

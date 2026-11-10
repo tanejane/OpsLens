@@ -99,12 +99,13 @@ test('expired session requires explicit new investigation rather than silent con
   assert.equal(h.calls.filter(x=>x.url==='/api/investigation-sessions').length,2);
 });
 
-test('Business/Analyst switching shares the controller and only changes presentation',async()=>{
+test('unified workspace retains one session controller and explicit reset',async()=>{
   const page=await readFile(new URL('../app/page.tsx',import.meta.url),'utf8');
-  assert.match(page,/useState\(\(\) => new InvestigationSessionClient\(requestJson\)\)/);
-  assert.match(page,/onClick=\{\(\) => setReportMode\(mode\)\}/);
+  assert.match(page,/useState\(\s*\(\) => new InvestigationSessionClient\(requestJson\)\s*\)/);
+  assert.match(page,/const \[reportMode\] = useState<ReportMode>\("Business"\)/);
+  assert.doesNotMatch(page,/setReportMode/);
   assert.match(page,/sessionClient\.turn\(value\)/);
-  assert.match(page,/disabled=\{loading \|\| !sessionReady\} onClick=\{newInvestigation\}/);
+  assert.match(page,/disabled=\{loading \|\| !sessionReady\}\s+onClick=\{newInvestigation\}/);
   assert.doesNotMatch(page,/useEffect\([^]*?runInvestigation[^]*?\[reportMode\]/);
 });
 

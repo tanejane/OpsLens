@@ -1,15 +1,30 @@
 
 "use client";
 
+import {
+  ArrowRight,
+  BarChart3,
+  Download,
+  ChevronDown,
+  CircleHelp,
+  FileSearch2,
+  LayoutDashboard,
+  LoaderCircle,
+  Menu,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
+
+
 import { useEffect, useState } from "react";
 import { BusinessLanding } from "../components/business-landing";
-import { BusinessDashboard } from "../components/BusinessDashboard";
 import { PageHeading, SectionHeading } from "../components/ui";
 import { InvestigationEvidence } from "../components/investigation-evidence";
 import { DocumentEvidence } from "../components/document-evidence";
 import { InvestigationTimeline } from "../components/investigation-timeline";
 import { RefundConcentration } from "../components/refund-concentration";
 import { DeliveryReviewComparison } from "../components/delivery-review-comparison";
+import { PerformanceExplore } from "../components/performance-explore";
 import { SellerConcentration } from "../components/seller-concentration";
 import {
   normalizeInvestigation,
@@ -27,20 +42,11 @@ import {
 import { InvestigationSessionClient } from "../lib/investigation-session";
 import { requestJson, ApiRequestError } from "../lib/api-client";
 import { questionSuggestions, selectSuggestedQuestion } from "../lib/suggestions";
-import {
-  ArrowRight,
-  Download,
-  ChevronDown,
-  CircleHelp,
-  FileSearch2,
-  LayoutDashboard,
-  LoaderCircle,
-  Menu,
-  Search,
-  ShieldCheck,
-} from "lucide-react";
-
-type PageName = "Home" | "Investigations" | "Reports";
+type PageName =
+  | "Home"
+  | "Explore"
+  | "Investigations"
+  | "Reports";
 type Data = Record<string, unknown>;
 type ReportMode = "Business" | "Analyst";
 
@@ -68,6 +74,7 @@ const pages: {
   group: string;
 }[] = [
   { name: "Home", icon: LayoutDashboard, group: "WORKSPACE" },
+  { name: "Explore", icon: BarChart3, group: "WORKSPACE" },
   { name: "Investigations", icon: Search, group: "WORKSPACE" },
   { name: "Reports", icon: FileSearch2, group: "WORKSPACE" },
 ];
@@ -95,22 +102,14 @@ function label(value: string): string {
 }
 
 function display(value: unknown): string {
-  if (typeof value === "number") {
-    return new Intl.NumberFormat("en", {
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
-
+  const fmt = (n: number) => new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(
+    Math.abs(n) < 0.005 ? 0 : n
+  );
+  if (typeof value === "number") return fmt(value);
   if (typeof value === "string") {
     const n = Number(value);
-    if (value.trim() !== "" && Number.isFinite(n)) {
-      return new Intl.NumberFormat("en", {
-        maximumFractionDigits: 2,
-      }).format(n);
-    }
-    return value;
+    return value.trim() !== "" && Number.isFinite(n) ? fmt(n) : value;
   }
-
   return "—";
 }
 
@@ -224,7 +223,7 @@ function extractBusinessReasoning(
           (value) =>
             typeof value === "string" &&
             value.trim().length > 0 &&
-            value.length <= 300
+            value.length <= 1200
         )
       );
     });
@@ -233,7 +232,7 @@ function extractBusinessReasoning(
       !validLists ||
       typeof raw.caveat !== "string" ||
       !raw.caveat.trim() ||
-      raw.caveat.length > 250
+      raw.caveat.length > 500
     ) {
       continue;
     }
@@ -254,81 +253,36 @@ function GeminiBusinessInsights({
 }) {
   if (!reasoning) return null;
 
+  // Follow-up recommendations are consolidated into the report's
+  // single Next steps section so they are not repeated here.
   const sections = [
-    {
-      title: "What this means",
-      items: reasoning.business_significance,
-    },
-    {
-      title: "What might explain the change",
-      items: reasoning.possible_explanations,
-    },
-    {
-      title: "What to investigate next",
-      items: reasoning.recommended_checks,
-    },
-    {
-      title: "What to maintain or monitor",
-      items: reasoning.maintenance_actions,
-    },
+    { title: "What this means", items: reasoning.business_significance },
+    { title: "Possible explanations", items: reasoning.possible_explanations },
+    { title: "What to maintain or monitor", items: reasoning.maintenance_actions },
   ];
 
   return (
     <section
       className="report-section gemini-business-insights"
-      aria-label="AI business interpretation"
+      aria-label="AI-assisted interpretation"
     >
-      <span className="eyebrow">BUSINESS INTERPRETATION</span>
-      <h2 style={{ marginTop: 10, marginBottom: 8 }}>
-        Understanding the results
-      </h2>
-
-      <p
-        style={{
-          color: "var(--muted, #79776f)",
-          fontSize: 13,
-          lineHeight: 1.7,
-          marginBottom: 22,
-        }}
-      >
-        An AI interpretation of approved aggregate evidence.
-        Possible explanations and recommendations are not
-        established business causes.
-      </p>
+      <div className="interpretation-heading">
+        <h2>Understanding the results</h2>
+        <span className="interpretation-source">AI-assisted</span>
+      </div>
 
       {sections.map(({ title, items }) =>
         items.length > 0 ? (
           <div
             key={title}
-            style={{
-              borderTop: "1px solid #e6e3dc",
-              paddingTop: 20,
-              paddingBottom: 18,
-            }}
+            style={{ borderTop: "1px solid #e6e3dc", paddingTop: 18, paddingBottom: 14 }}
           >
-            <h3
-              style={{
-                fontSize: 16,
-                fontWeight: 600,
-                marginBottom: 12,
-              }}
-            >
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
               {title}
             </h3>
-
-            <ul
-              className="plain-list"
-              style={{
-                paddingLeft: 18,
-                display: "grid",
-                gap: 10,
-              }}
-            >
+            <ul className="plain-list" style={{ paddingLeft: 18, display: "grid", gap: 10 }}>
               {items.map((item, index) => (
-                <li
-                  key={`${title}-${index}`}
-                  style={{ lineHeight: 1.7 }}
-                >
+                <li key={`${title}-${index}`} style={{ lineHeight: 1.7 }}>
                   {item}
                 </li>
               ))}
@@ -337,15 +291,7 @@ function GeminiBusinessInsights({
         ) : null
       )}
 
-      <p
-        style={{
-          borderTop: "1px solid #e6e3dc",
-          paddingTop: 15,
-          color: "var(--muted, #79776f)",
-          fontSize: 12,
-          lineHeight: 1.6,
-        }}
-      >
+      <p style={{ borderTop: "1px solid #e6e3dc", paddingTop: 15, color: "var(--muted, #79776f)", fontSize: 12, lineHeight: 1.6 }}>
         {reasoning.caveat}
       </p>
     </section>
@@ -374,7 +320,7 @@ function downloadReport(
     const anchor = document.createElement("a");
 
     anchor.href = href;
-    anchor.download = `opslens-${mode.toLowerCase()}-report.pdf`;
+    anchor.download = "opslens-report.pdf";
     document.body.append(anchor);
     anchor.click();
     anchor.remove();
@@ -439,19 +385,16 @@ function executiveSummary(report: NormalizedInvestigation) {
 }
 
 function changeLabel(value: unknown, unit?: string) {
-  return `${display(value)}${
-    unit === "percentage_points"
-      ? " percentage points"
-      : unit === "score_points"
-      ? " score points"
-      : unit
-      ? ` ${unit}`
-      : ""
-  }`;
+  const readableUnit = unit === "money" || unit === "currency" || unit === "reported units"
+    ? "reported units" : unit === "percentage_points" ? "percentage points"
+    : unit === "score_points" ? "score points" : unit;
+  return `${display(value)}${readableUnit ? ` ${readableUnit}` : ""}`;
 }
 
 function unitLabel(unit?: string) {
-  return unit === "percent"
+  return unit === "money" || unit === "currency"
+    ? " reported units"
+    : unit === "percent"
     ? "%"
     : unit === "score_1_to_5"
     ? " / 5"
@@ -508,9 +451,8 @@ function BusinessMetricChart({
   return (
     <section className="report-section business-chart">
       <SectionHeading
-        eyebrow="VISUAL EVIDENCE"
         title="Period comparison"
-        note="Each metric uses its own scale. The bars compare only the two measured periods."
+        note="Each metric is shown on its own scale."
       />
 
       {measures.map((m) => {
@@ -533,10 +475,10 @@ function BusinessMetricChart({
         return (
           <div className="business-chart-row" key={m.id}>
             <div className="business-chart-title">
-              <strong>{label(m.id)}</strong>
+              <strong>{metricLabel(m.id)}</strong>
               <span>
                 {m.delta !== undefined
-                  ? `Change ${changeLabel(
+                  ? `Change: ${changeLabel(
                       m.delta,
                       m.deltaUnit || m.unit
                     )}`
@@ -582,7 +524,7 @@ function BusinessMetricChart({
                 {display(m.after)}
                 {unitLabel(m.unit)}
                 {m.delta !== undefined
-                  ? ` · Change ${changeLabel(
+                  ? ` · Change: ${changeLabel(
                       m.delta,
                       m.deltaUnit || m.unit
                     )}`
@@ -597,114 +539,48 @@ function BusinessMetricChart({
 }
 
 function BusinessPerOrderChart({
-  report,
-  presentation,
+  report, presentation,
 }: {
   report: NormalizedInvestigation;
-  presentation: ReturnType<
-    typeof buildBusinessReportPresentation
-  >;
+  presentation: ReturnType<typeof buildBusinessReportPresentation>;
 }) {
   const rows = presentation.perOrderComponents;
   const evidence = presentation.perOrderCostEvidence;
-
   if (!rows.length) return null;
-
-  const maxValue = Math.max(
-    ...rows.flatMap((row) => [
-      Math.abs(row.before),
-      Math.abs(row.after),
-    ]),
-    0.0001
-  );
-
-  const earlier =
-    shortPeriod(report.periods.before) || "Earlier period";
-
-  const later =
-    shortPeriod(report.periods.after) || "Later period";
-
+  const earlier = shortPeriod(report.periods.before) || "Earlier period";
+  const later = shortPeriod(report.periods.after) || "Later period";
+  const two = (value: number) => (Math.abs(value) < 0.005 ? 0 : value).toLocaleString("en", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2,
+  });
+  const signed = (value: number) => (value > 0.005 ? "+" : "") + two(value);
   return (
     <section className="report-section per-order-evidence">
       <SectionHeading
-        eyebrow="SUPPORTING FINANCE MEASUREMENTS"
         title="Cost per eligible order"
-        note={`Returned for ${
-          evidence.populationBasis
-        }. ${evidence.limitations.join(" ")}`}
+        note={`Population: ${evidence.populationBasis}. ${evidence.limitations.join(" ")}`}
       />
-
       <p className="per-order-population">
-        Earlier cohort: {display(evidence.beforeOrders)} orders ·
-        Later cohort: {display(evidence.afterOrders)} orders ·
-        Values in dataset-reported units per order.
+        Earlier cohort: {display(evidence.beforeOrders)} orders · Later cohort: {display(evidence.afterOrders)} orders · Dataset-reported units per eligible order.
       </p>
-
-      <div className="per-order-legend">
-        <span>Earlier period</span>
-        <span>Later period</span>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }} aria-label="Cost per eligible order comparison">
+          <thead><tr style={{ borderBottom: "1px solid #d8d6cf" }}>
+            <th scope="col" style={{ padding: "12px 10px" }}>Cost component</th>
+            <th scope="col" style={{ padding: "12px 10px", textAlign: "right" }}>{earlier}</th>
+            <th scope="col" style={{ padding: "12px 10px", textAlign: "right" }}>{later}</th>
+            <th scope="col" style={{ padding: "12px 10px", textAlign: "right" }}>Change</th>
+          </tr></thead>
+          <tbody>{rows.map(row => <tr key={row.label} style={{ borderBottom: "1px solid #e6e3dc" }}>
+            <th scope="row" style={{ padding: "13px 10px", fontWeight: 500 }}>{row.label}</th>
+            <td style={{ padding: "13px 10px", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{two(row.before)}</td>
+            <td style={{ padding: "13px 10px", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{two(row.after)}</td>
+            <td style={{ padding: "13px 10px", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{signed(row.change)}</td>
+          </tr>)}</tbody>
+        </table>
       </div>
-
-      <div
-        className="per-order-chart"
-        role="table"
-        aria-label="Cost per eligible order comparison"
-      >
-        {rows.map((row) => (
-          <div
-            className="per-order-row"
-            role="row"
-            key={row.label}
-          >
-            <div className="per-order-row-heading">
-              <strong>{row.label}</strong>
-              <span>
-                Change {displaySigned(row.change)} per order
-              </span>
-            </div>
-
-            {[
-              { name: earlier, value: row.before, later: false },
-              { name: later, value: row.after, later: true },
-            ].map((item) => (
-              <div
-                className="per-order-bar-line"
-                key={item.name}
-                title={`${item.name}: ${display(
-                  item.value
-                )} reported units per order`}
-              >
-                <span>{item.name}</span>
-                <i>
-                  <b
-                    className={
-                      item.later ? "later-period-bar" : ""
-                    }
-                    style={{
-                      width: `${Math.max(
-                        1,
-                        (Math.abs(item.value) / maxValue) * 100
-                      )}%`,
-                    }}
-                  />
-                </i>
-                <strong>{display(item.value)}</strong>
-              </div>
-            ))}
-
-            <details className="chart-values">
-              <summary>Accessible values</summary>
-              <p>
-                {row.label}: {earlier}{" "}
-                {display(row.before)}, {later}{" "}
-                {display(row.after)}, change{" "}
-                {displaySigned(row.change)} reported units per
-                eligible order.
-              </p>
-            </details>
-          </div>
-        ))}
-      </div>
+      <p style={{ color: "var(--muted, #79776f)", fontSize: 12, marginTop: 12 }}>
+        These averages describe different eligible-order cohorts; changes do not establish operational causes.
+      </p>
     </section>
   );
 }
@@ -811,7 +687,7 @@ function AccountingPressures({
     <section className="report-section">
       <SectionHeading
         eyebrow="ACCOUNTING PRESSURES"
-        title="Largest recorded profit contributions"
+        title="Selected cost pressures — partial breakdown"
         note={`Negative values reduced profit. Ranked by recorded impact; units are shown as returned.${
           partial
             ? " This list is partial and does not reconcile to the full net profit movement."
@@ -892,8 +768,7 @@ function BusinessAccountingPressures({
   return (
     <section className="report-section">
       <SectionHeading
-        eyebrow="ACCOUNTING MOVEMENT"
-        title="Largest recorded profit contributions"
+        title="Selected cost pressures — partial breakdown"
         note={`${note} ${reconciliationNote}`}
       />
 
@@ -956,6 +831,7 @@ function BusinessAccountingPressures({
    EVIDENCE AND METHODOLOGY
    ============================================================ */
 
+
 function EvidenceMethodology({
   report,
   mode,
@@ -963,216 +839,385 @@ function EvidenceMethodology({
   report: ReasoningReport;
   mode: ReportMode;
 }) {
+  const isMeasuredResult = report.status === "measured";
+
   const grouped = evidenceSummary(
     buildReportPresentation(report).accountingGroup
   );
 
+  const detailedMeasures = report.measures.filter(
+    (m) =>
+      m.source ||
+      m.policy ||
+      m.timeBasis ||
+      m.definition ||
+      Object.keys(m.population ?? {}).length > 0 ||
+      m.limitations.length > 0
+  );
+
+  const uniqueLimitations = Array.from(
+    new Set(
+      [
+        ...report.limitations,
+        ...report.measures.flatMap((m) => m.limitations),
+      ].filter(Boolean)
+    )
+  );
+
+  const aiStatus =
+    report.geminiAttachment?.status ?? "NOT_RETURNED";
+
+  const aiAvailable =
+    report.geminiAttachment?.reasoning != null;
+
+  const statusTitle = isMeasuredResult
+    ? "Measured evidence"
+    : report.status === "evidence_gap"
+      ? "Additional evidence required"
+      : report.status === "clarification"
+        ? "Clarification required"
+        : report.status === "failed"
+          ? "Investigation incomplete"
+          : "Evidence not verified";
+
+  const statusDescription = isMeasuredResult
+    ? "The requested measurements were returned by the governed investigation. Review their scope and limitations before drawing conclusions."
+    : report.status === "evidence_gap"
+      ? "The available evidence is insufficient to answer the requested question."
+      : report.status === "clarification"
+        ? "The investigation needs additional information before a supported answer can be produced."
+        : "The available result does not establish a verified measurement.";
+
   return (
     <details className="trace-details evidence-methodology">
-      <summary>
-        Evidence &amp; Methodology
-        <ChevronDown size={15} />
+      <summary className="evidence-main-trigger">
+        <span>
+          <strong>Evidence &amp; methodology</strong>
+
+        </span>
+        <ChevronDown size={17} aria-hidden="true" />
       </summary>
 
-      <div className="trace-list">
-        <section>
-          <h3>Result and evidence status</h3>
+      <div className="evidence-content">
+        <header className="evidence-intro">
+          <h2>How this result was established</h2>
+          <p>{statusDescription}</p>
+        </header>
+
+        <section
+          className="evidence-status-card"
+          aria-label="Evidence status"
+        >
+          <div className="evidence-status-heading">
+            <span
+              className={`evidence-status-dot ${
+                isMeasuredResult ? "is-measured" : ""
+              }`}
+              aria-hidden="true"
+            />
+            <strong>{statusTitle}</strong>
+          </div>
+
           <p>
-            Validation status: {label(report.rawStatus)} ·{" "}
-            {label(report.status)}
+            {isMeasuredResult
+              ? "Evidence is measured, but its scope and coverage still matter."
+              : "Do not treat this investigation as a confirmed finding."}
           </p>
-          <p>
-            Causal claim:{" "}
+
+          <p className="evidence-secondary-note">
             {report.causalClaim === false
-              ? "No causal claim"
+              ? "No causal conclusion is claimed."
               : report.causalClaim === true
-              ? "Claim present; not verified"
-              : "Not supplied"}
+                ? "A causal claim was returned; independent validation is not established here."
+                : "Causal inference was not established by the returned metadata."}
           </p>
         </section>
 
-        <section>
-          <h3>Optional Gemini reasoning</h3>
-          <p>
-            Status:{" "}
-            {report.geminiAttachment?.status ?? "NOT_RETURNED"}
-          </p>
-          <p>
-            AI interpretation does not alter measured evidence
-            or establish operational causes.
-          </p>
-        </section>
+        {detailedMeasures.length > 0 && (
+          <section className="evidence-section">
+            <div className="evidence-section-heading">
+              <h3>Definitions and sources</h3>
+            </div>
 
-        {Object.keys(report.periods).length > 0 && (
-          <section>
-            <h3>Periods and scope</h3>
-            {Object.entries(report.periods).map(([k, v]) => (
-              <p key={k}>
-                {label(k)}:{" "}
-                {period(v) || string(v)}
-              </p>
-            ))}
-            {report.domains.length > 0 && (
-              <p>
-                Domains:{" "}
-                {report.domains.map(label).join(", ")}
-              </p>
-            )}
+            <div className="evidence-measure-list">
+              {detailedMeasures.map((m, index) => (
+                <article
+                  className="evidence-measure"
+                  key={`${m.id}-${index}`}
+                >
+                  <div className="evidence-measure-heading">
+                    <strong>{metricLabel(m.id)}</strong>
+                    <span>{m.unit || "Unit not supplied"}</span>
+                  </div>
+
+                  {m.definition && (
+                    <p>{m.definition}</p>
+                  )}
+
+                  {(m.value !== undefined ||
+                    m.before !== undefined ||
+                    m.after !== undefined) && (
+                    <div className="evidence-reading">
+                      {m.before !== undefined ||
+                      m.after !== undefined ? (
+                        <>
+                          <span>
+                            Earlier: {display(m.before)}
+                          </span>
+                          <span>
+                            Later: {display(m.after)}
+                          </span>
+                        </>
+                      ) : (
+                        <span>
+                          Measured value: {display(m.value)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  <dl className="evidence-metadata">
+                    {m.source && (
+                      <div>
+                        <dt>Source</dt>
+                        <dd>{m.source}</dd>
+                      </div>
+                    )}
+
+                    {m.timeBasis && (
+                      <div>
+                        <dt>Time basis</dt>
+                        <dd>
+                          {label(m.timeBasis)}
+                        </dd>
+                      </div>
+                    )}
+
+                    {m.policy && (
+                      <div>
+                        <dt>Calculation / eligibility rule</dt>
+                        <dd>{m.policy}</dd>
+                      </div>
+                    )}
+
+                    {Object.keys(m.population ?? {}).length > 0 && (
+                      <div>
+                        <dt>Population</dt>
+                        <dd>
+                          {Object.entries(m.population ?? {})
+                            .map(
+                              ([key, value]) =>
+                                `${label(key)}: ${display(value)}`
+                            )
+                            .join(" · ")}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  {m.limitations.length > 0 && (
+                    <details className="evidence-nested">
+                      <summary>Metric limitations</summary>
+                      <ul>
+                        {m.limitations.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+                </article>
+              ))}
+            </div>
           </section>
         )}
 
-        {mode === "Analyst" &&
-          report.measures.some(
-            (m) =>
-              m.source ||
-              m.policy ||
-              m.timeBasis ||
-              Object.keys(m.population ?? {}).length ||
-              m.definition
-          ) && (
-            <section>
-              <h3>Metric definitions and provenance</h3>
-              {report.measures
-                .filter(
-                  (m) =>
-                    m.source ||
-                    m.policy ||
-                    m.timeBasis ||
-                    Object.keys(m.population ?? {}).length ||
-                    m.definition
+        {(Object.keys(report.periods).length > 0 ||
+          report.domains.length > 0) && (
+          <section className="evidence-section">
+            <div className="evidence-section-heading">
+              <h3>What was examined</h3>
+            </div>
+
+            <dl className="evidence-metadata">
+              {Object.entries(report.periods).map(
+                ([key, value]) => (
+                  <div key={key}>
+                    <dt>{label(key)}</dt>
+                    <dd>
+                      {period(value) || string(value)}
+                    </dd>
+                  </div>
                 )
-                .map((m) => (
-                  <article key={m.id}>
-                    <strong>{label(m.id)}</strong>
-                    {m.definition && (
-                      <p>Definition: {m.definition}</p>
-                    )}
-                    {m.source && (
-                      <p>
-                        Source: <code>{m.source}</code>
-                      </p>
-                    )}
-                    {m.timeBasis && (
-                      <p>
-                        Time basis: {label(m.timeBasis)}
-                      </p>
-                    )}
-                    {Object.keys(m.population ?? {}).length >
-                      0 && (
-                      <p>
-                        Eligible population:{" "}
-                        {Object.entries(m.population ?? {})
-                          .map(
-                            ([k, v]) =>
-                              `${label(k)} ${display(v)}`
-                          )
-                          .join(" · ")}
-                      </p>
-                    )}
-                    {m.policy && (
-                      <p>Eligibility rule: {m.policy}</p>
-                    )}
-                    {m.limitations.map((x) => (
-                      <p key={x}>Limitation: {x}</p>
-                    ))}
-                  </article>
-                ))}
-            </section>
-          )}
+              )}
+
+              {report.domains.length > 0 && (
+                <div>
+                  <dt>Business domains</dt>
+                  <dd>
+                    {report.domains.map(label).join(", ")}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </section>
+        )}
+
+        {uniqueLimitations.length > 0 && (
+          <section className="evidence-section">
+            <div className="evidence-section-heading">
+              <h3>Full limitations</h3>
+            </div>
+
+            <ul className="evidence-limitations">
+              {uniqueLimitations.map((item, index) => (
+                <li key={index}>
+                  {plainLanguageLimitation(item)}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {grouped.length > 0 && (
-          <section>
-            <h3>Accounting evidence metadata</h3>
-            {grouped.map((v) => (
-              <p key={v}>{v}</p>
-            ))}
-          </section>
+          <details className="evidence-disclosure">
+            <summary>Accounting evidence context</summary>
+            <div className="evidence-disclosure-body">
+              {grouped.map((item, index) => (
+                <p key={index}>{item}</p>
+              ))}
+            </div>
+          </details>
         )}
 
         {Object.keys(report.cohortEvidence).length > 0 && (
-          <section>
-            <h3>Operational cohort audit</h3>
-            <p>
-              Status:{" "}
-              {label(
-                string(report.cohortEvidence.status) ||
-                  "Not supplied"
-              )}
-            </p>
-            {string(report.cohortEvidence.limitation) && (
-              <p>
-                Scope:{" "}
-                {string(report.cohortEvidence.limitation)}
-              </p>
-            )}
-            {array(report.cohortEvidence.months).map(
-              (v, i) => {
-                const row = object(v);
-                return (
-                  <p key={i}>
-                    {string(row.month)}:{" "}
-                    {display(row.orders)} audited orders
-                  </p>
-                );
-              }
-            )}
-          </section>
-        )}
-
-        {mode === "Analyst" &&
-          report.limitations.length > 0 && (
-            <section>
-              <h3>Evidence limitations</h3>
-              <ul>
-                {report.limitations.map((v) => (
-                  <li key={v}>{v}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-        {mode === "Analyst" &&
-          report.toolTrace.length > 0 && (
-            <section>
-              <h3>Governed tool trace</h3>
-              {report.toolTrace.map((trace, i) => (
-                <p key={i}>
-                  {label(
-                    string(trace.capability) ||
-                      `Step ${i + 1}`
-                  )}
-                  {string(trace.source) && (
-                    <>
-                      {" "}· <code>{string(trace.source)}</code>
-                    </>
-                  )}
-                  {string(trace.metric_id) && (
-                    <> · {string(trace.metric_id)}</>
-                  )}
+          <details className="evidence-disclosure">
+            <summary>Operational cohort evidence</summary>
+            <div className="evidence-disclosure-body">
+              {string(report.cohortEvidence.status) && (
+                <p>
+                  Status:{" "}
+                  {label(string(report.cohortEvidence.status))}
                 </p>
-              ))}
-            </section>
-          )}
+              )}
 
-        {report.stopReasons.length > 0 && (
-          <section>
-            <h3>Investigation stop reasons</h3>
-            {report.stopReasons.map((entry) => (
-              <p key={entry.path}>
-                {entry.path}: {entry.value}
-              </p>
-            ))}
-          </section>
+              {string(report.cohortEvidence.limitation) && (
+                <p>
+                  Scope:{" "}
+                  {string(report.cohortEvidence.limitation)}
+                </p>
+              )}
+
+              {array(report.cohortEvidence.months).map(
+                (item, index) => {
+                  const row = object(item);
+
+                  return (
+                    <p key={index}>
+                      {string(row.month)}:{" "}
+                      {display(row.orders)} audited orders
+                    </p>
+                  );
+                }
+              )}
+            </div>
+          </details>
         )}
 
-        <InvestigationEvidence
-          report={report}
-          mode={mode}
-        />
+        <details className="evidence-disclosure">
+          <summary>Optional AI interpretation</summary>
+          <div className="evidence-disclosure-body">
+            <p>
+              {aiAvailable
+                ? "An AI-assisted interpretation was returned. It is separate from the governed measurement."
+                : "An optional AI interpretation was not available for this result. The evidence above remains independently inspectable."}
+            </p>
+
+            <p>
+              AI-generated explanations do not establish
+              operational causes.
+            </p>
+          </div>
+        </details>
+
+        <details className="evidence-disclosure evidence-technical">
+          <summary>Technical diagnostics</summary>
+          <div className="evidence-disclosure-body">
+            <p>
+              Internal validation status:{" "}
+              <code>{report.rawStatus}</code>
+            </p>
+
+            <p>
+              AI provider status: <code>{aiStatus}</code>
+            </p>
+
+            {report.toolTrace.length > 0 && (
+              <div className="evidence-technical-group">
+                <h4>Governed execution trace</h4>
+
+                {report.toolTrace.map((trace, index) => (
+                  <p key={index}>
+                    {label(
+                      string(trace.capability) ||
+                        `Step ${index + 1}`
+                    )}
+                    {string(trace.source)
+                      ? ` · ${string(trace.source)}`
+                      : ""}
+                    {string(trace.metric_id)
+                      ? ` · ${string(trace.metric_id)}`
+                      : ""}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {report.stopReasons.length > 0 && (
+              <div className="evidence-technical-group">
+                <h4>Orchestration stop reasons</h4>
+                {report.stopReasons.map((entry, index) => (
+                  <p key={index}>
+                    <code>{entry.path}</code>
+                    {" — "}
+                    <code>{entry.value}</code>
+                  </p>
+                ))}
+              </div>
+            )}
+
+            <p>
+              These diagnostic labels describe internal
+              execution and should not be interpreted as
+              business findings.
+            </p>
+          </div>
+        </details>
+
+        <details className="evidence-disclosure evidence-full-audit">
+          <summary>Complete investigation evidence</summary>
+          <div className="evidence-disclosure-body">
+            <p>
+              Supporting records and detailed audit evidence
+              are available below. The full canonical record
+              remains available through the existing export.
+            </p>
+
+            <InvestigationEvidence
+              report={report}
+              mode={mode}
+            />
+          </div>
+        </details>
+
+        <p className="evidence-footnote">
+          Governed, read-only analysis. Measurements remain
+          subject to their documented scope and limitations.
+        </p>
       </div>
     </details>
   );
 }
+
 
 /* ============================================================
    INVESTIGATION REPORT
@@ -1280,6 +1325,14 @@ function BusinessReport({
 
   const geminiReasoning =
     report.geminiAttachment?.reasoning ?? null;
+  // Only for a measured, non-causal finance divergence with a validated answer-first summary.
+  // Other investigations keep the existing optional AI-assisted interpretation.
+  const financeGuidance = report.status === "measured"
+    && report.causalClaim === false
+    && financial.divergence_confirmed === true
+    && p.answer.startsWith("Revenue grew ");
+  const refundCost = report.perOrderCostEvidence.validated
+    ? p.perOrderComponents.find(row => row.label === "Refund expense") : undefined;
 
   const financialKpis = [
     ["Revenue change", financial.revenue_delta],
@@ -1296,45 +1349,174 @@ function BusinessReport({
     report.productContext.category_item_gmv
   );
 
+
+  // A simple measured result may be presented as one hero KPI.
+  // Comparisons, finance bridges and multi-metric investigations
+  // continue to use the existing detailed presentation.
+  const primaryMetric =
+    report.status === "measured" &&
+    report.measures.length === 1 &&
+    !financialKpis.some(([, value]) => hasValue(value)) &&
+    report.accountingHypotheses.length === 0 &&
+    report.measures[0].before === undefined &&
+    report.measures[0].after === undefined &&
+    hasValue(report.measures[0].value)
+      ? report.measures[0]
+      : null;
+
+  // Keep the answer card concise; all population fields remain in
+  // Evidence & Methodology below.
+  const population = primaryMetric?.population ?? {};
+  const preferredPopulationKeys = [
+    "reviewed_orders",
+    "eligible_orders",
+    "category_orders",
+    "category_units",
+    "late_orders",
+    "orders",
+  ];
+  const priorityPopulation = preferredPopulationKeys
+    .filter((key) => Object.prototype.hasOwnProperty.call(population, key))
+    .slice(0, 2);
+  const populationKeys = priorityPopulation.length
+    ? priorityPopulation
+    : Object.keys(population).filter((key) =>
+        Number.isFinite(Number(population[key]))
+      ).slice(0, 2);
+  const primaryPopulation = populationKeys.map(
+    (key) => `${label(key)}: ${display(population[key])}`
+  );
+
+  // Display an evidence-backed headline first; the rest of the existing
+  // narrative is retained immediately underneath it.
+  const answerBoundary = p.answer.search(/[.!?]\s+[A-Z]/);
+  const answerLead = answerBoundary >= 0
+    ? p.answer.slice(0, answerBoundary + 1)
+    : p.answer;
+  const answerDetail = answerBoundary >= 0
+    ? p.answer.slice(answerBoundary + 1).trim()
+    : "";
+
   return (
     <>
       <ReportHeader report={report} />
 
-      <section className="business-lead">
-        <span className="eyebrow">
-          {report.status === "measured"
-            ? "DIRECT ANSWER"
-            : "INVESTIGATION DISPOSITION"}
-        </span>
-        <h2>{p.answer}</h2>
-        {p.premise && <p>{p.premise}</p>}
+
+
+
+
+
+      <section
+        className="business-lead investigation-answer"
+        aria-label="Investigation answer"
+      >
+        <div className="investigation-answer-top">
+          <span className="investigation-answer-status">
+            {report.status === "measured"
+              ? "Measured evidence"
+              : "Review required"}
+          </span>
+        </div>
+
+        {primaryMetric ? (
+          <>
+            <div className="investigation-answer-metric">
+              <span className="investigation-answer-label">
+                {primaryMetric.id === "item_gmv" &&
+                report.productContext.category
+                  ? `${label(string(report.productContext.category))} category item GMV`
+                  : metricLabel(primaryMetric.id)}
+              </span>
+
+              <div className="investigation-answer-value">
+                {display(primaryMetric.value)}
+                <span>{unitLabel(primaryMetric.unit)}</span>
+              </div>
+
+              {period(primaryMetric.period) && (
+                <p className="investigation-answer-period">
+                  {period(primaryMetric.period)}
+                </p>
+              )}
+
+              {primaryPopulation.length > 0 && (
+                <p className="investigation-answer-population">
+                  {primaryPopulation.join(" · ")}
+                </p>
+              )}
+
+
+              {primaryMetric.id === "item_gmv" &&
+                hasValue(report.productContext.total_item_gmv) && (
+                  <p className="investigation-answer-population">
+                    Total item GMV across categories: {display(report.productContext.total_item_gmv)} reported units
+                  </p>
+                )}
+            </div>
+
+            <div className="investigation-answer-explanation">
+              <p>{p.answer}</p>
+              {p.premise &&
+                !/^(measurements are available|the requested metrics were measured)/i.test(p.premise) && (
+                  <p>{p.premise}</p>
+                )}
+            </div>
+          </>
+        ) : (
+          <>
+            <h2>{answerLead}</h2>
+
+            {answerDetail && (
+              <p className="investigation-answer-context">
+                {answerDetail}
+              </p>
+            )}
+
+            {p.premise && (
+              <p className="investigation-answer-context">
+                {p.premise}
+              </p>
+            )}
+          </>
+        )}
       </section>
 
-      {geminiReasoning && (
+
+
+      {financeGuidance ? (
+        <section className="report-section" aria-label="Grounded business interpretation">
+          <div className="interpretation-heading"><h2>Understanding the results</h2><span className="interpretation-source">Evidence-grounded</span></div>
+          <h3>Measured observation</h3>
+          <p>{refundCost && refundCost.after > refundCost.before
+            ? `Average refund expense per eligible order increased from ${refundCost.before.toFixed(2)} to ${refundCost.after.toFixed(2)} reported units. This indicates higher refund-related costs per order across the compared cohorts.`
+            : "The governed comparison establishes the accounting movement. A validated per-order refund comparison was not returned."}</p>
+          <h3>Possible explanations — not verified</h3>
+          <p>{refundCost && refundCost.after > refundCost.before
+            ? "The increase could reflect changes in order composition, refund amounts, or refund frequency. The current evidence cannot distinguish these possibilities."
+            : "Differences in costs or order composition could contribute to the movement, but the present evidence does not establish an operating mechanism."}</p>
+          <h3>Recommended check</h3>
+          <p>{refundCost && refundCost.after > refundCost.before
+            ? "Compare refund counts, amounts and rates using consistent order populations, then investigate product or customer patterns if approved data are available."
+            : "Confirm comparable order populations and approved detailed cost records before attributing the change to any business mechanism."}</p>
+        </section>
+      ) : geminiReasoning ? (
         <GeminiBusinessInsights reasoning={geminiReasoning} />
-      )}
+      ) : null}
 
       {report.status === "measured" && (
         <>
-          {(financialKpis.some(([, value]) =>
-            hasValue(value)
-          ) ||
+          {(financialKpis.some(([, value]) => hasValue(value)) ||
             report.measures.some(
               (m) =>
                 m.before === undefined &&
                 m.after === undefined &&
-                hasValue(m.value)
+                hasValue(m.value) &&
+                !primaryMetric
             ) ||
-            categoryGmv) && (
+            (categoryGmv && !primaryMetric)) && (
             <section className="report-section">
               <SectionHeading
-                eyebrow="KEY KPI CHANGES"
                 title="Measured results"
-                note={
-                  Object.keys(financial).length
-                    ? "Verified for the governed finance comparison."
-                    : undefined
-                }
               />
 
               {financialKpis.some(([, value]) =>
@@ -1352,21 +1534,19 @@ function BusinessReport({
                           <strong>
                             {displaySigned(value)}
                           </strong>
-                          <small>
-                            across compared periods
-                          </small>
+
                         </div>
                       ))}
                   </div>
 
                   <p className="business-metric-context">
-                    Amounts are shown in the dataset's
+                    Amounts are shown in the dataset&apos;s
                     reported units; no currency code was supplied.
                   </p>
                 </>
               )}
 
-              {categoryGmv && (
+              {categoryGmv && !primaryMetric && (
                 <div className="business-kpi-single">
                   <div>
                     <span>
@@ -1398,7 +1578,8 @@ function BusinessReport({
                   (m) =>
                     m.before === undefined &&
                     m.after === undefined &&
-                    hasValue(m.value)
+                    hasValue(m.value) &&
+                    !primaryMetric
                 )
                 .map((m) => (
                   <div
@@ -1448,10 +1629,9 @@ function BusinessReport({
             presentation={p}
           />
 
-          {!geminiReasoning && p.findings.length > 0 && (
+          {!primaryMetric && !geminiReasoning && p.businessInterpretation.length === 0 && p.findings.length > 0 && (
             <section className="report-section">
               <SectionHeading
-                eyebrow="KEY FINDINGS"
                 title="What matters"
               />
               <ul className="plain-list business-finding-list">
@@ -1465,13 +1645,14 @@ function BusinessReport({
             </section>
           )}
 
+
           {!geminiReasoning &&
             p.businessInterpretation.length > 0 && (
               <section className="report-section">
-                <SectionHeading
-                  eyebrow="BUSINESS INTERPRETATION"
-                  title="What the evidence means"
-                />
+                <div className="interpretation-heading">
+                  <h2>Understanding the results</h2>
+                </div>
+
                 <ul className="plain-list business-finding-list">
                   {p.businessInterpretation
                     .slice(0, 2)
@@ -1484,50 +1665,65 @@ function BusinessReport({
                 </ul>
               </section>
             )}
+
         </>
       )}
 
-      {(p.availableFollowUps.length > 0 ||
-        p.additionalEvidence.length > 0) && (
+      {(financeGuidance || p.availableFollowUps.length > 0 ||
+        p.additionalEvidence.length > 0 ||
+        (geminiReasoning?.recommended_checks.length ?? 0) > 0) && (
         <section className="report-section next-section">
-          <SectionHeading
-            eyebrow="NEXT STEPS"
-            title="What to investigate next"
-          />
+          <SectionHeading title="What to investigate next" />
 
           {p.availableFollowUps.length > 0 && (
-            <>
-              <h3>Available now</h3>
-              <ul className="business-next-actions">
-                {p.availableFollowUps.map(
-                  (question) => (
-                    <li key={question}>
-                      <button
-                        className="text-button"
-                        onClick={() =>
-                          onInvestigate?.(question)
-                        }
-                        disabled={!onInvestigate}
-                      >
-                        {question}
-                        <ArrowRight size={14} />
-                      </button>
-                    </li>
+            <ul className="business-next-actions">
+              {Array.from(new Set(p.availableFollowUps)).map((question) => (
+                <li key={question}>
+                  <button
+                    className="text-button"
+                    onClick={() => onInvestigate?.(question)}
+                    disabled={!onInvestigate}
+                  >
+                    {question}
+                    <ArrowRight size={14} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {financeGuidance && (
+            <div className="evidence-needed-next">
+              <h3>Prioritized recommended checks</h3>
+              <ol style={{ paddingLeft: 22, lineHeight: 1.7 }}>
+                <li><strong>Investigate COGS growth.</strong> Examine matched-product unit cost, quantity and sales mix using approved data.</li>
+                <li><strong>Reconcile other net charges.</strong> Identify source-backed cost components and adjustments before assigning them to business functions.</li>
+                <li><strong>Validate marketing and refund trends.</strong> Examine these partial signals using comparable order populations; do not treat them as verified causes.</li>
+              </ol>
+            </div>
+          )}
+          {!financeGuidance && geminiReasoning && geminiReasoning.recommended_checks.length > 0 && (
+            <div className="evidence-needed-next">
+              <h3>Suggested checks <span className="interpretation-source">AI-assisted</span></h3>
+              <ul className="plain-list">
+                {Array.from(new Set(geminiReasoning.recommended_checks))
+                  .filter((item) =>
+                    !p.availableFollowUps.some((q) =>
+                      q.trim().toLowerCase() === item.trim().toLowerCase()
+                    )
                   )
-                )}
+                  .map((item) => <li key={item}>{item}</li>)}
               </ul>
-            </>
+            </div>
           )}
 
           {p.additionalEvidence.length > 0 && (
             <div className="evidence-needed-next">
-              <h3>Requires additional evidence</h3>
+              <h3>Evidence still needed</h3>
               <ul className="plain-list">
-                {p.additionalEvidence
+                {Array.from(new Set(p.additionalEvidence))
                   .slice(0, 3)
-                  .map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
+                  .map((item) => <li key={item}>{item}</li>)}
               </ul>
             </div>
           )}
@@ -1538,7 +1734,6 @@ function BusinessReport({
         report.accountingHypotheses.length > 0) && (
         <section className="report-section limitation-section">
           <SectionHeading
-            eyebrow="LIMITATIONS"
             title="What remains uncertain"
           />
           <p>
@@ -1551,9 +1746,11 @@ function BusinessReport({
                   )} reported units; this residual is not attributed to a cause.`
                 : p.accountingComparable
                 ? "The inputs are marked comparable, but a completed net-profit reconciliation is not certified."
-                : "The response does not verify that the returned accounting components and net profit movement share matching periods, population and units."
+                : "The response does not verify that the selected cost components and contribution-profit movement share matching periods, populations and units. The selected cost breakdown cannot be treated as a complete reconciled bridge."
               : report.status === "measured"
-              ? "The returned comparison is descriptive and does not establish what caused the movement."
+              ? primaryMetric
+                ? "This measurement applies only to the stated population and period."
+                : "The returned comparison is descriptive and does not establish what caused the movement."
               : "The measured evidence needed to answer this question is unavailable."}{" "}
             {Array.from(
               new Set(
@@ -1561,7 +1758,7 @@ function BusinessReport({
                   plainLanguageLimitation
                 )
               )
-            ).join(" ")}
+            ).map(item => /[.!?]$/.test(item.trim()) ? item.trim() : `${item.trim()}.`).join(" ")}
           </p>
         </section>
       )}
@@ -1976,7 +2173,7 @@ function ReportWorkspaceBody({
         }
       >
         <Download size={15} />
-        Download {mode} PDF
+        Download Report
       </button>
 
       {pdfError && (
@@ -2009,6 +2206,8 @@ type InvestigationProps = {
   onInvestigate: (question: string) => void;
 };
 
+
+
 function BusinessInvestigationWorkspace(
   props: InvestigationProps
 ) {
@@ -2018,9 +2217,9 @@ function BusinessInvestigationWorkspace(
       aria-label="Business investigation workspace"
     >
       <PageHeading
-        eyebrow="BUSINESS WORKSPACE"
+        eyebrow="GOVERNED INVESTIGATION"
         title="Investigations"
-        description="Ask a business question, then review a concise, evidence-backed answer."
+        description="Ask a question and examine the measurements, evidence and limitations behind the answer."
       />
       <InvestigationComposer {...props} />
       <InvestigationResult {...props} />
@@ -2123,7 +2322,7 @@ function InvestigationComposer({
         }
       >
         <summary>
-          Suggested questions for {mode} view
+          Suggested investigation questions
         </summary>
 
         <div className="suggestion-title">
@@ -2227,7 +2426,7 @@ function InvestigationResult({
               }
             >
               <Download size={14} />
-              Download {mode} PDF
+              Download Report
             </button>
 
             <button
@@ -2250,7 +2449,7 @@ function InvestigationResult({
 }
 
 /* ============================================================
-   MAIN APPLICATION
+   MAIN APPLICATION — UNIFIED WORKSPACE
    ============================================================ */
 
 export default function Home() {
@@ -2263,8 +2462,11 @@ export default function Home() {
   const [question, setQuestion] = useState("");
   const [suggestionsOpen, setSuggestionsOpen] = useState(true);
   const [result, setResult] = useState<Data | null>(null);
-  const [reportMode, setReportMode] =
-    useState<ReportMode>("Business");
+
+  // Preserve the existing Business report, PDF, and
+  // question-suggestion contracts during this migration.
+  // The global workspace-mode toggle has been removed.
+  const [reportMode] = useState<ReportMode>("Business");
 
   const normalizedResult: ReasoningReport | null = result
     ? {
@@ -2278,25 +2480,30 @@ export default function Home() {
   const [pdfError, setPdfError] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Restore the original governed investigation session.
   useEffect(() => {
     let mounted = true;
 
     sessionClient
       .restore(window.sessionStorage)
       .then((record) => {
-        if (mounted && record) setResult(record);
-      })
-      .catch((cause) => {
-        if (mounted) {
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "Session could not be restored."
-          );
+        if (mounted && record) {
+          setResult(record);
         }
       })
+      .catch((cause) => {
+        if (!mounted) return;
+
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Session could not be restored."
+        );
+      })
       .finally(() => {
-        if (mounted) setSessionReady(true);
+        if (mounted) {
+          setSessionReady(true);
+        }
       });
 
     return () => {
@@ -2304,6 +2511,7 @@ export default function Home() {
     };
   }, [sessionClient]);
 
+  // Keep the established session-reset semantics.
   async function newInvestigation() {
     if (loading || !sessionReady) return;
 
@@ -2311,11 +2519,13 @@ export default function Home() {
 
     try {
       await sessionClient.reset();
+
       setResult(null);
       setQuestion("");
       setError("");
       setPdfError("");
       setSuggestionsOpen(true);
+      setPage("Investigations");
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -2335,9 +2545,8 @@ export default function Home() {
     }
   }, [page]);
 
-  async function runInvestigation(
-    value = question
-  ) {
+  // Preserve the current governed investigation request flow.
+  async function runInvestigation(value = question) {
     if (
       !value.trim() ||
       loading ||
@@ -2373,21 +2582,22 @@ export default function Home() {
     }
   }
 
+  function prepareInvestigation(value: string) {
+    setQuestion(value);
+    setSuggestionsOpen(false);
+    setError("");
+    setPage("Investigations");
+  }
+
   const title: Record<PageName, string> = {
-    Home: "Home",
+    Home: "Overview",
+    Explore: "Explore",
     Investigations: "Investigations",
     Reports: "Reports",
   };
 
   return (
-    <div
-      className={`app-shell ${
-        page === "Home" &&
-        reportMode === "Business"
-          ? "business-home"
-          : ""
-      }`}
-    >
+    <div className="app-shell business-home">
       {menuOpen && (
         <button
           className="mobile-scrim"
@@ -2418,57 +2628,40 @@ export default function Home() {
           WORKSPACE
         </div>
 
-        <nav aria-label="Main navigation" className="navigation">
+        <nav
+          aria-label="Main navigation"
+          className="navigation"
+        >
           {pages
             .filter(
               ({ name }) =>
                 name !== "Reports" || Boolean(result)
             )
-            .map(({ name, icon: Icon, group }, index, visiblePages) => {
-              const previousGroup =
-                visiblePages[index - 1]?.group;
-
-              return (
-                <div key={name}>
-                  {group !== previousGroup &&
-                    group !== "WORKSPACE" && (
-                      <div className="sidebar-label nav-group-label">
-                        {group}
-                      </div>
-                    )}
-
-                  <button
-                    className={`nav-item ${
-                      page === name
-                        ? "nav-active"
-                        : ""
-                    }`}
-                    aria-current={
-                      page === name
-                        ? "page"
-                        : undefined
-                    }
-                    onClick={() => {
-                      setPage(name);
-                      setMenuOpen(false);
-                    }}
-                  >
-                    <Icon
-                      size={17}
-                      strokeWidth={1.7}
-                    />
-                    <span>{name}</span>
-                  </button>
-                </div>
-              );
-            })}
+            .map(({ name, icon: Icon }) => (
+              <button
+                key={name}
+                className={`nav-item ${
+                  page === name ? "nav-active" : ""
+                }`}
+                aria-current={
+                  page === name ? "page" : undefined
+                }
+                onClick={() => {
+                  setPage(name);
+                  setMenuOpen(false);
+                }}
+              >
+                <Icon size={17} strokeWidth={1.7} />
+                <span>
+                  {name === "Home" ? "Overview" : name}
+                </span>
+              </button>
+            ))}
         </nav>
 
         <div className="sidebar-bottom">
           <ShieldCheck size={15} />
-          <span>
-            Governed, read-only analysis
-          </span>
+          <span>Governed, read-only analysis</span>
         </div>
       </aside>
 
@@ -2490,41 +2683,11 @@ export default function Home() {
           <div className="topbar-actions">
             <button
               className="text-button"
-              disabled={
-                loading || !sessionReady
-              }
+              disabled={loading || !sessionReady}
               onClick={newInvestigation}
             >
               New investigation
             </button>
-
-            <div
-              className="view-switch"
-              role="group"
-              aria-label="Workspace"
-            >
-              <span>Workspace</span>
-              {(
-                ["Business", "Analyst"] as const
-              ).map((mode) => (
-                <button
-                  key={mode}
-                  aria-pressed={
-                    reportMode === mode
-                  }
-                  className={
-                    reportMode === mode
-                      ? "view-active"
-                      : ""
-                  }
-                  onClick={() =>
-                    setReportMode(mode)
-                  }
-                >
-                  {mode}
-                </button>
-              ))}
-            </div>
 
             <span className="local-indicator">
               <i />
@@ -2534,147 +2697,61 @@ export default function Home() {
         </header>
 
         <div className="content-wrap">
-          {page === "Home" &&
-            reportMode === "Business" && (
-              <BusinessLanding
-                onInvestigate={(value) => {
-                  setQuestion(value);
-                  setSuggestionsOpen(false);
-                  setPage("Investigations");
-                }}
-                history={
-                  sessionClient.session?.history ??
-                  []
-                }
-                sessionReady={sessionReady}
-                sessionError={error}
-                onOpen={(record) => {
-                  setResult(record);
-                  setPdfError("");
-                  setPage("Reports");
-                }}
-              />
-            )}
+          {/* Overview: existing minimalist landing page */}
+          {page === "Home" && (
+            <BusinessLanding
+              onInvestigate={prepareInvestigation}
+              history={
+                sessionClient.session?.history ?? []
+              }
+              sessionReady={sessionReady}
+              sessionError={error}
+              onOpen={(record) => {
+                setResult(record);
+                setPdfError("");
+                setPage("Reports");
+              }}
+            />
+          )}
 
-          {page === "Home" &&
-            reportMode === "Analyst" && (
-              <section
-                className={`${reportMode.toLowerCase()}-workspace`}
-                aria-label={`${reportMode} workspace home`}
-              >
-                <PageHeading
-                  eyebrow="ANALYST WORKSPACE"
-                  title="Performance overview"
-                  description="Governed KPI comparisons with definitions and source context."
-                />
+          {/* Explore: metric-focused analytical workspace */}
+          {page === "Explore" && (
+            <PerformanceExplore
+              onInvestigate={prepareInvestigation}
+            />
+          )}
 
-                <BusinessDashboard
-                  mode={reportMode}
-                  onInvestigate={(value) => {
-                    setQuestion(value);
-                    setPage("Investigations");
-                  }}
-                />
+          {/* Existing governed investigation functionality */}
+          {page === "Investigations" && (
+            <BusinessInvestigationWorkspace
+              question={question}
+              setQuestion={setQuestion}
+              suggestionsOpen={suggestionsOpen}
+              setSuggestionsOpen={setSuggestionsOpen}
+              run={() => runInvestigation()}
+              loading={loading}
+              error={error}
+              result={normalizedResult}
+              mode={reportMode}
+              onPdfError={setPdfError}
+              onReport={() => setPage("Reports")}
+              onInvestigate={(value) => {
+                setQuestion(value);
+                setSuggestionsOpen(false);
+              }}
+            />
+          )}
 
-                {normalizedResult && (
-                  <section className="home-current-report">
-                    <span className="eyebrow">
-                      CURRENT INVESTIGATION
-                    </span>
-                    <h2>
-                      {headline(normalizedResult)}
-                    </h2>
-                    <p>
-                      {executiveSummary(
-                        normalizedResult
-                      )}
-                    </p>
-                    <button
-                      className="secondary-button"
-                      onClick={() =>
-                        setPage("Reports")
-                      }
-                    >
-                      Open detailed report
-                      <ArrowRight size={14} />
-                    </button>
-                  </section>
-                )}
-              </section>
-            )}
-
-          {page === "Investigations" &&
-            (reportMode === "Business" ? (
-              <BusinessInvestigationWorkspace
-                question={question}
-                setQuestion={setQuestion}
-                suggestionsOpen={suggestionsOpen}
-                setSuggestionsOpen={
-                  setSuggestionsOpen
-                }
-                run={() =>
-                  runInvestigation()
-                }
-                loading={loading}
-                error={error}
-                result={normalizedResult}
-                mode={reportMode}
-                onPdfError={setPdfError}
-                onReport={() =>
-                  setPage("Reports")
-                }
-                onInvestigate={(value) => {
-                  setQuestion(value);
-                  setSuggestionsOpen(false);
-                }}
-              />
-            ) : (
-              <AnalystInvestigationWorkspace
-                question={question}
-                setQuestion={setQuestion}
-                suggestionsOpen={suggestionsOpen}
-                setSuggestionsOpen={
-                  setSuggestionsOpen
-                }
-                run={() =>
-                  runInvestigation()
-                }
-                loading={loading}
-                error={error}
-                result={normalizedResult}
-                mode={reportMode}
-                onPdfError={setPdfError}
-                onReport={() =>
-                  setPage("Reports")
-                }
-                onInvestigate={(value) => {
-                  setQuestion(value);
-                  setSuggestionsOpen(false);
-                }}
-              />
-            ))}
-
-          {page === "Reports" &&
-            (reportMode === "Business" ? (
-              <BusinessReportsWorkspace
-                report={normalizedResult}
-                mode={reportMode}
-                pdfError={pdfError}
-                onPdfError={setPdfError}
-                onInvestigate={(value) => {
-                  setQuestion(value);
-                  setSuggestionsOpen(false);
-                  setPage("Investigations");
-                }}
-              />
-            ) : (
-              <AnalystReportsWorkspace
-                report={normalizedResult}
-                mode={reportMode}
-                pdfError={pdfError}
-                onPdfError={setPdfError}
-              />
-            ))}
+          {/* Existing Business report and PDF functionality */}
+          {page === "Reports" && (
+            <BusinessReportsWorkspace
+              report={normalizedResult}
+              mode={reportMode}
+              pdfError={pdfError}
+              onPdfError={setPdfError}
+              onInvestigate={prepareInvestigation}
+            />
+          )}
 
           <footer className="page-footer">
             <span>OpsLens</span>

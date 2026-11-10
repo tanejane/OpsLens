@@ -145,11 +145,13 @@ test("business and analyst PDF exports are valid non-empty PDFs with facts and l
     assert.match(extracted, /What Remains Unverified/i);
     assert.doesNotMatch(extracted, /Source: not returned|Population: not returned|\[object Object\]|\{"/i);
     assert.match(extracted, /caus/i);
-    assert.match(extracted, /propos|validation/i);
+    assert.match(extracted, /Direct answer/i);
     assert.match(extracted, /Generated/);
     assert.match(extracted, /currency/);
     assert.match(extracted, /139,034\.73/);
-    assert.match(extracted, /48,578\.13/);
+    assert.match(extracted, /-48,578\.13 currency units/);
+    assert.match(extracted, /Revenue change: 139,034\.73 currency units/);
+    assert.deepEqual(pdfRecord(text), report.canonicalRecord);
   }
 });
 
@@ -158,8 +160,8 @@ test("three-domain and single-domain reports format titles, measures, audited ev
     const report = lib.normalizeInvestigation(fixture);
     for (const mode of ["Business", "Analyst"]) {
       const text = extractPdfText(await pdf.createInvestigationPdf(report, mode).text());
-      assert.match(text, mode === "Analyst" ? /Investigation|Delivery Review Partial/i : /Revenue increased|Late Delivery Rate/i);
-      assert.match(text, /Key Metrics/);
+      assert.match(text, /Revenue increased|Late Delivery Rate/i);
+      assert.match(text, /Finance changes|Measured results/);
       assert.doesNotMatch(text, /Source: not returned|not returned|\[object Object\]/i);
       if (fixture === fixtures.delivery_review_partial) assert.match(text, /2018-06-01/);
       if (mode === "Analyst" && fixture === fixtures.delivery_review_partial) {
@@ -167,7 +169,8 @@ test("three-domain and single-domain reports format titles, measures, audited ev
         assert.match(text, /6,167/);
         assert.match(text, /85/);
         const pages = extractPdfPages(await pdf.createInvestigationPdf(report, mode).text());
-        assert.ok(pages.some((page) => page.includes("Low Rating Rate") && page.includes("Source: semantic.order_review_evidence_v1")));
+        assert.ok(pages.some((page) => page.includes("Low Rating Rate")));
+        assert.match(text, /Source: semantic.order_review_evidence_v1/);
       }
     }
   }
@@ -202,7 +205,11 @@ test("three-domain PDF preserves the supplied finance, delivery, review and coho
     assert.match(text, /139,034\.73/); assert.match(text, /48,578\.13/); assert.match(text, /21\.36/); assert.match(text, /3\.75/);
     assert.match(text, /6,728/); assert.match(text, /7,211/); assert.match(text, /no causal|not establish|Descriptive/i);
     assert.doesNotMatch(text, /\[object Object\]|Source: not returned|\{"status"/i);
-    assert.match(text, /Direct Answer and Verified Premise/);
+    assert.match(text, /Direct answer/i);
+    assert.match(text, /percentage points/);
+    assert.match(text, /score points/);
+    assert.ok(text.indexOf("Direct answer") < text.indexOf("Measured results"));
+    assert.match(text, /Recommended Next Validations/);
     assert.match(text, /Accounting Bridge/);
     assert.match(text, /What Remains Unverified/);
     const main = text.split("Evidence & Methodology")[0];
@@ -418,16 +425,13 @@ for (const [name, fixture] of Object.entries(p02.cases)) {
       }
       const source = await pdf.createInvestigationPdf(report, mode).text();
       assert.deepEqual(pdfRecord(source), report.canonicalRecord);
-      const text = extractPdfText(source).replaceAll(" ", "");
-      for (const entry of entries) {
-        // Full exact values are in the attachment; the human-readable appendix
-        // must also contain each path and scalar, with reversible Unicode escapes.
-        const escaped = (s) => s.replace(/[^\x20-\x7E]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4,"0")}`).replaceAll(" ", "");
-        assert.ok(text.includes(escaped(entry.path)), `${mode} PDF lost path ${entry.path}`);
-        // A long scalar may span pages (and therefore headers/footers); each
-        // short value is additionally checked directly in rendered text.
-        if (entry.value.length < 55) assert.ok(text.includes(escaped(entry.value)), `${mode} PDF lost scalar at ${entry.path}`);
-      }
+      // Readable pages are an answer-first summary. The decoded attachment above
+      // preserves every original field, precision, unknown value and Unicode.
+      const text = extractPdfText(source);
+      assert.match(text, /Direct answer/i);
+      assert.match(text, /opslens-investigation.json/);
+      assert.doesNotMatch(text, /\[object Object\]/);
+
     }
   });
 }
@@ -524,9 +528,11 @@ test("adaptive findings and traces survive both PDF modes", async () => {
     const report=lib.normalizeInvestigation(record);
     assert.deepEqual(report.canonicalRecord,record);
     for(const mode of ['Business','Analyst']) {
-      const text=extractPdfText(await pdf.createInvestigationPdf(report,mode).text());
-      for(const item of record.payload.supporting_analyses ?? []) assert.ok(text.includes(item.conclusion));
-      assert.ok(text.includes(record.payload.orchestration.stop_reason));
+      const raw=await pdf.createInvestigationPdf(report,mode).text();
+      assert.deepEqual(pdfRecord(raw),record);
+      const text=extractPdfText(raw);
+      assert.match(text,/Direct answer/i);
+      assert.match(text,/execution traces/);
     }
   }
 });
@@ -544,8 +550,12 @@ test('document conflicts and passages survive normalization and PDF modes',async
  const record=JSON.parse(await readFile(new URL('./fixtures/p2_1_documents.json',import.meta.url),'utf8'));
  const report=lib.normalizeInvestigation(record);assert.deepEqual(report.canonicalRecord,record);
  for(const mode of ['Business','Analyst']){
-  const text=extractPdfText(await pdf.createInvestigationPdf(report,mode).text());
-  assert.match(text,/Document cross-check/);assert.match(text,/CONTRADICTS/);assert.match(text,/CORROBORATES/);assert.match(text,/101/);
+  const raw=await pdf.createInvestigationPdf(report,mode).text();
+  assert.deepEqual(pdfRecord(raw),record);
+  const text=extractPdfText(raw);
+  assert.match(text,/Document cross-check/);assert.match(text,/CONTRADICTS/);assert.match(text,/CORROBORATES/);
+  assert.match(text,/embedded canonical JSON attachment/);
+  assert.doesNotMatch(text,/evidence appendix/);
  }
 });
 

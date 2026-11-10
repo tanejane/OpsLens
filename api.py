@@ -279,7 +279,60 @@ async def investigate(request: InvestigationRequest, http_request: Request):
     entry = sessions.acquire(request.session_id,http_request.cookies.get(COOKIE),request.revision)
     try:
         recovery = deepcopy(entry.recovery) if entry.recovery else new_recovery_session()
+        # Capture server-owned pending context before resolution mutates it.
+        refund_pending_before = deepcopy(recovery.investigation_pending)
         canonical, action, immediate, provenance = resolve(request.question,recovery,entry.last_valid)
+
+        # A contextual refund action must reconstruct to an explicit,
+        # independently routable operation before entering the runtime.
+        if isinstance(action, dict) and action.get("kind") == "refund_concentration":
+            from agent.refund_action_policy import evaluate as refund_policy
+            original_policy = refund_policy(request.question, action)
+
+            if original_policy["decision"] != "SEMANTIC_MATCH_SHADOW":
+                from agent.refund_context_binding import assess as bind_refund_context
+                from agent.refund_routing import contextual as reroute_refund
+
+                binding = bind_refund_context(
+                    request.question,
+                    action,
+                    prior=entry.last_valid,
+                    pending=refund_pending_before,
+                )
+
+                verified = False
+                if binding["status"] == "CONTEXT_SEMANTIC_MATCH_SHADOW":
+                    proposed = binding["canonical_question"]
+                    routed = reroute_refund(proposed, {}, {})
+
+                    if routed is not None:
+                        routed_action, routed_immediate, _ = routed
+                        verified = (
+                            routed_immediate is None
+                            and type(routed_action) is dict
+                            and routed_action == action
+                            and refund_policy(proposed, routed_action)["decision"]
+                            == "SEMANTIC_MATCH_SHADOW"
+                        )
+
+                    if verified:
+                        canonical = proposed
+                        action = routed_action
+                        provenance["resolved_question"] = proposed
+                        provenance["context_metric_binding"] = binding["requested_metric"]
+
+                if not verified:
+                    action = None
+                    immediate = {
+                        "route": "refund_action_policy",
+                        "status": "NEEDS_CLARIFICATION",
+                        "executable": False,
+                        "causal_claim": False,
+                        "reason": (
+                            "The requested refund operation could not be "
+                            "verified from the available session context."
+                        ),
+                    }
         provenance['source_turn'] = entry.last_valid_turn
         provenance['session_id'] = entry.id
         provenance['pending_source_turn'] = entry.recovery.investigation_pending.get('source_turn') if entry.recovery and entry.recovery.investigation_pending else None

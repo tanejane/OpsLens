@@ -1,17 +1,17 @@
 import { plainLanguageLimitation, type JsonObject, type NormalizedInvestigation } from "./investigation";
-import { buildReportPresentation, evidenceSummary } from "./report-presentation";
+import { buildReportPresentation } from "./report-presentation";
 
 type PdfMode = "Business" | "Analyst";
 type Page = { ops: string[]; y: number };
-const PAGE_W = 595.28; const PAGE_H = 841.89; const MARGIN = 52; const CONTENT_W = PAGE_W - MARGIN * 2;
+const PAGE_W = 595.28; const PAGE_H = 841.89; const MARGIN = 55; const CONTENT_W = PAGE_W - MARGIN * 2;
 const clean = (value: unknown) => String(value ?? "").replace(/[→–—·]/g, (c) => ({ "→": "to", "–": "-", "—": "-", "·": "|" })[c] ?? c).replace(/[^\x20-\x7E]/g, "?");
 function number(value: unknown): number | undefined { if (value === undefined || value === null || value === "") return undefined; const n = Number(value); return Number.isFinite(n) ? n : undefined; }
 function fmt(value: unknown, fraction = 2) { const n = number(value); return n === undefined ? clean(value) || "Not provided" : new Intl.NumberFormat("en-US", { maximumFractionDigits: fraction }).format(n); }
 function human(value: unknown) { return clean(value).replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase()); }
 function pdfEscape(s: string) { return clean(s).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)"); }
-// Standard PDF Helvetica AFM widths (ASCII), in 1/1000 em; no font dependency.
-const HELVETICA = [278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 556, 556, 278, 278, 584, 584, 584, 556, 1015, 667, 667, 722, 722, 667, 611, 778, 722, 278, 500, 667, 556, 833, 722, 778, 667, 778, 722, 667, 611, 722, 667, 944, 667, 667, 611, 278, 278, 278, 469, 556, 333, 556, 556, 500, 556, 556, 278, 556, 556, 222, 222, 500, 222, 833, 556, 556, 556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500, 334, 260, 334, 584];
-const HELVETICA_BOLD = [278, 333, 474, 556, 556, 889, 722, 238, 333, 333, 389, 584, 278, 333, 278, 278, 556, 556, 556, 556, 556, 556, 556, 556, 556, 556, 333, 333, 584, 584, 584, 611, 975, 722, 722, 722, 722, 667, 611, 778, 722, 278, 556, 722, 611, 833, 722, 778, 667, 778, 722, 667, 611, 722, 667, 944, 667, 667, 611, 333, 278, 333, 584, 556, 333, 556, 611, 556, 611, 556, 333, 611, 611, 278, 278, 556, 278, 889, 611, 611, 611, 611, 389, 556, 333, 611, 556, 778, 556, 556, 500, 389, 280, 389, 584];
+// Standard PDF Times-Roman font widths (ASCII), in 1/1000 em. Times-style serif substitutes for Times New Roman without bundling proprietary fonts.
+const HELVETICA = [250, 333, 408, 500, 500, 833, 778, 180, 333, 333, 500, 564, 250, 333, 250, 278, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 278, 278, 564, 564, 564, 444, 921, 722, 667, 667, 722, 611, 556, 722, 722, 333, 389, 722, 611, 889, 722, 722, 556, 722, 667, 556, 611, 722, 722, 944, 722, 722, 611, 333, 278, 333, 469, 500, 333, 444, 500, 444, 500, 444, 333, 500, 500, 278, 278, 500, 278, 778, 500, 500, 500, 500, 333, 389, 278, 500, 500, 722, 500, 500, 444, 480, 200, 480, 541];
+const HELVETICA_BOLD = [250, 333, 555, 500, 500, 1000, 833, 278, 333, 333, 500, 570, 250, 333, 250, 278, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 333, 333, 570, 570, 570, 500, 930, 722, 667, 722, 722, 667, 611, 778, 778, 389, 500, 778, 667, 944, 722, 778, 611, 778, 722, 556, 667, 722, 722, 1000, 722, 722, 667, 333, 278, 333, 581, 500, 333, 500, 556, 444, 556, 444, 333, 500, 556, 278, 333, 556, 278, 833, 556, 500, 556, 556, 444, 389, 333, 556, 500, 722, 500, 500, 444, 394, 220, 394, 520];
 function textWidth(value: string, size: number, bold = false): number {
   const widths = bold ? HELVETICA_BOLD : HELVETICA;
   return [...clean(value)].reduce((sum, char) => sum + (widths[char.charCodeAt(0) - 32] ?? 556), 0) * size / 1000;
@@ -77,7 +77,7 @@ function detailFields(value: unknown, depth = 0): string[] {
 function makePdf(pages: Page[], title: string, reportingPeriod: string, report: NormalizedInvestigation): Blob {
   const objects: string[] = ["", "<< /Type /Catalog /Pages 2 0 R >>", ""];
   const add = (value: string) => { objects.push(value); return objects.length - 1; };
-  const font = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"); const bold = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+  const font = add("<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman >>"); const bold = add("<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold >>");
   const pageIds: number[] = []; const total = pages.length;
   pages.forEach((page, index) => {
     page.ops.push(`q 0.89 0.88 0.85 RG ${MARGIN} 43 m ${PAGE_W - MARGIN} 43 l S Q`);
@@ -103,28 +103,54 @@ function makePdf(pages: Page[], title: string, reportingPeriod: string, report: 
   return new Blob(chunks, { type: "application/pdf" });
 }
 
-export function createInvestigationPdf(report: NormalizedInvestigation, mode: PdfMode): Blob {
+export function createInvestigationPdf(report: NormalizedInvestigation, _legacyView?: PdfMode): Blob {
+  const mode: PdfMode = _legacyView === "Analyst" ? "Analyst" : "Business";
   const presentation = buildReportPresentation(report);
   const pages: Page[] = []; let page!: Page;
-  const newPage = (continuation = false) => { page = { ops: [], y: PAGE_H - 66 }; pages.push(page); page.ops.push(`BT /F2 7 Tf 0.43 0.45 0.40 rg ${MARGIN} ${PAGE_H - 37} Td (${pdfEscape(continuation ? "OPSLENS  |  INVESTIGATION REPORT  |  CONTINUED" : `OPSLENS  |  ${mode.toUpperCase()} VIEW`)}) Tj ET`); };
+  const newPage = (continuation = false) => { page = { ops: [], y: PAGE_H - 66 }; pages.push(page); page.ops.push(`BT /F2 9 Tf 0.15 0.15 0.15 rg ${MARGIN} ${PAGE_H - 37} Td (${pdfEscape(continuation ? "OPSLENS REPORT  |  CONTINUED" : "OPSLENS REPORT")}) Tj ET`); };
   const ensure = (height: number, keepTogether = false) => { if (page.y - height < 62) newPage(true); if (keepTogether && page.y < PAGE_H - 66 && page.y - height < 62) newPage(true); };
-  const drawLine = (line: string, size: number, boldText: boolean, indent: number, color: string) => {
-    ensure(size * 1.55); page.ops.push(`BT /${boldText ? "F2" : "F1"} ${size} Tf ${color} rg ${MARGIN + indent} ${page.y} Td (${pdfEscape(line)}) Tj ET`); page.y -= size * 1.55;
+  // PDF Times-Roman glyphs occupy approximately 1.33 em vertically.
+  // Word-style 1.15 line spacing is measured against the natural font line box,
+  // not only the nominal font size. The previous size*1.15 advance caused
+  // adjacent Times-Roman lines to overlap in exported PDFs.
+  const NATURAL_LINE_BOX = 1.34;
+  const REQUESTED_LINE_SPACING = 1.15;
+  const LINE_ADVANCE = NATURAL_LINE_BOX * REQUESTED_LINE_SPACING;
+  // Justify wrapped body lines only; leave paragraph endings and headings aligned left.
+  const drawLine = (line: string, size: number, boldText: boolean, indent: number, color: string, justify = false) => {
+    ensure(size * LINE_ADVANCE + 2);
+    const spaces = (line.match(/ /g) ?? []).length;
+    const spare = CONTENT_W - indent - textWidth(line, size, boldText);
+    const wordSpacing = justify && spaces > 0 && spare > 0 && spare < CONTENT_W * 0.30 ? spare / spaces : 0;
+    page.ops.push(`BT /${boldText ? "F2" : "F1"} ${size} Tf ${color} rg ${wordSpacing.toFixed(3)} Tw ${MARGIN + indent} ${page.y} Td (${pdfEscape(line)}) Tj 0 Tw ET`);
+    page.y -= size * LINE_ADVANCE;
   };
-  const text = (value: string, size = 9.5, boldText = false, indent = 0, color = "0.17 0.17 0.16", keepTogether = false) => {
+  const text = (value: string, size = 10.5, boldText = false, indent = 0, color = "0.13 0.13 0.13", keepTogether = false) => {
     const lines = wrap(value, CONTENT_W - indent, size, boldText);
-    if (keepTogether) ensure(lines.length * size * 1.55 + 2, true);
-    lines.forEach((line) => drawLine(line, size, boldText, indent, color));
+    if (!lines.length) return;
+    if (keepTogether) ensure(lines.length * size * LINE_ADVANCE + 4, true);
+    lines.forEach((line, i) => drawLine(line, size, boldText, indent, color, !boldText && i < lines.length - 1));
+    page.y -= 5;
   };
   const section = (title: string, subtitle?: string) => {
-    ensure(subtitle ? 64 : 50, true); page.y -= 11;
-    page.ops.push(`q 0.85 0.84 0.80 RG ${MARGIN} ${page.y + 7} m ${PAGE_W - MARGIN} ${page.y + 7} l S Q`);
-    page.y -= 9; text(title, 11, true, 0, "0.20 0.21 0.19");
-    if (subtitle) text(subtitle, 8, false, 0, "0.44 0.44 0.41"); page.y -= 3;
+    ensure(subtitle ? 105 : 77, true);
+    page.y -= 13;
+    text(title, 12.5, true, 0, "0.12 0.12 0.12");
+    if (subtitle) {
+      const size = 9;
+      const lines = wrap(subtitle, CONTENT_W, size, false);
+      for (const line of lines) {
+        const baseline = page.y;
+        drawLine(line, size, false, 0, "0.25 0.25 0.25");
+        const length = Math.min(textWidth(line, size), CONTENT_W);
+        page.ops.push(`q 0.40 0.40 0.40 RG 0.4 w ${MARGIN} ${baseline - 2} m ${MARGIN + length} ${baseline - 2} l S Q`);
+      }
+      page.y -= 6;
+    }
   };
-  const bullet = (value: string, index?: number, keepTogether = true) => text(`${index === undefined ? "-" : `${index + 1}.`}  ${value}`, 9, false, 5, "0.22 0.22 0.20", keepTogether);
+  const bullet = (value: string, index?: number, keepTogether = true) => text(`${index === undefined ? "-" : `${index + 1}.`}  ${value}`, 9.5, false, 8, "0.15 0.15 0.15", keepTogether);
   const bulletBlock = (values: string[]) => {
-    const totalHeight = values.reduce((sum, value) => sum + wrap(`-  ${value}`, CONTENT_W - 5, 9).length * 9 * 1.55, 0) + 5;
+    const totalHeight = values.reduce((sum, value) => sum + wrap(`-  ${value}`, CONTENT_W - 5, 9).length * 9 * LINE_ADVANCE, 0) + 5;
     ensure(totalHeight, true); values.forEach((value) => bullet(value));
   };
   let repeatedHeader: { cells: string[]; widths: number[] } | null = null;
@@ -134,39 +160,60 @@ export function createInvestigationPdf(report: NormalizedInvestigation, mode: Pd
     if (originalPage !== page && !header && repeatedHeader) { const saved = repeatedHeader; repeatedHeader = null; tableRow(saved.cells, saved.widths, true, false); repeatedHeader = saved; ensure(rowHeight, keepTogether); }
     page.ops.push(`q ${header ? "0.93 0.92 0.89" : "0.99 0.99 0.98"} rg ${MARGIN} ${page.y - rowHeight + 4} ${CONTENT_W} ${rowHeight} re f Q`);
     let x = MARGIN + 6;
-    cells.forEach((cell, i) => { const lines = linesByCell[i]; lines.forEach((line, lineIndex) => { const alignRight = !header && i > 0; const dx = alignRight ? Math.max(3, widths[i] - 12 - textWidth(line, size, header)) : 0; page.ops.push(`BT /${header ? "F2" : "F1"} ${size} Tf ${header ? "0.42 0.42 0.39" : "0.20 0.20 0.19"} rg ${x + dx} ${page.y - 9 - lineIndex * 13} Td (${pdfEscape(line)}) Tj ET`); }); x += widths[i]; });
+    cells.forEach((cell, i) => { const lines = linesByCell[i]; lines.forEach((line, lineIndex) => { const alignRight = !header && i > 0 && /^-?[\d,.]+%?$/.test(cell.trim()); const dx = alignRight ? Math.max(3, widths[i] - 12 - textWidth(line, size, header)) : 0; page.ops.push(`BT /${header ? "F2" : "F1"} ${size} Tf ${header ? "0.42 0.42 0.39" : "0.20 0.20 0.19"} rg ${x + dx} ${page.y - 9 - lineIndex * 13} Td (${pdfEscape(line)}) Tj ET`); }); x += widths[i]; });
     page.y -= rowHeight; page.ops.push(`q 0.86 0.85 0.82 RG ${MARGIN} ${page.y + 4} m ${PAGE_W - MARGIN} ${page.y + 4} l S Q`);
   };
 
   const declaredPeriod = Object.entries(report.periods).map(([k, v]) => `${human(k)}: ${periodText(v)}`).filter((v) => !v.endsWith(": ")).join("  |  ");
   const evidencePeriods = [...new Set(report.measures.map((m) => periodText(m.period)).filter(Boolean))];
   const reportingPeriod = declaredPeriod || (evidencePeriods.length ? evidencePeriods.join("  |  ") : "");
-  const title = mode === "Business" ? businessHeadline(report) : analystTitle(report);
-  newPage(); text(title, 22, true, 0, "0.12 0.12 0.11");
+  const title = businessHeadline(report);
+  newPage(); text(title, 19, true, 0, "0.10 0.10 0.10");
   text(`${statusLabel(report.status)}${report.domains.length ? `  |  ${report.domains.map(human).join("  |  ")}` : ""}`, 9, false, 0, "0.40 0.40 0.37");
   if (reportingPeriod) text(reportingPeriod, 8, false, 0, "0.40 0.40 0.37");
   text(`Generated ${new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date())}`, 7.5, false, 0, "0.52 0.52 0.49");
 
-  section("Direct Answer and Verified Premise");
-  bullet(presentation.answer, undefined, false);
-  bullet(presentation.premise, undefined, false);
+  section("Direct answer");
+  const singleMetric = report.status === "measured" && report.measures.length === 1 && report.measures[0].before === undefined && report.measures[0].after === undefined ? report.measures[0] : null;
+  if (singleMetric) {
+    const metricName = report.productContext.category && singleMetric.id === "item_gmv" ? `${human(String(report.productContext.category))} category item GMV` : human(singleMetric.id);
+    text(`${metricName}: ${measureValue(singleMetric)}.`, 11, true);
+    if (periodText(singleMetric.period)) text(`Period: ${periodText(singleMetric.period)}.`, 9.5);
+  } else {
+    text(presentation.answer, 10.5);
+  }
+  if (presentation.premise && !/^(measurements are available|the requested metrics were measured)/i.test(presentation.premise)) text(presentation.premise, 9.5);
 
+
+  // Finance premise deltas are measured values even when no metric rows were returned.
+  const financeDeltas = report.status === "measured" ? presentation.metrics.filter((m) =>
+    ["Revenue change", "Contribution profit change"].includes(m.label) && number(m.delta) !== undefined) : [];
+  if (financeDeltas.length) {
+    section("Finance changes", "Signed changes in dataset-reported currency units; not causal attribution.");
+    financeDeltas.forEach((m) => bullet(`${m.label}: ${fmt(m.delta)} currency units.`));
+  }
   const measured = report.measures.filter((m) => m.before !== undefined || m.after !== undefined || m.value !== undefined);
-  if (measured.length || hasValue(report.financialPremise.revenue_delta) || hasValue(report.financialPremise.contribution_profit_delta)) {
-    section("Key Metrics", "Observed values from the requested scope; comparisons are descriptive.");
-    const widths = mode === "Analyst" ? [116, 200, 108, 67] : [150, 240, 101];
-    const metricHeader = mode === "Analyst" ? ["Metric", "Observed values", "Period", "Unit"] : ["Measure", "Observed comparison", "Period"];
-    tableRow(metricHeader, widths, true, false); repeatedHeader = { cells: metricHeader, widths };
-    for (const m of measured) {
-      const cells = mode === "Analyst" ? [human(m.id), measureValue(m), measurePeriod(m, report) || "", unitLabel(m.unit)] : [human(m.id), measureValue(m), measurePeriod(m, report) || ""];
-      tableRow(cells, widths);
-    }
-    if (hasValue(report.financialPremise.revenue_delta) || hasValue(report.financialPremise.contribution_profit_delta)) {
-      const widths = mode === "Analyst" ? [116, 200, 108, 67] : [150, 240, 101];
-      if (hasValue(report.financialPremise.revenue_delta)) tableRow(mode === "Analyst" ? ["Revenue movement", fmt(report.financialPremise.revenue_delta), reportingPeriod, "currency units"] : ["Revenue movement", `${fmt(report.financialPremise.revenue_delta)} currency units`, reportingPeriod], widths);
-      if (hasValue(report.financialPremise.contribution_profit_delta)) tableRow(mode === "Analyst" ? ["Contribution profit movement", fmt(report.financialPremise.contribution_profit_delta), reportingPeriod, "currency units"] : ["Contribution profit movement", `${fmt(report.financialPremise.contribution_profit_delta)} currency units`, reportingPeriod], widths);
+  if (measured.length) {
+    section("Measured results", "Values are descriptive and follow the documented reporting scope.");
+    const comparable = measured.some((m) => m.before !== undefined || m.after !== undefined);
+    if (comparable) {
+      const widths = [181, 103, 103, CONTENT_W - 387];
+      tableRow(["Measure", "Earlier", "Later", "Change"], widths, true, false);
+      repeatedHeader = { cells: ["Measure", "Earlier", "Later", "Change"], widths };
+      for (const m of measured) {
+        tableRow([`${human(m.id)}${m.unit ? ` (${unitLabel(m.unit)})` : ""}`, m.before !== undefined ? fmt(m.before) : "-", m.after !== undefined ? fmt(m.after) : fmt(m.value), m.delta !== undefined ? `${fmt(m.delta)} ${unitLabel(m.deltaUnit || m.unit)}`.trim() : "-"], widths);
+      }
+    } else {
+      const widths = [275, CONTENT_W - 275];
+      tableRow(["Measure", "Measured value"], widths, true, false);
+      repeatedHeader = { cells: ["Measure", "Measured value"], widths };
+      for (const m of measured) tableRow([human(m.id), measureValue(m)], widths);
     }
     repeatedHeader = null;
+    page.y -= 7; // Separate the table border from the following report note.
+    if (measured.some((m) => m.unit === "money" || m.unit === "currency" || m.unit === "dataset_currency")) {
+      text("Monetary values are in dataset-reported units unless a currency is explicitly established by the source.", 9);
+    }
   }
 
   if (report.route === "delivery_review_comparison") {
@@ -201,10 +248,10 @@ export function createInvestigationPdf(report: NormalizedInvestigation, mode: Pd
     const docs=report.canonicalRecord.payload.document_evidence as {summary:string;sources:{source:{filename?:string;source_date?:string};disposition:string}[]};
     section('Document cross-check');bullet(docs.summary,0);
     for(const doc of docs.sources)bullet(`${doc.source.filename??'Unknown source'} | ${doc.source.source_date??'Date unknown'} | ${doc.disposition}`,0);
-    bullet('Documents are context, not causal proof. Authoritative version history is unavailable. Full passages and conflicts are preserved in the evidence appendix and canonical attachment.',0);
+    bullet('Documents are context, not causal proof. Authoritative version history is unavailable. Full passages and conflicts are preserved in the embedded canonical JSON attachment.',0);
   }
   const findings = presentation.findings;
-  if (findings.length) { section("Key Findings"); findings.forEach((finding, i) => bullet(finding, i)); }
+  if (findings.length && !singleMetric) { section("Key findings"); findings.slice(0, 3).forEach((finding, i) => bullet(finding, i)); }
 
   if (report.accountingHypotheses.length) {
     section("Accounting Bridge | Ranked Components", "Returned ranking, not the complete bridge. Signed contribution to profit; negative values reduced profit.");
@@ -215,20 +262,20 @@ export function createInvestigationPdf(report: NormalizedInvestigation, mode: Pd
     repeatedHeader = null;
   }
   if (report.accountingBridge.length) {
-    section("Complete Accounting Bridge", "Original accounting identity; the residual is not a causal explanation.");
-    report.accountingBridge.forEach((row) => bullet(`${human(row.component)}: change ${clean(row.delta)}; contribution to profit change ${clean(row.contribution_to_profit_delta)}${row.limitation ? `; ${clean(row.limitation)}` : ""}`));
+    section("Accounting identity", "The residual is not a verified operational cause.");
+    report.accountingBridge.forEach((row) => bullet(`${human(row.component)}: change ${fmt(row.delta)}; contribution to profit change ${fmt(row.contribution_to_profit_delta)}${row.limitation ? `; ${clean(row.limitation)}` : ""}`));
   }
   if (report.perOrderCostEvidence.validated) {
     section("Per-order Cost Evidence", report.perOrderCostEvidence.populationBasis);
     text(`Before orders: ${report.perOrderCostEvidence.beforeOrders}; after orders: ${report.perOrderCostEvidence.afterOrders}`);
-    report.perOrderCostEvidence.components.forEach((row) => bullet(`${human(row.component)}: ${clean(row.beforePerOrder)} to ${clean(row.afterPerOrder)}; change ${clean(row.changePerOrder)}`));
+    report.perOrderCostEvidence.components.filter((row) => Math.abs(Number(row.changePerOrder)) > 0.005).slice(0, 6).forEach((row) => bullet(`${human(row.component)}: ${fmt(row.beforePerOrder)} to ${fmt(row.afterPerOrder)}; change ${fmt(row.changePerOrder)}`));
     report.perOrderCostEvidence.limitations.forEach((line) => bullet(line));
   }
   if (report.graphRows.length) {
     section("Grouped Measurements", "Returned dimensions and metric values, without population inference.");
-    report.graphRows.forEach((row, i) => bullet(`Row ${i + 1}: ${Object.entries(row).map(([key, value]) => `${key}: ${JSON.stringify(value)}`).join("; ")}`, undefined, false));
+    report.graphRows.slice(0, 8).forEach((row, i) => bullet(`Row ${i + 1}: ${Object.entries(row).map(([key, value]) => `${key}: ${JSON.stringify(value)}`).join("; ")}`, undefined, false));
   }
-  if (report.measures.some((m) => m.before !== undefined && m.after !== undefined)) {
+  if (false && report.measures.some((m) => m.before !== undefined && m.after !== undefined)) {
     section("Measured Comparisons", "Bars use a separate scale per measure and show the two observed period values.");
     for (const m of report.measures.filter((x) => number(x.before) !== undefined && number(x.after) !== undefined)) {
       ensure(38, true); const a = number(m.before)!; const b = number(m.after)!; const max = Math.max(Math.abs(a), Math.abs(b), 0.0001); const y = page.y - 3; const barW = CONTENT_W - 105;
@@ -252,79 +299,34 @@ export function createInvestigationPdf(report: NormalizedInvestigation, mode: Pd
     months.forEach((v) => { const x = v as JsonObject; bullet(`${clean(x.month)}: ${fmt(x.orders)} audited orders`); });
     if (report.cohortEvidence.exact_order_id_sets_verified === true) bullet("Exact operational order-ID sets reconciled. This does not certify finance population equality.");
   }
-  if (mode === "Analyst") {
-    const evidenceRows = report.measures.filter((m) => m.source || m.policy || m.timeBasis || Object.keys(m.population ?? {}).length || m.definition);
-    if (evidenceRows.length || report.sourceEvidence.length) {
-      section("Evidence & Methodology | Provenance", "Only metadata returned by the governed result is shown.");
-      evidenceRows.forEach((m) => {
-        const lines = [m.definition && `Definition: ${m.definition}`, m.source && `Source: ${m.source}`, m.timeBasis && `Time basis: ${human(m.timeBasis)}`, Object.keys(m.population ?? {}).length > 0 && `Eligible population: ${detailFields(m.population).join("; ")}`, m.policy && `Eligibility rule: ${m.policy}`, ...m.limitations.map((x) => `Limitation: ${x}`)].filter((x): x is string => Boolean(x));
-        const lineHeight = 9 * 1.55; const headingHeight = lineHeight + 4;
-        const bodyHeight = lines.reduce((sum, value) => sum + wrap(`-  ${value}`, CONTENT_W - 5, 9).length * lineHeight, 0);
-        ensure(headingHeight + bodyHeight + 5, true);
-        text(human(m.id), 9, true, 0, "0.20 0.20 0.18", true);
-        bulletBlock(lines);
-      });
-      const representedMetrics = new Set(evidenceRows.map((m) => m.id));
-      report.sourceEvidence.filter((e) => !representedMetrics.has(clean(e.metric_id))).forEach((e) => bullet(`${human(e.metric_id)}${e.source ? ` | ${clean(e.source)}` : ""}${e.unit ? ` | ${human(e.unit)}` : ""}${hasValue(e.value) ? ` | ${fmt(e.value)}` : ""}${e.period ? ` | ${periodText(e.period)}` : ""}${Object.keys((e.population as JsonObject) ?? {}).length ? ` | eligible population ${detailFields(e.population).join("; ")}` : ""}`));
-    }
-  }
-  if (report.accountingHypotheses.length && mode === "Analyst") {
-    const sourced = report.accountingHypotheses.filter((h) => h.source || h.causal_claim === false);
-    if (sourced.length) { section("Accounting Evidence"); sourced.forEach((h) => bullet(`${clean(h.label ?? human(h.hypothesis_id))}${h.source ? ` | ${clean(h.source)}` : ""}${h.causal_claim === false ? " | non-causal contribution" : ""}`)); }
-  }
   if (presentation.validations.length) {
     section("Recommended Next Validations", "Evidence-grounded proposals only; not approved actions or proven remedies.");
-    presentation.validations.forEach((v, i) => bullet(v, i));
+    presentation.validations.slice(0, 5).forEach((v, i) => bullet(v, i));
   }
   if (Object.keys(report.untestedHypotheses).length && mode === "Analyst") {
     section("Hypotheses Not Tested");
     Object.entries(report.untestedHypotheses).forEach(([key, value]) => bullet(`${human(key)}: ${clean(value)}`));
   }
   const renderedLimitations = presentation.limitations.map((x) => mode === "Business" ? plainLanguageLimitation(x) : x);
-  const limitations = [...new Set(renderedLimitations)];
+  const limitations = [...new Set(renderedLimitations)].slice(0, 8).map(String);
   if (limitations.length || report.causalClaim !== false || report.status !== "measured") {
     section("What Remains Unverified");
-    if (report.causalClaim === false) bullet("Observed changes are descriptive and do not establish what caused them.");
-    else bullet(report.status === "evidence_gap" ? "Required evidence was unavailable; this is not a completed measurement." : "No verified causal conclusion is established by this result.");
-    limitations.forEach((x) => bullet(x));
+    const openingLimitation = report.causalClaim === false
+      ? "Observed changes are descriptive and do not establish what caused them."
+      : report.status === "evidence_gap"
+      ? "Required evidence was unavailable; this is not a completed measurement."
+      : "No verified causal conclusion is established by this result.";
+    bullet(openingLimitation);
+    limitations.filter((x) => x.trim().toLowerCase() !== openingLimitation.toLowerCase()).forEach((x) => bullet(x));
     if (report.evidenceRequirements.length && report.status === "measured") report.evidenceRequirements.forEach((x) => bullet(`Unresolved evidence: ${x}`));
   }
-  {
-    section("Evidence & Methodology", "Expandable in the web report; exact returned metadata is consolidated here.");
-    const accountingDetails = evidenceSummary(presentation.accountingGroup);
-    accountingDetails.forEach((value) => bullet(value));
-    if (mode === "Analyst") {
-      report.measures.forEach((m) => {
-        const detail = [m.definition && `Definition: ${m.definition}`, m.source && `Source: ${m.source}`, m.timeBasis && `Time basis: ${human(m.timeBasis)}`, Object.keys(m.population ?? {}).length > 0 && `Eligible population: ${detailFields(m.population).join("; ")}`, m.policy && `Eligibility rule: ${m.policy}`].filter((v): v is string => typeof v === "string" && v.length > 0);
-        if (detail.length) { text(human(m.id), 9, true); detail.forEach((v) => bullet(v)); }
-      });
-      if (Object.keys(report.cohortEvidence).length) {
-        if (hasValue(report.cohortEvidence.status)) bullet(`Cohort audit status: ${human(String(report.cohortEvidence.status))}`);
-        if (hasValue(report.cohortEvidence.limitation)) bullet(`Cohort scope: ${clean(report.cohortEvidence.limitation)}`);
-        const months = Array.isArray(report.cohortEvidence.months) ? report.cohortEvidence.months : [];
-        months.forEach((v) => { const row = v as JsonObject; bullet(`${clean(row.month)}: ${fmt(row.orders)} audited orders`); });
-      }
-      report.toolTrace.forEach((trace, i) => { const fields = detailFields(trace); if (fields.length) bullet(`Governed trace ${i + 1}: ${fields.join("; ")}`); });
-    }
-    if (!accountingDetails.length && !report.cohortEvidence && !report.measures.some((m) => m.source || m.policy || m.timeBasis || Object.keys(m.population ?? {}).length || m.definition) && report.toolTrace.length === 0) bullet("No additional provenance or methodology metadata was returned.");
-  }
-  if (mode === "Analyst" && report.toolTrace.length) {
-    section("Technical Appendix | Governed Tool Trace");
-    report.toolTrace.forEach((trace, i) => {
-      const details = detailFields(trace).join("; "); if (details) bullet(`Step ${i + 1}: ${details}`);
-    });
-  }
-  if (report.status === "measured" && report.nextValidations.length === 0 && report.evidenceRequirements.length === 0) {
-    section("Review Note"); bullet("No additional validation steps were returned for this investigation.");
-  }
-  section("Complete Evidence Appendix", "Exact values follow by JSON Pointer path. Stage limitations retain their original scope; summaries above are projections.");
-  text("The complete UTF-8 canonical record is also embedded as opslens-investigation.json. Non-ASCII characters below use reversible JSON Unicode escapes. Retention does not certify evidence or grant query permissions.", 8);
-  const asciiJson = (value: string) => value.replace(/[^\x20-\x7E]/g, (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`);
-  report.evidenceEntries.forEach((entry) => {
-    ensure(wrap(asciiJson(entry.path), CONTENT_W, 7, true).length * 7 * 1.55 + 8 * 1.55 + 3, true);
-    text(asciiJson(entry.path), 7, true, 0, "0.17 0.17 0.16", true);
-    text(asciiJson(entry.value), 8, false, 8);
-  });
+  section("Sources and methodology", "Original source details and complete audit data remain in the embedded JSON record.");
+  const sources = [...new Set([...report.measures.map((m) => m.source), ...presentation.accountingGroup.sources].filter((v): v is string => Boolean(v)))];
+  for (const source of sources) bullet(`Source: ${source}`);
+  const scopeItems = report.measures.flatMap((m) => Object.entries(m.population ?? {}).map(([k, v]) => `${human(k)}: ${fmt(v)}`));
+  for (const item of [...new Set(scopeItems)].slice(0, 6)) bullet(String(item));
+  if (report.causalClaim === false) text("This document reports measured descriptive evidence, not causal attribution.", 9.5);
+  text("The full canonical investigation record is embedded as opslens-investigation.json, preserving unrounded figures, source metadata, and execution traces without printing them as report pages.", 9.5);
   return makePdf(pages, title, reportingPeriod, report);
 }
 

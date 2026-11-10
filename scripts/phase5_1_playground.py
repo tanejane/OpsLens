@@ -218,12 +218,21 @@ class InvestigationRuntime:
                     "business_reasoning_error_type": type(exc).__name__,
                 }
 
-            return {
+            final_result = {
                 **result,
                 "execution_trace": execution_trace,
                 "validated_evidence": archive,
                 "model_calls": models,
             }
+
+            # Stage 5.13L: explicitly opted-in completion coverage.
+            # No additional tools, replanning, or evidence mutation.
+            import os
+            if os.environ.get("OPSLENS_COVERAGE_STOP_GATE") == "1":
+                from agent.coverage_stop_gate import apply_gate
+                final_result = apply_gate(question, final_result)
+
+            return final_result
 
     async def _investigate(
         self,
@@ -235,6 +244,14 @@ class InvestigationRuntime:
         state=None,
     ):
         from agent.phase4b1_semantic_playground import call
+
+        # Security guidance is a non-executable, deterministic capability.
+        # It never interprets a vendor note as an authorized instruction.
+        if context_action is None:
+            from agent.security_guidance import security_guidance
+            security_result = security_guidance(question)
+            if security_result is not None:
+                return security_result
 
         if (
             context_action
@@ -345,6 +362,23 @@ class InvestigationRuntime:
             context_action is not None
             and context_action.get("kind") == "refund_concentration"
         ):
+            from agent.refund_action_policy import evaluate as refund_policy
+
+            policy = refund_policy(question, context_action)
+
+            if policy["decision"] != "SEMANTIC_MATCH_SHADOW":
+                return {
+                    "route": "refund_action_policy",
+                    "status": "NEEDS_CLARIFICATION",
+                    "executable": False,
+                    "causal_claim": False,
+                    "reason": (
+                        "The requested refund operation does not match "
+                        "a verified supported question."
+                    ),
+                    "policy_decision": policy["decision"],
+                }
+
             from agent.refund_concentration import initial
 
             result = await initial(

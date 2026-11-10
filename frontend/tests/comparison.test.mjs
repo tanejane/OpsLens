@@ -15,14 +15,14 @@ async function moduleUrl(path,replacements={}) {
 }
 const {normalizeInvestigation}=await import(await moduleUrl('../lib/investigation.ts'));
 const {InvestigationTimeline}=await import(await moduleUrl('../components/investigation-timeline.tsx'));
-test('timeline and replay are optional Analyst-only diagnostics',()=>{
+test('unified timeline and saved replay remain optional diagnostics in both legacy modes',()=>{
  const canonical={schema_version:'opslens.investigation.v1',question:'Revenue',payload:{
   observability:{run_id:'run-fixture',latency_ms:12,validation_decision:'VALIDATED',stop_reason:'SUFFICIENT',persistence:'SAVED',evidence:[],model_metadata:{}},
   context_provenance:{session_id:'session-fixture'},execution_trace:[{tool:'search_knowledge',latency_ms:4,outcome:'RETURNED'}]}};
  const report=normalizeInvestigation(canonical);
- assert.equal(renderToStaticMarkup(React.createElement(InvestigationTimeline,{report,mode:'Business'})),'');
+ const business=renderToStaticMarkup(React.createElement(InvestigationTimeline,{report,mode:'Business'}));
  const html=renderToStaticMarkup(React.createElement(InvestigationTimeline,{report,mode:'Analyst'}));
- assert.match(html,/run-fixture/);assert.match(html,/search_knowledge/);assert.match(html,/\/runs\/run-fixture\/replay/);
+ assert.match(html,/run-fixture/);assert.match(html,/Search Knowledge/);assert.equal(business,html);assert.match(html,/No cross-stream chronology/);assert.match(html,/\/runs\/run-fixture\/replay/);
  assert.doesNotMatch(html,/<details[^>]*open/);
 });
 const evidence=await moduleUrl('../components/investigation-evidence.tsx');

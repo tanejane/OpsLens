@@ -1,0 +1,40 @@
+{
+  "contract": "opslens.stage5_15e6.live-s03.v1",
+  "case_id": "S03",
+  "model": "gemini-3.5-flash-lite",
+  "outcome": "ACCEPTED",
+  "error_type": null,
+  "candidate": {
+    "contract": "opslens.semantic-proposal.v1",
+    "handling": "UNSUPPORTED_SCOPE",
+    "period": "2018-06",
+    "obligations": [
+      {
+        "code": "refund_rate",
+        "capability_state": "KNOWN_LABEL"
+      },
+      {
+        "code": "discount_codes_filter",
+        "capability_state": "UNVERIFIED_CAPABILITY"
+      }
+    ],
+    "execution_authorized": false,
+    "evidence_state": "NOT_ASSESSED",
+    "completion_eligible": false
+  },
+  "comparison": {
+    "handling_match": true,
+    "period_match": true,
+    "obligations_match": false,
+    "missing_obligations": [
+      "discount_code_population"
+    ],
+    "extra_obligations": [
+      "discount_codes_filter"
+    ],
+    "reference_coverage_fraction": 0.5,
+    "execution_authorized": false,
+    "evidence_state": "NOT_ASSESSED",
+    "completion_eligible": false
+  }
+}

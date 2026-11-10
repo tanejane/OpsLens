@@ -81,8 +81,9 @@ async def async_tests():
     finally:m.investigate=original
 asyncio.run(async_tests())
 
+from scripts.stage5_governed_wiring import router_verified, repair_verified, compiled_finance_verified
 source=(ROOT/'scripts'/'phase5_1_playground.py').read_text(encoding='utf-8')
 check('unified CLI wired', 'await multi_domain_route(' in source)
-check('governed finance reader reused','multi_domain_route(q,existing_dispatch,finance_reader,existing_finance_investigator,cohort_audit=cohort_audit)' in source)
-check('governed finance investigator uses trusted compiled periods','adaptive_investigation(question,CompiledComparisonInterpreter(),rd)' in source)
+check('governed finance reader reused',router_verified())
+check('governed finance investigator uses trusted compiled periods',compiled_finance_verified())
 print(f'Checks passed: {len(PASS)}/{len(PASS)}')

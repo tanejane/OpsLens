@@ -37,6 +37,7 @@ const metricNames: Record<string, string> = {
   late_delivery_rate: "Late Delivery Rate", average_review_score: "Average Review Score", low_rating_rate: "Low Rating Rate",
   review_coverage: "Review Coverage", purchase_session_rate: "Purchase Session Rate", checkout_abandon_rate: "Checkout Abandonment Rate",
   orders: "Orders", revenue: "Revenue", contribution_profit: "Contribution Profit", contribution_margin: "Contribution Margin",
+  effective_cogs: "Cost of goods sold (COGS)",
   category_item_gmv: "Category Item Gross Merchandise Value (GMV)", total_item_gmv: "Total Item Gross Merchandise Value (GMV)",
 };
 export function metricLabel(id: string): string { return metricNames[id.toLowerCase()] ?? human(id); }
@@ -120,10 +121,54 @@ function verifiedExplanationType(report: NormalizedInvestigation): string {
   return "";
 }
 
+/**
+ * Answer-first finance interpretation. Derived only from verified, reconciled
+ * backend measurements. Never infers operating causes or invents missing data.
+ */
+function financeExecutiveSummary(report: NormalizedInvestigation):
+    { answer: string; premise: string; nextAction: string } | null {
+  const f = report.financialPremise;
+  if (report.status !== "measured" || f.divergence_confirmed !== true
+      || report.canonicalRecord.payload.causal_claim !== false) return null;
+
+  const revenue = report.measures.find((m) => m.id === "effective_revenue");
+  const profit = report.measures.find((m) => m.id === "effective_contribution_profit");
+  const revBefore = number(revenue?.before), revAfter = number(revenue?.after);
+  const profitBefore = number(profit?.before), profitAfter = number(profit?.after);
+  if (revBefore === undefined || revAfter === undefined || profitBefore === undefined
+      || profitAfter === undefined || revBefore <= 0 || revAfter <= 0 || profitBefore <= 0) return null;
+
+  const revenueChange = revAfter - revBefore;
+  const profitChange = profitAfter - profitBefore;
+  const declaredRevenueChange = number(f.revenue_delta);
+  const declaredProfitChange = number(f.contribution_profit_delta);
+  // Refuse to create a polished quantified narrative if the evidence conflicts.
+  if (revenueChange <= 0 || profitChange >= 0 ||
+      declaredRevenueChange === undefined || declaredProfitChange === undefined ||
+      Math.abs(revenueChange - declaredRevenueChange) > 0.05 ||
+      Math.abs(profitChange - declaredProfitChange) > 0.05) return null;
+
+  const percent = (n: number) => Math.abs(n).toFixed(1);
+  const answer = `Revenue grew ${percent(100 * revenueChange / revBefore)}%, but contribution profit fell ${percent(100 * profitChange / profitBefore)}%, reducing the contribution margin from ${(100 * profitBefore / revBefore).toFixed(1)}% to ${(100 * profitAfter / revAfter).toFixed(1)}%.`;
+
+  const cogs = report.accountingBridge.find((row) => row.component === "effective_cogs");
+  const charges = report.accountingBridge.find((row) => row.component === "other_net_charges_residual");
+  const cogsChange = number(cogs?.delta), chargesChange = number(charges?.delta);
+  const bridgeReconciles = cogsChange !== undefined && chargesChange !== undefined &&
+      cogsChange > 0 && chargesChange > 0 &&
+      Math.abs(revenueChange - cogsChange - chargesChange - profitChange) <= 0.05;
+  const premise = bridgeReconciles
+    ? "The accounting comparison shows that higher cost of goods sold and other net charges more than offset the additional revenue. This explains the financial movement, but not the underlying business causes. The other-net-charges residual is not a verified category-level attribution."
+    : "The verified comparison confirms the financial movement, but the available accounting bridge does not support a complete breakdown of the difference or establish its business causes.";
+  const nextAction = "Examine changes in unit costs and product mix, then reconcile the remaining net charges before attributing the decline to marketing or other operations.";
+  return { answer, premise, nextAction };
+}
+
 /** Existing Analyst/PDF adapter. Business-specific narration stays in a separate adapter. */
 export function buildReportPresentation(report: NormalizedInvestigation): ReportPresentation {
   const financial = report.financialPremise;
   const divergence = financial.divergence_confirmed === true;
+  const financeSummary = financeExecutiveSummary(report);
   const accounting = rankAccountingRows(report.accountingHypotheses);
   const accountingGroup: AccountingGroup = {
     evidenceTypes: unique(report.accountingHypotheses.map((h) => human(text(h.evidence_type)))),
@@ -141,9 +186,9 @@ export function buildReportPresentation(report: NormalizedInvestigation): Report
         : report.status === "failed" ? "The investigation could not be completed; no finding is presented as measured."
           : "This result has not been verified against the evidence contract."
     : financial.divergence_confirmed === false ? "The revenue-up/profit-down premise was not confirmed by the governed measurements."
-    : divergence ? "Revenue increased while contribution profit declined across the compared periods."
+    : divergence ? (financeSummary?.answer ?? "Revenue increased while contribution profit declined across the compared periods.")
       : report.findings[0] || "The requested metrics were measured for the specified scope.";
-  const premise = divergence ? "The revenue-up/profit-down premise is confirmed in the governed finance comparison. This verifies the movement, not its cause."
+  const premise = divergence ? (financeSummary?.premise ?? "The revenue-up/profit-down premise is confirmed in the governed finance comparison. This verifies the movement, not its cause.")
     : report.status === "measured" ? "The comparison reflects the supplied governed measurements; no causal conclusion is implied."
       : report.reason || "No verified premise is available.";
   const netProfitChange = Number(financial.contribution_profit_delta);
@@ -170,7 +215,7 @@ export function buildReportPresentation(report: NormalizedInvestigation): Report
   return {
     answer, premise, metrics, accounting, accountingGroup,
     findings: businessFindings.length ? businessFindings : unique([...report.businessImplications, ...report.findings].filter((v) => !/\b(?:semantic\.[a-z0-9_.]+|SUPPORTS_PROFIT_PRESSURE|reconciled_accounting_contribution|evidence_type|next_validation)\b/i.test(v))).slice(0, 3),
-    limitations: shortLimitations, validations: uniqueValidations(report), evidenceNeeded: unique(report.evidenceRequirements),
+    limitations: shortLimitations, validations: unique([...(financeSummary ? [financeSummary.nextAction] : []), ...uniqueValidations(report)]), evidenceNeeded: unique(report.evidenceRequirements),
     accountingReconciled, shownAccountingImpact, netProfitChange: Number.isFinite(netProfitChange) ? netProfitChange : undefined,
     availableFollowUps, additionalEvidence,
   };
@@ -179,6 +224,7 @@ export function buildReportPresentation(report: NormalizedInvestigation): Report
 export function buildBusinessReportPresentation(report: NormalizedInvestigation): BusinessReportPresentation {
   const financial = report.financialPremise;
   const divergence = financial.divergence_confirmed === true;
+  const financeSummary = financeExecutiveSummary(report);
   const accounting = rankBusinessAccountingRows(report.accountingHypotheses);
   const selectedAccounting = accounting.slice(0, 3);
   const perOrderComponents = report.perOrderCostEvidence.validated
@@ -242,6 +288,7 @@ export function buildBusinessReportPresentation(report: NormalizedInvestigation)
   else if (report.status === "failed") answer = "The investigation could not complete, so no finding is presented as measured.";
   else if (report.status !== "measured") answer = report.reason || "This result has not been verified against the evidence contract.";
   else if (financial.divergence_confirmed === false) answer = "The revenue-up/profit-down premise was not confirmed by the governed measurements.";
+  else if (financeSummary) answer = financeSummary.answer;
   else if (divergence && selectedAccounting.length) answer = `Revenue increased while contribution profit declined. The largest returned accounting movement was ${selectedAccounting[0].label} (${numberText(selectedAccounting[0].impact)} reported units); this identifies a recorded profit contribution, not its operating cause.`;
   else if (divergence && hasOperations && operationalFacts.length) answer = `Revenue increased while contribution profit declined; ${operationalFacts.length} operational measures were also returned for descriptive comparison. These results do not identify a cause.`;
   else if (productFacts.length) answer = productFacts[0];
@@ -250,7 +297,7 @@ export function buildBusinessReportPresentation(report: NormalizedInvestigation)
   else if (operationalFacts.length > 1) answer = `${operationalFacts.length} requested measures were returned for the stated scope; the comparisons are descriptive.`;
   else answer = implications[0] || "Validated measurements are available for the requested scope.";
 
-  const premise = report.status === "measured"
+  const premise = financeSummary ? financeSummary.premise : report.status === "measured"
       ? divergence ? `The supplied finance comparison confirms the revenue-up/profit-down movement; it does not establish an operational cause.${report.coverage === "partial" ? " Population or coverage limits apply as noted below." : ""}`
       : report.coverage === "partial" ? "Measurements are available, with the scope limits below. No causal conclusion is implied."
         : "The result reflects the returned governed measurements. No causal conclusion is implied."
@@ -300,7 +347,7 @@ export function buildBusinessReportPresentation(report: NormalizedInvestigation)
     accountingSelectionNote: accounting.length ? `Showing ${selectedAccounting.length} of ${accounting.length} returned components, ranked by absolute recorded profit impact. Positive values increased profit; negative values reduced it.` : "",
     accountingGroup, accountingComparable: explicitlyComparable, accountingReconciled, unreconciledAmount,
     perOrderCostEvidence: report.perOrderCostEvidence, perOrderComponents,
-    findings, businessInterpretation, limitations, validations: uniqueValidations(report), evidenceNeeded: unique(report.evidenceRequirements),
+    findings, businessInterpretation, limitations, validations: unique([...(financeSummary ? [financeSummary.nextAction] : []), ...uniqueValidations(report)]), evidenceNeeded: unique(report.evidenceRequirements),
     availableFollowUps, additionalEvidence,
   };
 }

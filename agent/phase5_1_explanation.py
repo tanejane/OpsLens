@@ -248,6 +248,30 @@ async def explain_result(question,result,model_call=None,*,timeout_seconds=15):
     from agent.phase5_3c_incident_gateway import identify, DANGEROUS
     if not isinstance(result,dict):return result
     output=deepcopy(result)
+    if output.get('route') == 'security_guidance':
+        if output.get('status') != 'SECURITY_GUIDANCE' or output.get('executable') is not False:
+            return output
+        output['explanation'] = {
+            'version': 'opslens.explanation.v1',
+            'status': 'DETERMINISTIC',
+            'fallback_reason': 'SECURITY_POLICY_GUIDANCE',
+            'selection': None,
+            'sections': [
+                {
+                    'kind': 'limitation',
+                    'text': message,
+                    'evidence_refs': [],
+                    'causal_claim': False,
+                }
+                for message in output.get('conclusions', [])
+            ],
+            'causal_claim': False,
+            'generation': 'deterministic_local_security_policy',
+            'provider_elapsed_ms': 0,
+            'provider_code': None,
+            'evidence_authority': 'application_security_contract',
+        }
+        return output
     try:
         # Policy blocks, ambiguity and explicit causal refusals are not invitations to speculate.
         eligible=(result.get('causal_claim') is False and

@@ -68,3 +68,12 @@ __pycache__/
 
 # Local validation script — excluded from GitHub
 /scripts/p2_2_validate.py
+
+# Next.js generated files
+frontend/.next/
+frontend/.next-dev/
+.next/
+.next-dev/
+
+# Generated TypeScript incremental build metadata
+*.tsbuildinfo
